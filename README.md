@@ -1201,7 +1201,7 @@
       }
     }
 
-    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbyV0XSz9eW8gjbCtAc3Fd2XKOZYJEiNmG8Xk1urrAppOXjUwgVQsLOsw6EqrKpN_L1P/exec";
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbx1y0ZQcPX9v66ddWlU8B5xCnOpgGvld39iY3EVNzKQ9tcNcod2onajvq0fM2p6pqExqQ/exec"; 
     
     const ONE_HOUR_MS = 1 * 60 * 60 * 1000;
     let activeModalBooking = null;
@@ -1763,11 +1763,9 @@
           "Price / Day": b.perDayPrice || 0,
           "Food Orders Details": foodList.map(f => `${f.foodDesc} (${format24hDate(f.foodDateTime)}): ${f.plates} pl @ ₹${f.itemPrice} = ₹${f.foodCharge}`).join('\n'),
           "Cab Trips Details": cabList.map(c => `${c.tripName} (${format24hDate(c.dateTime)}): ₹${c.rate} ${c.remark ? `[${c.remark}]` : ''}`).join('\n'),
-          "Total Cab Fare": b.cabFare || 0,
           "Total Amount": b.totalAmount || 0,
           "Initial Advance": b.initialAdv || 0,
           "Cleared Due": b.clearedDue || 0,
-          "Advance Paid": b.advanced || 0,
           "Balance Due": b.totalDue || 0
         };
       });
@@ -2141,7 +2139,7 @@
           <div id="alert-details-${i}" class="hidden bg-white border-t border-amber-200/60 p-3 space-y-2 text-[10px]">
             <div class="grid grid-cols-2 gap-1 text-slate-600">
               <div>Total Charges: <strong>₹${b.totalAmount}</strong></div>
-              <div>Advance Paid: <strong class="text-emerald-600">₹${b.advanced}</strong></div>
+              <div>Advance Paid: <strong class="text-emerald-600">₹${b.initialAdv || 0}</strong></div>
             </div>
             <div class="flex justify-end pt-1 border-t border-slate-100">
               <button onclick="closeAlertModal(); openBookingModal('${b.id}')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-full font-bold text-[10px] flex items-center gap-1 transition shadow-xs">
@@ -2381,7 +2379,7 @@
 
       const totalBookings = filteredBookings.length;
       const totalAmt = filteredBookings.reduce((sum, b) => sum + (b.totalAmount || 0), 0);
-      const totalAdv = filteredBookings.reduce((sum, b) => sum + (b.advanced || 0), 0);
+      const totalAdv = filteredBookings.reduce((sum, b) => sum + (b.initialAdv || 0) + (b.clearedDue || 0), 0);
       const totalDue = filteredBookings.reduce((sum, b) => sum + (b.totalDue || 0), 0);
 
       document.getElementById('dash-total-bookings').innerText = totalBookings;
@@ -2399,12 +2397,13 @@
       const b = activeModalBooking;
       let rawCountryCode = b.countryCode ? String(b.countryCode).replace(/\D/g, '') : '91';
       let phone = b.contactNo ? String(b.contactNo).replace(/\D/g, '') : '';
+      let initialAdvanceVal = b.initialAdv !== undefined ? parseFloat(b.initialAdv) : 0;
       
       let validationErrors = [];
       if (!phone || phone.length !== 10) {
         validationErrors.push("• Guest contact number must be exactly 10 digits.");
       }
-      if (!(parseFloat(b.advanced) > 0)) {
+      if (!(initialAdvanceVal > 0)) {
         validationErrors.push("• Advanced payment must be greater than 0.");
       }
 
@@ -2429,7 +2428,7 @@
         `• Check-Out: ${formatDateTime(effectiveOut)}\n\n` +
         `*Billing Summary:*\n` +
         `• Total Amount: ₹${b.totalAmount}\n` +
-        `• Advance Amount: ₹${b.advanced}\n` +
+        `• Advance Amount: ₹${initialAdvanceVal}\n` +
         `• Balance Due: ₹${b.totalDue}\n\n` +
         `*UPI Payment Details:*\n` +
         `• UPI ID: *${upiId}*\n\n` +
@@ -2474,7 +2473,7 @@
           waBtn.classList.remove('hidden');
           const contactDigits = b.contactNo ? String(b.contactNo).replace(/\D/g, '') : '';
           const hasValidContact = contactDigits.length === 10;
-          const hasAdvanced = (parseFloat(b.advanced) || 0) > 0;
+          const hasAdvanced = (parseFloat(b.initialAdv) || 0) > 0;
 
           if (hasValidContact && hasAdvanced) {
             waBtn.classList.remove('opacity-50', 'cursor-not-allowed');
@@ -2616,7 +2615,7 @@
         });
       }
 
-      const initialAdv = b.initialAdv !== undefined ? b.initialAdv : b.advanced;
+      const initialAdv = b.initialAdv || 0;
       const clearDueAmt = b.clearedDue || 0;
 
       document.getElementById('inv-sum-total').innerText = `₹${(b.totalAmount || 0).toLocaleString('en-IN')}`;
@@ -3058,14 +3057,12 @@
             }
             addCabTripRow(trip.rate || 0, cDate, cTime, trip.remark || '', isClosedBooking);
           });
-        } else if (b.cabFare !== undefined && (b.cabFare > 0 || b.cabRemark)) {
-          addCabTripRow(b.cabFare || 0, '', '', b.cabRemark || '', isClosedBooking);
         }
 
         document.getElementById('cust-price').value = b.perDayPrice;
         
         const advanceElem = document.getElementById('cust-advance');
-        const baseAdv = b.initialAdv !== undefined ? b.initialAdv : b.advanced;
+        const baseAdv = b.initialAdv || 0;
         advanceElem.value = baseAdv;
         advanceElem.setAttribute('data-initial-adv', baseAdv);
 
@@ -3530,8 +3527,6 @@
       }
       
       const cabTripsList = [];
-      let totalCabFareToSave = 0;
-      let cabRemarksList = [];
       
       document.querySelectorAll('.cab-trip-row').forEach((row, index) => {
         const rate = parseFloat(row.querySelector('.cust-cab-rate').value) || 0;
@@ -3541,10 +3536,6 @@
         const dt = (dateVal && timeVal) ? `${dateVal}T${timeVal}:00+05:30` : '';
 
         if (rate > 0 || remark) {
-          totalCabFareToSave += rate;
-          if (remark) {
-             cabRemarksList.push(remark);
-          }
           cabTripsList.push({
             tripName: `Trip ${index + 1}`,
             dateStr: dateVal,
@@ -3646,12 +3637,9 @@
         perDayPrice: parseFloat(document.getElementById('cust-price').value) || 0,
         foodOrders: foodOrdersList,
         cabTrips: cabTripsList,
-        cabFare: totalCabFareToSave,
-        cabRemark: cabRemarksList.join(' | '),
         totalAmount: totalAmt,
         initialAdv: initialAdvAmt,
         clearedDue: clearedDueAmt,
-        advanced: totalPaid,
         totalDue: Math.max(0, totalAmt - totalPaid),
         inactive: false
       };
@@ -3779,14 +3767,8 @@
         }
         
         let cabSummaryHtml = '';
-        let totalCab = 0;
         const parseCab = parseJSONField(b.cabTrips);
-        
-        if (parseCab.length > 0) {
-            totalCab = parseCab.reduce((acc, t) => acc + (t.rate || 0), 0);
-        } else if (b.cabFare > 0) {
-            totalCab = b.cabFare; 
-        }
+        const totalCab = parseCab.reduce((acc, t) => acc + (t.rate || 0), 0);
         
         if (totalCab > 0) {
           cabSummaryHtml = `<div class="text-[9px] ${!isMasterValid ? 'text-rose-950 font-bold' : 'text-indigo-800 font-semibold'}"><i class="fa-solid fa-taxi text-[8px] mr-0.5"></i>Cab: +₹${totalCab}</div>`;
@@ -3817,6 +3799,8 @@
         const extraPersonsText = (b.extraPersons && b.extraPersons > 0) ? `<span class="text-amber-700 font-bold block text-[9px]">(+${b.extraPersons} Extra)</span>` : '';
         const contactDisplay = b.contactNo ? `${b.countryCode || '+91'} ${b.contactNo}`.trim() : '-';
 
+        const totalReceived = (b.initialAdv || 0) + (b.clearedDue || 0);
+
         const tr = document.createElement('tr');
         tr.className = `${statusBgClass} transition border-b border-slate-100`;
         tr.innerHTML = `
@@ -3846,7 +3830,7 @@
           </td>
           <td class="py-2.5 px-3 font-bold ${!isMasterValid ? 'text-rose-950' : 'text-slate-800'}">
             ₹${b.totalAmount}
-            <span class="block text-[9px] text-emerald-600 font-medium">Adv: ₹${b.advanced}</span>
+            <span class="block text-[9px] text-emerald-600 font-medium">Adv: ₹${totalReceived}</span>
           </td>
           <td class="py-2.5 px-3 font-bold ${b.totalDue > 0 ? 'text-rose-600' : 'text-emerald-600'}">₹${b.totalDue}</td>
           <td class="py-2.5 px-3 text-center">

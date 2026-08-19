@@ -135,7 +135,9 @@
     </div>
   </div>
 
-  <!-- MASTER DATA ACCESS PASSWORD MODAL -->
+
+
+<!-- MASTER DATA ACCESS PASSWORD MODAL -->
   <div id="master-auth-modal" class="hidden fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-4 no-print">
     <div class="bg-white rounded-3xl shadow-2xl border border-slate-100 max-w-xs w-full p-5 space-y-3 text-left">
       <div class="text-center space-y-1">
@@ -365,7 +367,9 @@
     </div>
   </header>
 
-  <!-- Notification Toast -->
+
+
+<!-- Notification Toast -->
   <div id="toast" class="hidden fixed bottom-6 right-6 bg-slate-900/90 backdrop-blur-md text-white px-4 py-2.5 rounded-2xl shadow-xl z-50 flex items-center gap-2.5 no-print border border-slate-800 text-[11px]">
     <i class="fa-solid fa-circle-check text-emerald-400 text-base"></i>
     <span id="toast-message" class="font-medium">Changes Auto save successfully!</span>
@@ -401,6 +405,18 @@
         </button>
       </div>
 
+      <!-- Slicer Filter for Dashboard -->
+      <div class="bg-white p-3 rounded-2xl shadow-sm border border-slate-200/60 mb-2 flex flex-wrap gap-2 items-center">
+        <span class="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-1 mr-2">
+          <i class="fa-solid fa-filter text-blue-500"></i> Status Filter:
+        </span>
+        <button onclick="setDashboardStatusFilter('ALL')" id="slicer-ALL" class="slicer-btn active bg-blue-600 text-white px-3 py-1.5 rounded-xl text-[10px] font-bold transition shadow-sm">All Status</button>
+        <button onclick="setDashboardStatusFilter('LIVE')" id="slicer-LIVE" class="slicer-btn bg-slate-100 text-slate-600 hover:bg-slate-200 px-3 py-1.5 rounded-xl text-[10px] font-bold transition">Live</button>
+        <button onclick="setDashboardStatusFilter('UPCOMING')" id="slicer-UPCOMING" class="slicer-btn bg-slate-100 text-slate-600 hover:bg-slate-200 px-3 py-1.5 rounded-xl text-[10px] font-bold transition">Upcoming</button>
+        <button onclick="setDashboardStatusFilter('CLOSED')" id="slicer-CLOSED" class="slicer-btn bg-slate-100 text-slate-600 hover:bg-slate-200 px-3 py-1.5 rounded-xl text-[10px] font-bold transition">Closed</button>
+        <button onclick="setDashboardStatusFilter('INACTIVE')" id="slicer-INACTIVE" class="slicer-btn bg-slate-100 text-slate-600 hover:bg-slate-200 px-3 py-1.5 rounded-xl text-[10px] font-bold transition">Inactive</button>
+      </div>
+
       <!-- One UI Rounded Cards -->
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200/60 flex items-center justify-between">
@@ -433,6 +449,26 @@
         </div>
       </div>
 
+      <!-- New 4 Boxes: Live, Upcoming, Closed, Inactive -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-3">
+        <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200/60 flex items-center justify-between">
+          <div><p class="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Live Bookings</p><p id="dash-live-count" class="text-xl font-black text-amber-500 mt-0.5">0</p></div>
+          <div class="p-3 bg-amber-50 text-amber-500 rounded-2xl"><i class="fa-solid fa-play text-base"></i></div>
+        </div>
+        <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200/60 flex items-center justify-between">
+          <div><p class="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Upcoming</p><p id="dash-upcoming-count" class="text-xl font-black text-blue-500 mt-0.5">0</p></div>
+          <div class="p-3 bg-blue-50 text-blue-500 rounded-2xl"><i class="fa-solid fa-calendar-day text-base"></i></div>
+        </div>
+        <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200/60 flex items-center justify-between">
+          <div><p class="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Closed</p><p id="dash-closed-count" class="text-xl font-black text-emerald-500 mt-0.5">0</p></div>
+          <div class="p-3 bg-emerald-50 text-emerald-500 rounded-2xl"><i class="fa-solid fa-check-double text-base"></i></div>
+        </div>
+        <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200/60 flex items-center justify-between">
+          <div><p class="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Inactive</p><p id="dash-inactive-count" class="text-xl font-black text-slate-500 mt-0.5">0</p></div>
+          <div class="p-3 bg-slate-100 text-slate-500 rounded-2xl"><i class="fa-solid fa-ban text-base"></i></div>
+        </div>
+      </div>
+      
       <!-- Active years Directory Table Hidden -->
       <div class="hidden bg-white rounded-3xl shadow-sm border border-slate-200/60 p-4">
         <div class="mb-3 flex justify-between items-center">
@@ -471,8 +507,10 @@
               </span>
             </div>
           </div>
-          
-          <div class="flex items-center space-x-2 w-full md:w-auto">
+
+
+
+<div class="flex items-center space-x-2 w-full md:w-auto">
             <!-- Search by Date -->
             <div class="flex items-center bg-slate-100 border border-slate-200 rounded-2xl px-2 py-1 space-x-1.5">
               <label for="booking-date-search" class="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-1 pl-1">
@@ -644,6 +682,32 @@
 
   </main>
 
+
+
+<!-- Floating Navigation Controls -->
+  <div class="fixed bottom-6 right-6 z-40 flex flex-col items-center gap-1.5 no-print transition-all duration-300 opacity-40 hover:opacity-100">
+    <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="w-10 h-10 bg-slate-800 text-white rounded-full shadow-lg hover:bg-blue-600 hover:scale-110 transition flex items-center justify-center text-sm" title="Go to Top">
+      <i class="fa-solid fa-angles-up"></i>
+    </button>
+    <button onclick="window.scrollBy({top: -window.innerHeight, behavior: 'smooth'})" class="w-8 h-8 bg-slate-600 text-white rounded-full shadow hover:bg-blue-500 hover:scale-110 transition flex items-center justify-center text-xs" title="Page Up">
+      <i class="fa-solid fa-angle-up"></i>
+    </button>
+    <div class="flex gap-1.5">
+      <button onclick="window.scrollBy({left: -window.innerWidth, behavior: 'smooth'})" class="w-8 h-8 bg-slate-600 text-white rounded-full shadow hover:bg-blue-500 hover:scale-110 transition flex items-center justify-center text-xs" title="Page Left">
+        <i class="fa-solid fa-angle-left"></i>
+      </button>
+      <button onclick="window.scrollBy({left: window.innerWidth, behavior: 'smooth'})" class="w-8 h-8 bg-slate-600 text-white rounded-full shadow hover:bg-blue-500 hover:scale-110 transition flex items-center justify-center text-xs" title="Page Right">
+        <i class="fa-solid fa-angle-right"></i>
+      </button>
+    </div>
+    <button onclick="window.scrollBy({top: window.innerHeight, behavior: 'smooth'})" class="w-8 h-8 bg-slate-600 text-white rounded-full shadow hover:bg-blue-500 hover:scale-110 transition flex items-center justify-center text-xs" title="Page Down">
+      <i class="fa-solid fa-angle-down"></i>
+    </button>
+    <button onclick="window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'})" class="w-10 h-10 bg-slate-800 text-white rounded-full shadow-lg hover:bg-blue-600 hover:scale-110 transition flex items-center justify-center text-sm" title="Go to Bottom">
+      <i class="fa-solid fa-angles-down"></i>
+    </button>
+  </div>
+
   <!-- POPUP MODAL: CHECK-OUT ALERT LIST -->
   <div id="alert-modal" class="hidden fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-4 no-print">
     <div class="bg-white rounded-3xl shadow-2xl border border-slate-100 max-w-lg w-full flex flex-col max-h-[85vh] overflow-hidden">
@@ -738,7 +802,9 @@
           </div>
         </div>
 
-        <!-- Room & Stay Schedule Box -->
+
+
+<!-- Room & Stay Schedule Box -->
         <div id="sec-room-dates" class="bg-slate-50 p-3 rounded-2xl border border-slate-200/60 space-y-2.5 transition-all">
           <h4 class="text-[9px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
             <i class="fa-solid fa-bed text-blue-600"></i> Room Selection &amp; Stay Dates
@@ -931,7 +997,9 @@
     </div>
   </div>
 
-   <!-- FIXED & PRINTABLE INVOICE / BOOKING RECEIPT MODAL -->
+
+
+<!-- FIXED & PRINTABLE INVOICE / BOOKING RECEIPT MODAL -->
   <div id="invoice-modal" class="hidden fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
     <div class="bg-white rounded-3xl shadow-2xl border border-slate-100 max-w-xl w-full p-5 sm:p-6 space-y-4 relative my-auto max-h-[92vh] overflow-y-auto" id="printable-invoice">
       
@@ -1038,6 +1106,9 @@
   <script>
     // System Constants & Robust Helpers
     const MAX_SHEET_ROWS = 10000000;
+    
+    // NEW: Variable to hold dashboard slicer status filter
+    let currentDashboardStatusFilter = 'ALL';
 
     function isTrue(val) {
       return val === true || val === 'true' || val === 'TRUE' || val === 1 || val === '1';
@@ -1063,8 +1134,10 @@
       }
       return d.getTime();
     }
-    
-    // Extract IST local parts robustly for input fields ensuring UTC+05:30 offset
+
+
+
+// Extract IST local parts robustly for input fields ensuring UTC+05:30 offset
     function extractISTDateParts(dtStr) {
       if (!dtStr) return { date: '', time: '' };
       let d = new Date(typeof dtStr === 'string' ? dtStr.replace(' ', 'T') : dtStr);
@@ -1113,16 +1186,6 @@
       const hh = String(istDate.getUTCHours()).padStart(2, '0');
       const min = String(istDate.getUTCMinutes()).padStart(2, '0');
       return `${dd}/${mm}/${yy} ${hh}:${min}`;
-    }
-    
-    // Robust parsing for generic JSON array fields (Food Orders, Cab Trips)
-    function parseJSONField(fieldData) {
-      if (!fieldData) return [];
-      if (Array.isArray(fieldData)) return fieldData;
-      if (typeof fieldData === 'string' && fieldData.length > 5) {
-        try { return JSON.parse(fieldData); } catch (e) {}
-      }
-      return [];
     }
     
     function checkSheetRowLimits() {
@@ -1299,7 +1362,9 @@
       }
     }
 
-    function handleIdProofUpload(e) {
+
+
+function handleIdProofUpload(e) {
       const fileInput = e.target;
       const file = fileInput.files[0];
       const statusText = document.getElementById('cust-id-file-status');
@@ -1778,7 +1843,9 @@
       closeExportModal();
     }
 
-    function searchBookingByDate() {
+
+
+function searchBookingByDate() {
       const dateVal = document.getElementById('booking-date-search').value;
       renderBookingsTable(dateVal);
     }
@@ -2067,12 +2134,130 @@
       initDashboard();
     }
 
+    // Slicer Logic for Dashboard
+    function setDashboardStatusFilter(status) {
+      currentDashboardStatusFilter = status;
+      
+      document.querySelectorAll('.slicer-btn').forEach(btn => {
+        btn.classList.remove('active', 'bg-blue-600', 'text-white', 'shadow-sm');
+        btn.classList.add('bg-slate-100', 'text-slate-600');
+      });
+      const activeBtn = document.getElementById(`slicer-${status}`);
+      if (activeBtn) {
+        activeBtn.classList.remove('bg-slate-100', 'text-slate-600');
+        activeBtn.classList.add('active', 'bg-blue-600', 'text-white', 'shadow-sm');
+      }
+
+      updateDashboardCards();
+    }
+
+    function updateDashboardCards() {
+      const selectedFilter = state.dashSelectedYear;
+      const label = document.getElementById('dash-filter-label');
+
+      let baseBookings = [];
+
+      if (selectedFilter === 'ALL' || !selectedFilter) {
+        baseBookings = state.bookings;
+        if (label) label.innerText = "Consolidated Summary (All Years)";
+      } else {
+        const targetYear = parseInt(selectedFilter);
+        baseBookings = state.bookings.filter(b => {
+          if (!b.checkIn) return false;
+          const yr = new Date(b.checkIn.replace(' ', 'T')).getFullYear();
+          return yr === targetYear;
+        });
+
+        if (label) {
+          label.innerText = targetYear === defaultAppYear 
+            ? `Year ${targetYear} (Current Year)` 
+            : `Year ${targetYear}`;
+        }
+      }
+
+      const now = new Date().getTime();
+      
+      let liveCount = 0;
+      let upcomingCount = 0;
+      let closedCount = 0;
+      let inactiveCount = 0;
+
+      baseBookings.forEach(b => {
+        if (isInactiveBooking(b)) {
+           inactiveCount++;
+        } else {
+           const cIn = parseDateMs(b.checkIn);
+           const cOut = getEffectiveCheckoutTime(b);
+           if (now > cOut) closedCount++;
+           else if (now >= cIn && now <= cOut) liveCount++;
+           else upcomingCount++;
+        }
+      });
+
+      document.getElementById('dash-live-count').innerText = liveCount;
+      document.getElementById('dash-upcoming-count').innerText = upcomingCount;
+      document.getElementById('dash-closed-count').innerText = closedCount;
+      document.getElementById('dash-inactive-count').innerText = inactiveCount;
+
+      let finalFilteredBookings = baseBookings.filter(b => {
+        if (currentDashboardStatusFilter === 'ALL') return !isInactiveBooking(b);
+        if (currentDashboardStatusFilter === 'INACTIVE') return isInactiveBooking(b);
+        
+        if (isInactiveBooking(b)) return false;
+
+        const cIn = parseDateMs(b.checkIn);
+        const cOut = getEffectiveCheckoutTime(b);
+
+        if (currentDashboardStatusFilter === 'CLOSED') return now > cOut;
+        if (currentDashboardStatusFilter === 'LIVE') return now >= cIn && now <= cOut;
+        if (currentDashboardStatusFilter === 'UPCOMING') return now < cIn;
+        
+        return true;
+      });
+
+      const totalBookings = finalFilteredBookings.length;
+      const totalAmt = finalFilteredBookings.reduce((sum, b) => sum + (b.totalAmount || 0), 0);
+      const totalAdv = finalFilteredBookings.reduce((sum, b) => sum + (b.initialAdv || 0) + (b.clearedDue || 0), 0);
+      const totalDue = finalFilteredBookings.reduce((sum, b) => sum + (b.totalDue || 0), 0);
+
+      document.getElementById('dash-total-bookings').innerText = totalBookings;
+      document.getElementById('dash-total-amount').innerText = `₹${totalAmt.toLocaleString('en-IN')}`;
+      document.getElementById('dash-advanced').innerText = `₹${totalAdv.toLocaleString('en-IN')}`;
+      document.getElementById('dash-due').innerText = `₹${totalDue.toLocaleString('en-IN')}`;
+    }
+
+    function initDashboard() {
+      const grid = document.getElementById('years-grid');
+      if (grid) {
+        grid.innerHTML = '';
+        for (let y = 2026; y <= 2085; y++) {
+          const item = document.createElement('div');
+          const isSelectedYear = state.dashSelectedYear !== 'ALL' && parseInt(state.dashSelectedYear) === y;
+          const isCurrentRealYear = y === defaultAppYear;
+
+          item.className = `text-center py-1.5 px-1 rounded-2xl text-[10px] font-bold cursor-pointer transition ${
+            isSelectedYear
+              ? 'bg-blue-600 text-white shadow-xs' 
+              : (isCurrentRealYear ? 'bg-amber-100 text-amber-900 font-extrabold hover:bg-amber-200' : 'bg-slate-100 text-slate-600 hover:bg-blue-50 hover:text-blue-600')
+          }`;
+          item.innerText = y;
+          item.onclick = () => selectDashboardYear(y);
+          grid.appendChild(item);
+        }
+      }
+      updateDashboardCards();
+    }
+
+    function selectDashboardYear(year) {
+      handleDashboardYearChange(year);
+      renderCalendar(year);
+      switchTab('calendar');
+    }
+
     function checkUpcomingCheckoutsWithDue() {
       const alertBookings = state.bookings.filter(b => {
         if (!isRoomInMaster(b.roomNo) || isInactiveBooking(b)) return false;
-        
-        const hasDue = (b.totalDue || 0) > 0;
-        return hasDue;
+        return (b.totalDue || 0) > 0;
       });
 
       const badge = document.getElementById('alert-badge');
@@ -2090,6 +2275,7 @@
     function renderAlertModalList(alertList) {
       const container = document.getElementById('alert-list-container');
       const textCount = document.getElementById('alert-list-count-text');
+      if (!container) return;
       container.innerHTML = '';
 
       textCount.innerText = `${alertList.length} active warnings found`;
@@ -2115,9 +2301,6 @@
         const card = document.createElement('div');
         card.className = "bg-amber-50/60 border border-amber-200/80 rounded-2xl overflow-hidden shadow-xs";
         
-        const alertMessageText = `Checkout: <strong>${timeFormatted}</strong> | Room ${roomsDisplay} | Guest: <strong>${b.name}</strong> | Total: ₹${b.totalAmount} | Due: ₹${b.totalDue}`;
-        const alertBadgeHtml = `<span class="text-[11px] font-black text-rose-600 bg-rose-50 border border-rose-200 px-2.5 py-0.5 rounded-full">₹${b.totalDue.toLocaleString('en-IN')} Due</span>`;
-
         card.innerHTML = `
           <div class="p-3 flex justify-between items-center cursor-pointer hover:bg-amber-100/50 transition" onclick="toggleAlertDetails('alert-details-${i}')">
             <div class="flex items-center space-x-2.5">
@@ -2127,15 +2310,14 @@
                   ${b.name} <span class="bg-blue-50 text-blue-700 text-[9px] px-2 py-0.5 rounded-full font-mono">${b.bookingCode || 'N/A'}</span>
                   <span class="bg-slate-100 text-slate-700 text-[9px] px-2 py-0.5 rounded-full font-medium">Room ${roomsDisplay}</span>
                 </h4>
-                <p class="text-[10px] text-slate-600 mt-0.5">${alertMessageText}</p>
+                <p class="text-[10px] text-slate-600 mt-0.5">Checkout: <strong>${timeFormatted}</strong> | Due: ₹${b.totalDue}</p>
               </div>
             </div>
             <div class="flex items-center space-x-1.5">
-              ${alertBadgeHtml}
+              <span class="text-[11px] font-black text-rose-600 bg-rose-50 border border-rose-200 px-2.5 py-0.5 rounded-full">₹${b.totalDue.toLocaleString('en-IN')} Due</span>
               <i class="fa-solid fa-chevron-down text-slate-400 text-[10px]"></i>
             </div>
           </div>
-
           <div id="alert-details-${i}" class="hidden bg-white border-t border-amber-200/60 p-3 space-y-2 text-[10px]">
             <div class="grid grid-cols-2 gap-1 text-slate-600">
               <div>Total Charges: <strong>₹${b.totalAmount}</strong></div>
@@ -2320,74 +2502,6 @@
       }
     }
 
-    function selectDashboardYear(year) {
-      handleDashboardYearChange(year);
-      renderCalendar(year);
-      switchTab('calendar');
-    }
-
-    function initDashboard() {
-      const grid = document.getElementById('years-grid');
-      grid.innerHTML = '';
-      
-      for (let y = 2026; y <= 2085; y++) {
-        const item = document.createElement('div');
-        const isSelectedYear = state.dashSelectedYear !== 'ALL' && parseInt(state.dashSelectedYear) === y;
-        const isCurrentRealYear = y === defaultAppYear;
-
-        item.className = `text-center py-1.5 px-1 rounded-2xl text-[10px] font-bold cursor-pointer transition ${
-          isSelectedYear
-            ? 'bg-blue-600 text-white shadow-xs' 
-            : (isCurrentRealYear ? 'bg-amber-100 text-amber-900 font-extrabold hover:bg-amber-200' : 'bg-slate-100 text-slate-600 hover:bg-blue-50 hover:text-blue-600')
-        }`;
-        
-        item.innerText = y;
-        if (isCurrentRealYear) {
-          item.title = "Current Active Year";
-        }
-
-        item.onclick = () => selectDashboardYear(y);
-        grid.appendChild(item);
-      }
-
-      updateDashboardCards();
-    }
-
-    function updateDashboardCards() {
-      const selectedFilter = state.dashSelectedYear;
-      const label = document.getElementById('dash-filter-label');
-
-      let filteredBookings = [];
-
-      if (selectedFilter === 'ALL' || !selectedFilter) {
-        filteredBookings = state.bookings.filter(b => !isInactiveBooking(b));
-        if (label) label.innerText = "Consolidated Summary (All Years)";
-      } else {
-        const targetYear = parseInt(selectedFilter);
-        filteredBookings = state.bookings.filter(b => {
-          if (isInactiveBooking(b) || !b.checkIn) return false;
-          const yr = new Date(b.checkIn.replace(' ', 'T')).getFullYear();
-          return yr === targetYear;
-        });
-
-        if (label) {
-          label.innerText = targetYear === defaultAppYear 
-            ? `Year ${targetYear} (Current Year)` 
-            : `Year ${targetYear}`;
-        }
-      }
-
-      const totalBookings = filteredBookings.length;
-      const totalAmt = filteredBookings.reduce((sum, b) => sum + (b.totalAmount || 0), 0);
-      const totalAdv = filteredBookings.reduce((sum, b) => sum + (b.initialAdv || 0) + (b.clearedDue || 0), 0);
-      const totalDue = filteredBookings.reduce((sum, b) => sum + (b.totalDue || 0), 0);
-
-      document.getElementById('dash-total-bookings').innerText = totalBookings;
-      document.getElementById('dash-total-amount').innerText = `₹${totalAmt.toLocaleString('en-IN')}`;
-      document.getElementById('dash-advanced').innerText = `₹${totalAdv.toLocaleString('en-IN')}`;
-      document.getElementById('dash-due').innerText = `₹${totalDue.toLocaleString('en-IN')}`;
-    }
-
     function sendReceiptViaWhatsApp() {
       if (!activeModalBooking) {
         alert("⚠️ Booking information not found!");
@@ -2463,8 +2577,6 @@
       const cOut = getEffectiveCheckoutTime(b);
       const isClosed = now > cOut;
       const isInactive = isInactiveBooking(b);
-      const isLive = now >= cIn && now <= cOut;
-      const isUpcoming = now < cIn;
 
       if (waBtn) {
         if (isClosed || isInactive) {
@@ -2816,7 +2928,6 @@
         b = state.bookings.find(item => String(item.id) === String(bookingId));
         if (b) {
           if (isInactiveBooking(b)) {
-            // "just receipt view will be enabled."
             printInvoice(bookingId);
             return;
           }
@@ -2960,7 +3071,6 @@
       if (b) {
         document.getElementById('modal-title').innerText = isPast3Days ? 'Closed Booking (Read-Only)' : (isClosedBooking ? 'Closed Booking (Billing Active)' : 'Edit Booking Details');
         
-        // ** ONLY ALLOW EDITING OF MAIN CHECK-IN AND CHECK-OUT DATES IF BOOKING IS UPCOMING **
         setInputEnabled(document.getElementById('cust-checkin-date'), isUpcomingBooking);
         setInputEnabled(document.getElementById('cust-checkin-time'), isUpcomingBooking);
         setInputEnabled(document.getElementById('cust-checkout-date'), isUpcomingBooking);
@@ -3075,13 +3185,11 @@
         document.getElementById('modal-title').innerText = 'Add New Booking';
         document.getElementById('modal-booking-id').value = '';
         
-        // DO NOT lock the fields if adding a new booking
         setInputEnabled(document.getElementById('cust-checkin-date'), true);
         setInputEnabled(document.getElementById('cust-checkin-time'), true);
         setInputEnabled(document.getElementById('cust-checkout-date'), true);
         setInputEnabled(document.getElementById('cust-checkout-time'), true);
 
-        // Calculate and set today's date as min for new bookings strictly using IST standard
         const todayDt = new Date();
         const utcMs = todayDt.getTime();
         const istDate = new Date(utcMs + (330 * 60000));
@@ -3111,16 +3219,11 @@
         populateRoomDropdown(state.roomsCapacity.length > 0 ? [state.roomsCapacity[0].roomNo] : []);
 
         document.getElementById('cust-country-code').value = "+91";
-
-        // SET DEFAULT CHECK-IN AND CHECK-OUT TIME TO 11:00 AM FOR NEW BOOKING
         document.getElementById('cust-checkin-time').value = "11:00";
         document.getElementById('cust-checkout-time').value = "11:00";
 
         if (extraPersonsInput) extraPersonsInput.value = 0;
-        
         if (extraPersonDateInput) extraPersonDateInput.value = "";
-        
-        // SET EXTRA PERSON DEFAULT TIMES TO 11:00 AM FOR NEW BOOKING
         if (extraPersonTimeInput) extraPersonTimeInput.value = "11:00";
         if (extraPersonOutDateInput) extraPersonOutDateInput.value = "";
         if (extraPersonOutTimeInput) extraPersonOutTimeInput.value = "11:00";
@@ -3391,7 +3494,6 @@
       const bookingModalId = document.getElementById('modal-booking-id').value;
       const id = bookingModalId;
 
-      // Add strict check-in date validation for New Booking
       if (!id) {
         const todayDt = new Date();
         const utcMs = todayDt.getTime();
@@ -3433,7 +3535,6 @@
       }
 
       const includeMeals = document.getElementById('cust-include-meals')?.checked ?? true;
-
       const extraPersons = parseInt(document.getElementById('cust-extra-persons')?.value) || 0;
       
       const epDateCheck = document.getElementById('cust-extra-person-date')?.value;
@@ -3527,7 +3628,6 @@
       }
       
       const cabTripsList = [];
-      
       document.querySelectorAll('.cab-trip-row').forEach((row, index) => {
         const rate = parseFloat(row.querySelector('.cust-cab-rate').value) || 0;
         const dateVal = row.querySelector('.cust-cab-date').value || '';
@@ -3556,7 +3656,6 @@
         return;
       }
 
-      // Check for same room / date conflict
       const conflict = state.bookings.find(b => {
         if (isInactiveBooking(b)) return false;
         if (id && String(b.id) === String(id)) return false;

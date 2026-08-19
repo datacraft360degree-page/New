@@ -12,6 +12,22 @@
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <style>
+
+    
+
+/* Custom Slicer & Hover Navigation Control Styles */
+.slicer-btn {
+  user-select: none;
+  cursor: pointer;
+}
+
+/* Dynamic styling state for active slicers */
+.slicer-active-all { background-color: #2563EB !important; color: #FFFFFF !important; }
+.slicer-active-live { background-color: #D97706 !important; color: #FFFFFF !important; }
+.slicer-active-upcoming { background-color: #2563EB !important; color: #FFFFFF !important; }
+.slicer-active-closed { background-color: #059669 !important; color: #FFFFFF !important; }
+.slicer-active-inactive { background-color: #E11D48 !important; color: #FFFFFF !important; }
+
     /* Samsung One UI Smooth Styling & Compact Scrollbar */
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -374,32 +390,143 @@
   <!-- Main Content Area -->
   <main class="max-w-7xl mx-auto px-4 py-4 flex-1 w-full no-print space-y-4">
 
-    <!-- DASHBOARD TAB -->
-    <section id="tab-dashboard" class="tab-content space-y-4">
-      <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl p-5 text-white shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-        <div>
-          <h2 class="text-base font-bold tracking-tight">Hi Aniruddha, Welcome to dashboard 🏠</h2>
-          <p class="text-blue-100 text-[10px] mt-0.5">Quickly view, schedule, and manage room allocations and orders.</p>
-        </div>
-        <div class="flex items-center bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-2xl border border-white/20 space-x-2">
-          <label for="dash-year-select" class="text-[10px] font-bold text-blue-50 uppercase flex items-center gap-1">
-            <i class="fa-solid fa-filter text-amber-300"></i> Filter Year:
-          </label>
-          <select id="dash-year-select" onchange="handleDashboardYearChange(this.value)" class="bg-white text-blue-900 text-[11px] font-bold rounded-xl px-2.5 py-1 focus:outline-none cursor-pointer shadow-sm">
-          </select>
-        </div>
-      </div>
+   
 
-      <!-- Summary Filter Banner Indicator -->
-      <div class="flex items-center justify-between bg-white px-4 py-2 rounded-2xl border border-slate-200/60 shadow-sm">
-        <span class="text-[11px] font-semibold text-slate-600 flex items-center gap-2">
-          <i class="fa-solid fa-chart-line text-blue-600"></i>
-          Showing Summary For: <strong id="dash-filter-label" class="text-blue-600 font-bold">Consolidated (All Years)</strong>
-        </span>
-        <button onclick="handleDashboardYearChange('CURRENT')" class="text-[10px] bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-1 rounded-full transition border border-slate-200">
-          Reset to Current Year
-        </button>
+<!-- DASHBOARD TAB -->
+<section id="tab-dashboard" class="tab-content space-y-4">
+  <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl p-5 text-white shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+    <div>
+      <h2 class="text-base font-bold tracking-tight">Hi Aniruddha, Welcome to dashboard 🏠</h2>
+      <p class="text-blue-100 text-[10px] mt-0.5">Quickly view, schedule, and manage room allocations and orders.</p>
+    </div>
+    <div class="flex items-center bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-2xl border border-white/20 space-x-2">
+      <label for="dash-year-select" class="text-[10px] font-bold text-blue-50 uppercase flex items-center gap-1">
+        <i class="fa-solid fa-filter text-amber-300"></i> Filter Year:
+      </label>
+      <select id="dash-year-select" onchange="handleDashboardYearChange(this.value)" class="bg-white text-blue-900 text-[11px] font-bold rounded-xl px-2.5 py-1 focus:outline-none cursor-pointer shadow-sm">
+      </select>
+    </div>
+  </div>
+
+  <!-- Summary Filter Banner Indicator -->
+  <div class="flex items-center justify-between bg-white px-4 py-2 rounded-2xl border border-slate-200/60 shadow-sm">
+    <span class="text-[11px] font-semibold text-slate-600 flex items-center gap-2">
+      <i class="fa-solid fa-chart-line text-blue-600"></i>
+      Showing Summary For: <strong id="dash-filter-label" class="text-blue-600 font-bold">Consolidated (All Years)</strong>
+    </span>
+    <button onclick="handleDashboardYearChange('CURRENT')" class="text-[10px] bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-1 rounded-full transition border border-slate-200">
+      Reset to Current Year
+    </button>
+  </div>
+
+  <!-- 1. NEW 4 YEAR-WISE BOOKING COUNT BOXES -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+    <div id="slicer-box-live" onclick="setDashboardStatusSlicer('live')" class="cursor-pointer bg-white p-4 rounded-3xl shadow-sm border border-slate-200/60 hover:border-amber-400 transition flex items-center justify-between">
+      <div>
+        <p class="text-[9px] uppercase font-bold text-amber-800 tracking-wider">Live Booking Count Total</p>
+        <p id="dash-live-count" class="text-xl font-black text-amber-600 mt-0.5">0</p>
       </div>
+      <div class="p-3 bg-amber-50 text-amber-600 rounded-2xl"><i class="fa-solid fa-hotel text-base"></i></div>
+    </div>
+    <div id="slicer-box-upcoming" onclick="setDashboardStatusSlicer('upcoming')" class="cursor-pointer bg-white p-4 rounded-3xl shadow-sm border border-slate-200/60 hover:border-blue-400 transition flex items-center justify-between">
+      <div>
+        <p class="text-[9px] uppercase font-bold text-blue-800 tracking-wider">Upcoming Booking Count Total</p>
+        <p id="dash-upcoming-count" class="text-xl font-black text-blue-600 mt-0.5">0</p>
+      </div>
+      <div class="p-3 bg-blue-50 text-blue-600 rounded-2xl"><i class="fa-solid fa-calendar-check text-base"></i></div>
+    </div>
+    <div id="slicer-box-closed" onclick="setDashboardStatusSlicer('closed')" class="cursor-pointer bg-white p-4 rounded-3xl shadow-sm border border-slate-200/60 hover:border-emerald-400 transition flex items-center justify-between">
+      <div>
+        <p class="text-[9px] uppercase font-bold text-emerald-800 tracking-wider">Closed Booking Count Total</p>
+        <p id="dash-closed-count" class="text-xl font-black text-emerald-600 mt-0.5">0</p>
+      </div>
+      <div class="p-3 bg-emerald-50 text-emerald-600 rounded-2xl"><i class="fa-solid fa-circle-check text-base"></i></div>
+    </div>
+    <div id="slicer-box-inactive" onclick="setDashboardStatusSlicer('inactive')" class="cursor-pointer bg-white p-4 rounded-3xl shadow-sm border border-slate-200/60 hover:border-rose-400 transition flex items-center justify-between">
+      <div>
+        <p class="text-[9px] uppercase font-bold text-rose-800 tracking-wider">Inactive Booking Count Total</p>
+        <p id="dash-inactive-count" class="text-xl font-black text-rose-600 mt-0.5">0</p>
+      </div>
+      <div class="p-3 bg-rose-50 text-rose-600 rounded-2xl"><i class="fa-solid fa-ban text-base"></i></div>
+    </div>
+  </div>
+
+  <!-- 2. EXCEL SLICER TAB CONTROL -->
+  <div class="bg-white p-3 rounded-2xl border border-slate-200/60 flex flex-wrap items-center justify-between gap-2 shadow-xs">
+    <div class="flex items-center space-x-1">
+      <span class="text-[10px] font-bold text-slate-500 uppercase mr-2 flex items-center gap-1">
+        <i class="fa-solid fa-filter text-emerald-600"></i> Status Slicer:
+      </span>
+      <button id="slicer-btn-all" onclick="setDashboardStatusSlicer('all')" class="slicer-btn px-3 py-1 rounded-xl text-[10px] font-bold transition bg-blue-600 text-white shadow-xs">All</button>
+      <button id="slicer-btn-live" onclick="setDashboardStatusSlicer('live')" class="slicer-btn px-3 py-1 rounded-xl text-[10px] font-bold transition bg-slate-100 text-slate-600 hover:bg-slate-200">Live</button>
+      <button id="slicer-btn-upcoming" onclick="setDashboardStatusSlicer('upcoming')" class="slicer-btn px-3 py-1 rounded-xl text-[10px] font-bold transition bg-slate-100 text-slate-600 hover:bg-slate-200">Upcoming</button>
+      <button id="slicer-btn-closed" onclick="setDashboardStatusSlicer('closed')" class="slicer-btn px-3 py-1 rounded-xl text-[10px] font-bold transition bg-slate-100 text-slate-600 hover:bg-slate-200">Closed</button>
+      <button id="slicer-btn-inactive" onclick="setDashboardStatusSlicer('inactive')" class="slicer-btn px-3 py-1 rounded-xl text-[10px] font-bold transition bg-slate-100 text-slate-600 hover:bg-slate-200">Inactive</button>
+    </div>
+    <span id="dash-slicer-active-label" class="text-[10px] font-semibold text-slate-400">Filtering: All Statuses</span>
+  </div>
+
+  <!-- Existing Dashboard Monetary Financial Cards -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+    <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200/60 flex items-center justify-between">
+      <div>
+        <p class="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Total Bookings</p>
+        <p id="dash-total-bookings" class="text-xl font-black text-slate-900 mt-0.5">0</p>
+      </div>
+      <div class="p-3 bg-blue-50 text-blue-600 rounded-2xl"><i class="fa-solid fa-bookmark text-base"></i></div>
+    </div>
+    <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200/60 flex items-center justify-between">
+      <div>
+        <p class="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Booking Amount</p>
+        <p id="dash-total-amount" class="text-xl font-black text-slate-900 mt-0.5">₹0</p>
+      </div>
+      <div class="p-3 bg-indigo-50 text-indigo-600 rounded-2xl"><i class="fa-solid fa-receipt text-base"></i></div>
+    </div>
+    <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200/60 flex items-center justify-between">
+      <div>
+        <p class="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Amount Received</p>
+        <p id="dash-advanced" class="text-xl font-black text-emerald-600 mt-0.5">₹0</p>
+      </div>
+      <div class="p-3 bg-emerald-50 text-emerald-600 rounded-2xl"><i class="fa-solid fa-wallet text-base"></i></div>
+    </div>
+    <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200/60 flex items-center justify-between">
+      <div>
+        <p class="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Total Due Amount</p>
+        <p id="dash-due" class="text-xl font-black text-rose-600 mt-0.5">₹0</p>
+      </div>
+      <div class="p-3 bg-rose-50 text-rose-600 rounded-2xl"><i class="fa-solid fa-hand-holding-dollar text-base"></i></div>
+    </div>
+  </div>
+
+  <div class="hidden bg-white rounded-3xl shadow-sm border border-slate-200/60 p-4">
+    <div class="mb-3 flex justify-between items-center">
+      <h3 class="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+        <i class="fa-solid fa-calendar-days text-blue-600"></i> Active Years Directory (2026 – 2085)
+      </h3>
+      <span class="text-[10px] text-slate-400 font-medium">Click any year to filter dashboard &amp; open year calendar</span>
+    </div>
+    <div id="years-grid" class="grid grid-cols-6 sm:grid-cols-10 md:grid-cols-12 gap-2"></div>
+  </div>
+</section>
+
+<!-- 3. HOVER FLOATING NAVIGATION BUTTON CONTROLS (Page Up/Down & Scroll Left/Right) -->
+<div class="fixed bottom-6 left-6 z-50 flex flex-col gap-2 no-print opacity-30 hover:opacity-100 transition-opacity duration-300">
+  <div class="flex gap-1.5 bg-slate-900/80 backdrop-blur-md p-1.5 rounded-full shadow-2xl border border-slate-700">
+    <button onclick="scrollPageVertical('up')" title="Page Up" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-blue-600 text-white flex items-center justify-center transition active:scale-95">
+      <i class="fa-solid fa-chevron-up text-xs"></i>
+    </button>
+    <button onclick="scrollPageVertical('down')" title="Page Down" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-blue-600 text-white flex items-center justify-center transition active:scale-95">
+      <i class="fa-solid fa-chevron-down text-xs"></i>
+    </button>
+    <div class="w-px h-6 bg-slate-700 self-center"></div>
+    <button onclick="scrollBarHorizontal('left')" title="Bar Scroll Left" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-emerald-600 text-white flex items-center justify-center transition active:scale-95">
+      <i class="fa-solid fa-chevron-left text-xs"></i>
+    </button>
+    <button onclick="scrollBarHorizontal('right')" title="Bar Scroll Right" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-emerald-600 text-white flex items-center justify-center transition active:scale-95">
+      <i class="fa-solid fa-chevron-right text-xs"></i>
+    </button>
+  </div>
+</div>
 
       <!-- One UI Rounded Cards -->
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">

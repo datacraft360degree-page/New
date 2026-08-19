@@ -2428,6 +2428,13 @@
 
       updateDashboardCards();
     }
+// Helper to safely extract numbers from formatted strings (e.g., "₹1,500" -> 1500)
+const parseNum = (val) => {
+  if (val === null || val === undefined) return 0;
+  if (typeof val === 'number') return isNaN(val) ? 0 : val;
+  const cleaned = String(val).replace(/[^0-9.-]+/g, '');
+  return parseFloat(cleaned) || 0;
+};
 
 function getPieGradient(c1, c2, c3, v1, v2, v3) {
   const total = v1 + v2 + v3;
@@ -2441,13 +2448,13 @@ function updateDashboardCards() {
   const now = Date.now();
   
   let targetYear = state.dashSelectedYear;
-  let filteredBookings = state.bookings;
+  let filteredBookings = state.bookings || [];
   
-  if (targetYear !== 'ALL') {
+  if (targetYear && targetYear !== 'ALL') {
     const yearNum = parseInt(targetYear);
-    filteredBookings = state.bookings.filter(b => {
-      const inYear = new Date(parseDateMs(b.checkIn)).getFullYear();
-      return inYear === yearNum;
+    filteredBookings = filteredBookings.filter(b => {
+      const checkInDate = typeof parseDateMs === 'function' ? parseDateMs(b.checkIn) : new Date(b.checkIn).getTime();
+      return new Date(checkInDate).getFullYear() === yearNum;
     });
   }
 
@@ -2455,34 +2462,41 @@ function updateDashboardCards() {
   const activeBookings = filteredBookings.filter(b => !isInactiveBooking(b));
   const inactiveBookings = filteredBookings.filter(b => isInactiveBooking(b));
 
-  // Initialize breakdown metrics for Active Bookings
   let bkLive = 0, bkUp = 0, bkClosed = 0;
   let recLive = 0, recUp = 0, recClosed = 0;
   let amtLive = 0, amtUp = 0, amtClosed = 0;
   let dueLive = 0, dueUp = 0, dueClosed = 0;
 
   activeBookings.forEach(b => {
-    const checkInTime = parseDateMs(b.checkIn);
-    const checkOutTime = getEffectiveCheckoutTime(b);
+    const checkInTime = typeof parseDateMs === 'function' ? parseDateMs(b.checkIn) : new Date(b.checkIn).getTime();
+    const checkOutTime = typeof getEffectiveCheckoutTime === 'function' 
+      ? getEffectiveCheckoutTime(b) 
+      : (typeof parseDateMs === 'function' ? parseDateMs(b.checkOut) : new Date(b.checkOut).getTime());
     
-    const totalAmt = parseFloat(b.totalAmount) || 0;
-    const advanceAmt = parseFloat(b.advancePayment) || 0;
-    const dueAmt = parseFloat(b.dueAmount) || 0;
+    // Safely parse amounts with multi-property fallbacks
+    const totalAmt = parseNum(b.totalAmount || b.total || b.amount);
+    const advanceAmt = parseNum(b.advancePayment || b.amountReceived || b.receivedAmount || b.paidAmount || b.advance);
+    
+    // If dueAmount isn't explicitly defined on the object, calculate totalAmt - advanceAmt
+    const rawDue = (b.dueAmount !== undefined && b.dueAmount !== null) 
+      ? b.dueAmount 
+      : (totalAmt - advanceAmt);
+    const dueAmt = Math.max(0, parseNum(rawDue));
 
     if (now >= checkInTime && now <= checkOutTime) {
-      // Live Booking
+      // Live
       bkLive++;
       recLive += advanceAmt;
       amtLive += totalAmt;
       dueLive += dueAmt;
     } else if (now < checkInTime) {
-      // Upcoming Booking
+      // Upcoming
       bkUp++;
       recUp += advanceAmt;
       amtUp += totalAmt;
       dueUp += dueAmt;
     } else {
-      // Closed Booking
+      // Closed
       bkClosed++;
       recClosed += advanceAmt;
       amtClosed += totalAmt;
@@ -2492,47 +2506,59 @@ function updateDashboardCards() {
 
   // Calculate Inactive Metrics
   const inactiveCount = inactiveBookings.length;
-  const inactiveAmt = inactiveBookings.reduce((sum, b) => sum + (parseFloat(b.totalAmount) || 0), 0);
+  const inactiveAmt = inactiveBookings.reduce((sum, b) => sum + parseNum(b.totalAmount || b.total || b.amount), 0);
 
-  // Totals for Active
+  // Grand Totals
   const totalBookings = bkLive + bkUp + bkClosed;
   const totalReceived = recLive + recUp + recClosed;
   const totalAmount = amtLive + amtUp + amtClosed;
   const totalDue = dueLive + dueUp + dueClosed;
 
-  // 1. Total Bookings Values & Pie Chart
-  document.getElementById('dash-total-bookings').innerText = totalBookings;
-  document.getElementById('dash-bk-live').innerText = bkLive;
-  document.getElementById('dash-bk-up').innerText = bkUp;
-  document.getElementById('dash-bk-closed').innerText = bkClosed;
-  document.getElementById('pie-bk').style.background = getPieGradient('#f59e0b', '#3b82f6', '#10b981', bkLive, bkUp, bkClosed);
+  // Safe DOM updater
+  const setTxt = (id, val) => {
+    const el = document.getElementById(id);
+    if (el) el.innerText = val;
+  };
 
-  // 2. Amount Received Values & Pie Chart
-  document.getElementById('dash-total-received').innerText = '₹' + totalReceived.toLocaleString('en-IN');
-  document.getElementById('dash-rec-live').innerText = '₹' + recLive.toLocaleString('en-IN');
-  document.getElementById('dash-rec-up').innerText = '₹' + recUp.toLocaleString('en-IN');
-  document.getElementById('dash-rec-closed').innerText = '₹' + recClosed.toLocaleString('en-IN');
-  document.getElementById('pie-rec').style.background = getPieGradient('#f59e0b', '#3b82f6', '#10b981', recLive, recUp, recClosed);
+  // 1. Total Bookings
+  setTxt('dash-total-bookings', totalBookings);
+  setTxt('dash-bk-live', bkLive);
+  setTxt('dash-bk-up', bkUp);
+  setTxt('dash-bk-closed', bkClosed);
 
-  // 3. Booking Amount Values & Pie Chart
-  document.getElementById('dash-total-amount').innerText = '₹' + totalAmount.toLocaleString('en-IN');
-  document.getElementById('dash-amt-live').innerText = '₹' + amtLive.toLocaleString('en-IN');
-  document.getElementById('dash-amt-up').innerText = '₹' + amtUp.toLocaleString('en-IN');
-  document.getElementById('dash-amt-closed').innerText = '₹' + amtClosed.toLocaleString('en-IN');
-  document.getElementById('pie-amt').style.background = getPieGradient('#f59e0b', '#3b82f6', '#10b981', amtLive, amtUp, amtClosed);
+  // 2. Amount Received
+  setTxt('dash-total-received', '₹' + totalReceived.toLocaleString('en-IN'));
+  setTxt('dash-rec-live', '₹' + recLive.toLocaleString('en-IN'));
+  setTxt('dash-rec-up', '₹' + recUp.toLocaleString('en-IN'));
+  setTxt('dash-rec-closed', '₹' + recClosed.toLocaleString('en-IN'));
 
-  // 4. Total Due Values & Pie Chart
-  document.getElementById('dash-total-due').innerText = '₹' + totalDue.toLocaleString('en-IN');
-  document.getElementById('dash-due-live').innerText = '₹' + dueLive.toLocaleString('en-IN');
-  document.getElementById('dash-due-up').innerText = '₹' + dueUp.toLocaleString('en-IN');
-  document.getElementById('dash-due-closed').innerText = '₹' + dueClosed.toLocaleString('en-IN');
-  document.getElementById('pie-due').style.background = getPieGradient('#f59e0b', '#3b82f6', '#10b981', dueLive, dueUp, dueClosed);
+  // 3. Booking Amount
+  setTxt('dash-total-amount', '₹' + totalAmount.toLocaleString('en-IN'));
+  setTxt('dash-amt-live', '₹' + amtLive.toLocaleString('en-IN'));
+  setTxt('dash-amt-up', '₹' + amtUp.toLocaleString('en-IN'));
+  setTxt('dash-amt-closed', '₹' + amtClosed.toLocaleString('en-IN'));
 
-  // 5. Inactive Bookings Values & Pie Chart
-  document.getElementById('dash-inactive-count').innerText = inactiveCount;
-  document.getElementById('dash-inactive-amt').innerText = '₹' + inactiveAmt.toLocaleString('en-IN');
-  
-  // Inactive vs Active Pie Chart
+  // 4. Total Due
+  setTxt('dash-total-due', '₹' + totalDue.toLocaleString('en-IN'));
+  setTxt('dash-due-live', '₹' + dueLive.toLocaleString('en-IN'));
+  setTxt('dash-due-up', '₹' + dueUp.toLocaleString('en-IN'));
+  setTxt('dash-due-closed', '₹' + dueClosed.toLocaleString('en-IN'));
+
+  // 5. Inactive Bookings
+  setTxt('dash-inactive-count', inactiveCount);
+  setTxt('dash-inactive-amt', '₹' + inactiveAmt.toLocaleString('en-IN'));
+
+  // Render Pie Charts
+  const setPie = (id, v1, v2, v3) => {
+    const el = document.getElementById(id);
+    if (el) el.style.background = getPieGradient('#f59e0b', '#3b82f6', '#10b981', v1, v2, v3);
+  };
+
+  setPie('pie-bk', bkLive, bkUp, bkClosed);
+  setPie('pie-rec', recLive, recUp, recClosed);
+  setPie('pie-amt', amtLive, amtUp, amtClosed);
+  setPie('pie-due', dueLive, dueUp, dueClosed);
+
   const pieInactiveElem = document.getElementById('pie-inactive');
   if (pieInactiveElem) {
     const grandTotalCount = totalBookings + inactiveCount;

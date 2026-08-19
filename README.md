@@ -2444,110 +2444,40 @@
       updateDashboardCards();
     }
 
-    
-        function updateDashboardCards() {
-  const now = new Date().getTime();
-  
-  // Variables for active bookings
-  let bkLive = 0, bkUp = 0, bkClosed = 0;
-  let recLive = 0, recUp = 0, recClosed = 0;
-  let amtLive = 0, amtUp = 0, amtClosed = 0;
-  let dueLive = 0, dueUp = 0, dueClosed = 0;
+    function updateDashboardCards() {
+      const selectedFilter = state.dashSelectedYear;
+      const label = document.getElementById('dash-filter-label');
 
-  // Variables for inactive bookings
-  let inactiveCount = 0, inactiveAmt = 0;
+      let filteredBookings = [];
 
-  // Optional: Apply your dashboard year filter if required
-  let filteredBookings = state.bookings;
-  if (state.dashSelectedYear !== 'CURRENT' && state.dashSelectedYear !== 'ALL') {
-    filteredBookings = state.bookings.filter(b => {
-      if (!b.checkIn) return false;
-      return String(b.checkIn).startsWith(state.dashSelectedYear);
-    });
-  }
-
-  filteredBookings.forEach(b => {
-    let total = parseFloat(b.totalAmount) || 0;
-    let adv = parseFloat(b.initialAdv) || 0;
-    let cleared = parseFloat(b.clearedDue) || 0;
-    let received = adv + cleared;
-    let due = parseFloat(b.totalDue) || 0;
-
-    if (isInactiveBooking(b)) {
-      inactiveCount++;
-      inactiveAmt += total;
-    } else {
-      const cIn = parseDateMs(b.checkIn);
-      const cOut = getEffectiveCheckoutTime(b);
-      
-      if (now > cOut) {
-        // Closed
-        bkClosed++; recClosed += received; amtClosed += total; dueClosed += due;
-      } else if (now >= cIn && now <= cOut) {
-        // Live
-        bkLive++; recLive += received; amtLive += total; dueLive += due;
+      if (selectedFilter === 'ALL' || !selectedFilter) {
+        filteredBookings = state.bookings.filter(b => !isInactiveBooking(b));
+        if (label) label.innerText = "Consolidated Summary (All Years)";
       } else {
-        // Upcoming
-        bkUp++; recUp += received; amtUp += total; dueUp += due;
+        const targetYear = parseInt(selectedFilter);
+        filteredBookings = state.bookings.filter(b => {
+          if (isInactiveBooking(b) || !b.checkIn) return false;
+          const yr = new Date(b.checkIn.replace(' ', 'T')).getFullYear();
+          return yr === targetYear;
+        });
+
+        if (label) {
+          label.innerText = targetYear === defaultAppYear 
+            ? `Year ${targetYear} (Current Year)` 
+            : `Year ${targetYear}`;
+        }
       }
+
+      const totalBookings = filteredBookings.length;
+      const totalAmt = filteredBookings.reduce((sum, b) => sum + (b.totalAmount || 0), 0);
+      const totalAdv = filteredBookings.reduce((sum, b) => sum + (b.initialAdv || 0) + (b.clearedDue || 0), 0);
+      const totalDue = filteredBookings.reduce((sum, b) => sum + (b.totalDue || 0), 0);
+
+      document.getElementById('dash-total-bookings').innerText = totalBookings;
+      document.getElementById('dash-total-amount').innerText = `₹${totalAmt.toLocaleString('en-IN')}`;
+      document.getElementById('dash-advanced').innerText = `₹${totalAdv.toLocaleString('en-IN')}`;
+      document.getElementById('dash-due').innerText = `₹${totalDue.toLocaleString('en-IN')}`;
     }
-  });
-
-  // Calculate Totals (Excluding Inactive)
-  const totalBk = bkLive + bkUp + bkClosed;
-  const totalRec = recLive + recUp + recClosed;
-  const totalAmt = amtLive + amtUp + amtClosed;
-  const totalDue = dueLive + dueUp + dueClosed;
-
-  // 1. Update Box 1 (Total Bookings)
-  document.getElementById('dash-total-bookings').innerText = totalBk;
-  document.getElementById('dash-bk-live').innerText = bkLive;
-  document.getElementById('dash-bk-up').innerText = bkUp;
-  document.getElementById('dash-bk-closed').innerText = bkClosed;
-  
-  // 2. Update Box 2 (Amount Received)
-  document.getElementById('dash-total-received').innerText = '₹' + totalRec;
-  document.getElementById('dash-rec-live').innerText = '₹' + recLive;
-  document.getElementById('dash-rec-up').innerText = '₹' + recUp;
-  document.getElementById('dash-rec-closed').innerText = '₹' + recClosed;
-
-  // 3. Update Box 3 (Booking Amount)
-  document.getElementById('dash-total-amount').innerText = '₹' + totalAmt;
-  document.getElementById('dash-amt-live').innerText = '₹' + amtLive;
-  document.getElementById('dash-amt-up').innerText = '₹' + amtUp;
-  document.getElementById('dash-amt-closed').innerText = '₹' + amtClosed;
-
-  // 4. Update Box 4 (Total Due)
-  document.getElementById('dash-total-due').innerText = '₹' + totalDue;
-  document.getElementById('dash-due-live').innerText = '₹' + dueLive;
-  document.getElementById('dash-due-up').innerText = '₹' + dueUp;
-  document.getElementById('dash-due-closed').innerText = '₹' + dueDueClosed = dueClosed; // Format Due Closed
-  document.getElementById('dash-due-closed').innerText = '₹' + dueClosed;
-
-  // 5. Update Box 5 (Inactive Bookings)
-  document.getElementById('dash-inactive-count').innerText = inactiveCount;
-  document.getElementById('dash-inactive-amt').innerText = '₹' + inactiveAmt;
-
-  // Utility to calculate percentage for CSS Width
-  const getPct = (val, max) => max > 0 ? ((val / max) * 100).toFixed(1) + '%' : '0%';
-
-  // Set Bar Chart Widths
-  document.getElementById('bar-bk-live').style.width = getPct(bkLive, totalBk);
-  document.getElementById('bar-bk-up').style.width = getPct(bkUp, totalBk);
-  document.getElementById('bar-bk-closed').style.width = getPct(bkClosed, totalBk);
-
-  document.getElementById('bar-rec-live').style.width = getPct(recLive, totalRec);
-  document.getElementById('bar-rec-up').style.width = getPct(recUp, totalRec);
-  document.getElementById('bar-rec-closed').style.width = getPct(recClosed, totalRec);
-
-  document.getElementById('bar-amt-live').style.width = getPct(amtLive, totalAmt);
-  document.getElementById('bar-amt-up').style.width = getPct(amtUp, totalAmt);
-  document.getElementById('bar-amt-closed').style.width = getPct(amtClosed, totalAmt);
-
-  document.getElementById('bar-due-live').style.width = getPct(dueLive, totalDue);
-  document.getElementById('bar-due-up').style.width = getPct(dueUp, totalDue);
-  document.getElementById('bar-due-closed').style.width = getPct(dueClosed, totalDue);
-}
 
     function sendReceiptViaWhatsApp() {
       if (!activeModalBooking) {

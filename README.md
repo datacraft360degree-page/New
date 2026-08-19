@@ -4232,10 +4232,7 @@ function setDashboardStatus(status) {
     function closeCommentBox() {
       const box = document.getElementById('excel-comment-box');
       if (box) box.classList.add('hidden');
-    }
-  </script>
-
-  
+    }  
 
 <!-- Hover Scroll Logic & Overlays -->
   <div id="scroll-bar-up" class="fixed top-16 left-1/2 -translate-x-1/2 w-64 h-6 bg-slate-800/10 hover:bg-slate-800/30 backdrop-blur-sm rounded-full z-[100] transition cursor-n-resize flex items-center justify-center text-slate-600 opacity-0 hover:opacity-100 no-print" onmouseenter="startHoverScroll('up', window)" onmouseleave="stopHoverScroll()">
@@ -4287,6 +4284,6 @@ function setDashboardStatus(status) {
     });
   </script>
 
-
+  </script>
 </body>
 </html>

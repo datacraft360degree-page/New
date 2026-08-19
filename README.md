@@ -301,64 +301,6 @@
       <!-- One UI Pill Navigation -->
       <nav class="flex space-x-1 bg-slate-100 p-1 rounded-full text-[11px] font-medium">
         <button onclick="switchTab('dashboard')" id="btn-dashboard" class="tab-btn px-3 py-1 rounded-full transition-all active-tab bg-white text-blue-600 shadow-sm font-bold">Dashboard</button>
-        
-
-<!-- Summary Filter Banner Indicator -->
-      <div class="flex items-center justify-between bg-white px-4 py-2 rounded-2xl border border-slate-200/60 shadow-sm">
-        <span class="text-[11px] font-semibold text-slate-600 flex items-center gap-2">
-          <i class="fa-solid fa-chart-line text-blue-600"></i>
-          Showing Summary For: <strong id="dash-filter-label" class="text-blue-600 font-bold">Consolidated (All Years)</strong>
-        </span>
-        <button onclick="handleDashboardYearChange('CURRENT')" class="text-[10px] bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-1 rounded-full transition border border-slate-200">
-          Reset to Current Year
-        </button>
-      </div>
-
-
-
-<!-- NEW: Slicer Filter Tab -->
-      <div class="flex flex-wrap gap-2 mt-4 bg-white p-3 rounded-2xl border border-slate-200/60 shadow-sm">
-        <span class="text-[11px] font-bold text-slate-600 flex items-center mr-2">Status Slicer:</span>
-        <button id="slicer-ALL" onclick="setDashboardStatus('ALL')" class="slicer-btn bg-blue-600 text-white shadow-sm px-4 py-1.5 rounded-xl text-[10px] font-bold transition">All Data</button>
-        <button id="slicer-LIVE" onclick="setDashboardStatus('LIVE')" class="slicer-btn bg-slate-100 text-slate-600 hover:bg-amber-100 px-4 py-1.5 rounded-xl text-[10px] font-bold transition">Live</button>
-        <button id="slicer-UPCOMING" onclick="setDashboardStatus('UPCOMING')" class="slicer-btn bg-slate-100 text-slate-600 hover:bg-blue-100 px-4 py-1.5 rounded-xl text-[10px] font-bold transition">Upcoming</button>
-        <button id="slicer-CLOSED" onclick="setDashboardStatus('CLOSED')" class="slicer-btn bg-slate-100 text-slate-600 hover:bg-emerald-100 px-4 py-1.5 rounded-xl text-[10px] font-bold transition">Closed</button>
-        <button id="slicer-INACTIVE" onclick="setDashboardStatus('INACTIVE')" class="slicer-btn bg-slate-100 text-slate-600 hover:bg-rose-100 px-4 py-1.5 rounded-xl text-[10px] font-bold transition">Inactive</button>
-      </div>
-
-      <!-- NEW: 4 Status Count Boxes -->
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-4 mb-4">
-        <div class="bg-white p-4 rounded-3xl shadow-sm border border-amber-200/60 flex items-center justify-between">
-          <div>
-            <p class="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Live Bookings</p>
-            <p id="dash-live-count" class="text-xl font-black text-amber-500 mt-0.5">0</p>
-          </div>
-          <div class="p-3 bg-amber-50 text-amber-500 rounded-2xl"><i class="fa-solid fa-spinner fa-spin text-base"></i></div>
-        </div>
-        <div class="bg-white p-4 rounded-3xl shadow-sm border border-blue-200/60 flex items-center justify-between">
-          <div>
-            <p class="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Upcoming Bookings</p>
-            <p id="dash-upcoming-count" class="text-xl font-black text-blue-500 mt-0.5">0</p>
-          </div>
-          <div class="p-3 bg-blue-50 text-blue-500 rounded-2xl"><i class="fa-solid fa-calendar-day text-base"></i></div>
-        </div>
-        <div class="bg-white p-4 rounded-3xl shadow-sm border border-emerald-200/60 flex items-center justify-between">
-          <div>
-            <p class="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Closed Bookings</p>
-            <p id="dash-closed-count" class="text-xl font-black text-emerald-500 mt-0.5">0</p>
-          </div>
-          <div class="p-3 bg-emerald-50 text-emerald-500 rounded-2xl"><i class="fa-solid fa-circle-check text-base"></i></div>
-        </div>
-        <div class="bg-white p-4 rounded-3xl shadow-sm border border-rose-200/60 flex items-center justify-between">
-          <div>
-            <p class="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Inactive Bookings</p>
-            <p id="dash-inactive-count" class="text-xl font-black text-rose-500 mt-0.5">0</p>
-          </div>
-          <div class="p-3 bg-rose-50 text-rose-500 rounded-2xl"><i class="fa-solid fa-ban text-base"></i></div>
-        </div>
-      </div>
-
-
         <button onclick="switchTab('booking')" id="btn-booking" class="tab-btn px-3 py-1 rounded-full transition-all text-slate-600 hover:text-slate-900">Booking Details</button>
         <button onclick="switchTab('master')" id="btn-master" class="tab-btn px-3 py-1 rounded-full transition-all text-slate-600 hover:text-slate-900 flex items-center gap-1">
           <i class="fa-solid fa-lock text-[9px] text-amber-500"></i> Master Data
@@ -1686,9 +1628,7 @@
     const currentRealYear = new Date().getFullYear();
     const defaultAppYear = currentRealYear >= 2026 && currentRealYear <= 2085 ? currentRealYear : 2026;
 
-
-
-let state = {
+    let state = {
       yearlyCounters: { [defaultAppYear]: 0 },
       bookings: [],
       roomsCapacity: [
@@ -1698,15 +1638,6 @@ let state = {
         { roomNo: 4, capacity: 4 },
         { roomNo: 5, capacity: 4 }
       ],
-      masterAgents: [
-        { agentName: "Self", phone: "Direct", roomNo: "All Rooms" }
-      ],
-      selectedYear: defaultAppYear,
-      dashSelectedYear: defaultAppYear,
-      dashSelectedStatus: 'ALL' // <-- ADD THIS LINE
-    };
-
-
       masterAgents: [
         { agentName: "Self", phone: "Direct", roomNo: "All Rooms" }
       ],
@@ -2422,103 +2353,40 @@ let state = {
       updateDashboardCards();
     }
 
-  
-
-function setDashboardStatus(status) {
-      state.dashSelectedStatus = status;
-      
-      document.querySelectorAll('.slicer-btn').forEach(btn => {
-        btn.classList.remove('bg-blue-600', 'text-white', 'bg-amber-500', 'bg-emerald-500', 'bg-rose-500', 'bg-blue-500', 'shadow-sm');
-        btn.classList.add('bg-slate-100', 'text-slate-600');
-      });
-      
-      const activeBtn = document.getElementById(`slicer-${status}`);
-      if (activeBtn) {
-        activeBtn.classList.remove('bg-slate-100', 'text-slate-600');
-        if (status === 'ALL') activeBtn.classList.add('bg-blue-600', 'text-white', 'shadow-sm');
-        if (status === 'LIVE') activeBtn.classList.add('bg-amber-500', 'text-white', 'shadow-sm');
-        if (status === 'UPCOMING') activeBtn.classList.add('bg-blue-500', 'text-white', 'shadow-sm');
-        if (status === 'CLOSED') activeBtn.classList.add('bg-emerald-500', 'text-white', 'shadow-sm');
-        if (status === 'INACTIVE') activeBtn.classList.add('bg-rose-500', 'text-white', 'shadow-sm');
-      }
-      
-      updateDashboardCards();
-    }
-
     function updateDashboardCards() {
       const selectedFilter = state.dashSelectedYear;
-      const selectedStatus = state.dashSelectedStatus || 'ALL';
       const label = document.getElementById('dash-filter-label');
 
-      let yearFilteredBookings = [];
+      let filteredBookings = [];
 
       if (selectedFilter === 'ALL' || !selectedFilter) {
-        yearFilteredBookings = state.bookings;
-        if (label) label.innerText = `Consolidated Summary - ${selectedStatus}`;
+        filteredBookings = state.bookings.filter(b => !isInactiveBooking(b));
+        if (label) label.innerText = "Consolidated Summary (All Years)";
       } else {
         const targetYear = parseInt(selectedFilter);
-        yearFilteredBookings = state.bookings.filter(b => {
-          if (!b.checkIn) return false;
+        filteredBookings = state.bookings.filter(b => {
+          if (isInactiveBooking(b) || !b.checkIn) return false;
           const yr = new Date(b.checkIn.replace(' ', 'T')).getFullYear();
           return yr === targetYear;
         });
 
         if (label) {
-          label.innerText = (targetYear === defaultAppYear 
+          label.innerText = targetYear === defaultAppYear 
             ? `Year ${targetYear} (Current Year)` 
-            : `Year ${targetYear}`) + ` - ${selectedStatus}`;
+            : `Year ${targetYear}`;
         }
       }
 
-      const now = new Date().getTime();
-      let liveCnt = 0, upCnt = 0, clsCnt = 0, inactCnt = 0;
-
-      yearFilteredBookings.forEach(b => {
-        if (isInactiveBooking(b)) {
-          inactCnt++;
-        } else {
-          const cIn = parseDateMs(b.checkIn);
-          const cOut = getEffectiveCheckoutTime(b);
-          if (now > cOut) clsCnt++;
-          else if (now >= cIn && now <= cOut) liveCnt++;
-          else upCnt++;
-        }
-      });
-
-      const elLive = document.getElementById('dash-live-count');
-      const elUp = document.getElementById('dash-upcoming-count');
-      const elCls = document.getElementById('dash-closed-count');
-      const elInact = document.getElementById('dash-inactive-count');
-      
-      if(elLive) elLive.innerText = liveCnt;
-      if(elUp) elUp.innerText = upCnt;
-      if(elCls) elCls.innerText = clsCnt;
-      if(elInact) elInact.innerText = inactCnt;
-
-      const finalBookings = yearFilteredBookings.filter(b => {
-        if (selectedStatus === 'ALL') return !isInactiveBooking(b);
-        if (selectedStatus === 'INACTIVE') return isInactiveBooking(b);
-        if (isInactiveBooking(b)) return false;
-        
-        const cIn = parseDateMs(b.checkIn);
-        const cOut = getEffectiveCheckoutTime(b);
-        if (selectedStatus === 'CLOSED') return now > cOut;
-        if (selectedStatus === 'LIVE') return now >= cIn && now <= cOut;
-        if (selectedStatus === 'UPCOMING') return now < cIn;
-        return true;
-      });
-
-      const totalBookings = finalBookings.length;
-      const totalAmt = finalBookings.reduce((sum, b) => sum + (b.totalAmount || 0), 0);
-      const totalAdv = finalBookings.reduce((sum, b) => sum + (b.initialAdv || 0) + (b.clearedDue || 0), 0);
-      const totalDue = finalBookings.reduce((sum, b) => sum + (b.totalDue || 0), 0);
+      const totalBookings = filteredBookings.length;
+      const totalAmt = filteredBookings.reduce((sum, b) => sum + (b.totalAmount || 0), 0);
+      const totalAdv = filteredBookings.reduce((sum, b) => sum + (b.initialAdv || 0) + (b.clearedDue || 0), 0);
+      const totalDue = filteredBookings.reduce((sum, b) => sum + (b.totalDue || 0), 0);
 
       document.getElementById('dash-total-bookings').innerText = totalBookings;
       document.getElementById('dash-total-amount').innerText = `₹${totalAmt.toLocaleString('en-IN')}`;
       document.getElementById('dash-advanced').innerText = `₹${totalAdv.toLocaleString('en-IN')}`;
       document.getElementById('dash-due').innerText = `₹${totalDue.toLocaleString('en-IN')}`;
     }
-
 
     function sendReceiptViaWhatsApp() {
       if (!activeModalBooking) {
@@ -4224,7 +4092,6 @@ function setDashboardStatus(status) {
         leftPos = window.innerWidth - 270;
       }
       box.style.left = `${Math.max(10, leftPos)}px`;
-    
 
       box.classList.remove('hidden');
     }
@@ -4232,58 +4099,7 @@ function setDashboardStatus(status) {
     function closeCommentBox() {
       const box = document.getElementById('excel-comment-box');
       if (box) box.classList.add('hidden');
-    }  
-
-<!-- Hover Scroll Logic & Overlays -->
-  <div id="scroll-bar-up" class="fixed top-16 left-1/2 -translate-x-1/2 w-64 h-6 bg-slate-800/10 hover:bg-slate-800/30 backdrop-blur-sm rounded-full z-[100] transition cursor-n-resize flex items-center justify-center text-slate-600 opacity-0 hover:opacity-100 no-print" onmouseenter="startHoverScroll('up', window)" onmouseleave="stopHoverScroll()">
-    <span class="text-[9px] font-bold uppercase tracking-widest">Hover to Scroll Up</span>
-  </div>
-  
-  <div id="scroll-bar-down" class="fixed bottom-4 left-1/2 -translate-x-1/2 w-64 h-6 bg-slate-800/10 hover:bg-slate-800/30 backdrop-blur-sm rounded-full z-[100] transition cursor-s-resize flex items-center justify-center text-slate-600 opacity-0 hover:opacity-100 no-print" onmouseenter="startHoverScroll('down', window)" onmouseleave="stopHoverScroll()">
-    <span class="text-[9px] font-bold uppercase tracking-widest">Hover to Scroll Down</span>
-  </div>
-
-  <script>
-    let globalScrollInterval;
-
-    function startHoverScroll(direction, element) {
-      const speed = 15;
-      globalScrollInterval = setInterval(() => {
-        if (element === window) {
-          if (direction === 'up') window.scrollBy(0, -speed);
-          else if (direction === 'down') window.scrollBy(0, speed);
-        } else {
-          if (direction === 'left') element.scrollBy(-speed, 0);
-          else if (direction === 'right') element.scrollBy(speed, 0);
-        }
-      }, 20);
     }
-
-    function stopHoverScroll() {
-      clearInterval(globalScrollInterval);
-    }
-
-    // Attach horizontal hover bars to all tables automatically
-    document.addEventListener('DOMContentLoaded', () => {
-      document.querySelectorAll('.overflow-x-auto').forEach(container => {
-        container.style.position = 'relative';
-
-        const leftBar = document.createElement('div');
-        leftBar.className = "absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-slate-300/80 to-transparent z-10 cursor-w-resize opacity-0 hover:opacity-100 transition";
-        leftBar.onmouseenter = () => startHoverScroll('left', container);
-        leftBar.onmouseleave = stopHoverScroll;
-        
-        const rightBar = document.createElement('div');
-        rightBar.className = "absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-slate-300/80 to-transparent z-10 cursor-e-resize opacity-0 hover:opacity-100 transition";
-        rightBar.onmouseenter = () => startHoverScroll('right', container);
-        rightBar.onmouseleave = stopHoverScroll;
-        
-        container.appendChild(leftBar);
-        container.appendChild(rightBar);
-      });
-    });
-  </script>
-
   </script>
 </body>
 </html>

@@ -2480,40 +2480,22 @@
       updateDashboardCards();
     }
 
-    function updateDashboardCards() {
-      const selectedFilter = state.dashSelectedYear;
-      const label = document.getElementById('dash-filter-label');
+  
 
-      let filteredBookings = [];
+/* Custom Slicer & Hover Navigation Control Styles */
+.slicer-btn {
+  user-select: none;
+  cursor: pointer;
+}
 
-      if (selectedFilter === 'ALL' || !selectedFilter) {
-        filteredBookings = state.bookings.filter(b => !isInactiveBooking(b));
-        if (label) label.innerText = "Consolidated Summary (All Years)";
-      } else {
-        const targetYear = parseInt(selectedFilter);
-        filteredBookings = state.bookings.filter(b => {
-          if (isInactiveBooking(b) || !b.checkIn) return false;
-          const yr = new Date(b.checkIn.replace(' ', 'T')).getFullYear();
-          return yr === targetYear;
-        });
+/* Dynamic styling state for active slicers */
+.slicer-active-all { background-color: #2563EB !important; color: #FFFFFF !important; }
+.slicer-active-live { background-color: #D97706 !important; color: #FFFFFF !important; }
+.slicer-active-upcoming { background-color: #2563EB !important; color: #FFFFFF !important; }
+.slicer-active-closed { background-color: #059669 !important; color: #FFFFFF !important; }
+.slicer-active-inactive { background-color: #E11D48 !important; color: #FFFFFF !important; }
 
-        if (label) {
-          label.innerText = targetYear === defaultAppYear 
-            ? `Year ${targetYear} (Current Year)` 
-            : `Year ${targetYear}`;
-        }
-      }
 
-      const totalBookings = filteredBookings.length;
-      const totalAmt = filteredBookings.reduce((sum, b) => sum + (b.totalAmount || 0), 0);
-      const totalAdv = filteredBookings.reduce((sum, b) => sum + (b.initialAdv || 0) + (b.clearedDue || 0), 0);
-      const totalDue = filteredBookings.reduce((sum, b) => sum + (b.totalDue || 0), 0);
-
-      document.getElementById('dash-total-bookings').innerText = totalBookings;
-      document.getElementById('dash-total-amount').innerText = `₹${totalAmt.toLocaleString('en-IN')}`;
-      document.getElementById('dash-advanced').innerText = `₹${totalAdv.toLocaleString('en-IN')}`;
-      document.getElementById('dash-due').innerText = `₹${totalDue.toLocaleString('en-IN')}`;
-    }
 
     function sendReceiptViaWhatsApp() {
       if (!activeModalBooking) {

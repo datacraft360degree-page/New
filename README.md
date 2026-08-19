@@ -401,36 +401,127 @@
         </button>
       </div>
 
-      <!-- One UI Rounded Cards -->
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200/60 flex items-center justify-between">
-          <div>
-            <p class="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Total Bookings</p>
-            <p id="dash-total-bookings" class="text-xl font-black text-slate-900 mt-0.5">0</p>
+      <!-- 5-Box Excel-Style Bar Chart Dashboard -->
+      <div class="grid grid-cols-1 lg:grid-cols-5 gap-3">
+        
+        <!-- Box 1: Total Bookings -->
+        <div class="bg-white p-3.5 rounded-3xl shadow-sm border border-slate-200/60 flex flex-col h-full">
+          <div class="flex justify-between items-start mb-2">
+            <div>
+              <p class="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Total Bookings</p>
+              <p id="dash-total-bookings" class="text-xl font-black text-slate-900 mt-0.5">0</p>
+            </div>
+            <div class="p-2 bg-slate-50 text-slate-500 rounded-xl"><i class="fa-solid fa-bookmark"></i></div>
           </div>
-          <div class="p-3 bg-blue-50 text-blue-600 rounded-2xl"><i class="fa-solid fa-bookmark text-base"></i></div>
-        </div>
-        <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200/60 flex items-center justify-between">
-          <div>
-            <p class="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Booking Amount</p>
-            <p id="dash-total-amount" class="text-xl font-black text-slate-900 mt-0.5">₹0</p>
+          <div class="mt-auto space-y-2 text-[9px] font-bold">
+            <div>
+              <div class="flex justify-between text-amber-600 mb-0.5"><span>Live</span><span id="dash-bk-live">0</span></div>
+              <div class="w-full bg-slate-100 rounded-full h-1.5"><div id="bar-bk-live" class="bg-amber-500 h-1.5 rounded-full transition-all duration-500" style="width: 0%"></div></div>
+            </div>
+            <div>
+              <div class="flex justify-between text-blue-600 mb-0.5"><span>Upcoming</span><span id="dash-bk-up">0</span></div>
+              <div class="w-full bg-slate-100 rounded-full h-1.5"><div id="bar-bk-up" class="bg-blue-500 h-1.5 rounded-full transition-all duration-500" style="width: 0%"></div></div>
+            </div>
+            <div>
+              <div class="flex justify-between text-emerald-600 mb-0.5"><span>Closed</span><span id="dash-bk-closed">0</span></div>
+              <div class="w-full bg-slate-100 rounded-full h-1.5"><div id="bar-bk-closed" class="bg-emerald-500 h-1.5 rounded-full transition-all duration-500" style="width: 0%"></div></div>
+            </div>
           </div>
-          <div class="p-3 bg-indigo-50 text-indigo-600 rounded-2xl"><i class="fa-solid fa-receipt text-base"></i></div>
         </div>
-        <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200/60 flex items-center justify-between">
-          <div>
-            <p class="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Amount Received</p>
-            <p id="dash-advanced" class="text-xl font-black text-emerald-600 mt-0.5">₹0</p>
+
+        <!-- Box 2: Amount Received -->
+        <div class="bg-white p-3.5 rounded-3xl shadow-sm border border-slate-200/60 flex flex-col h-full">
+          <div class="flex justify-between items-start mb-2">
+            <div>
+              <p class="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Amount Received</p>
+              <p id="dash-total-received" class="text-xl font-black text-slate-900 mt-0.5">₹0</p>
+            </div>
+            <div class="p-2 bg-emerald-50 text-emerald-600 rounded-xl"><i class="fa-solid fa-wallet"></i></div>
           </div>
-          <div class="p-3 bg-emerald-50 text-emerald-600 rounded-2xl"><i class="fa-solid fa-wallet text-base"></i></div>
-        </div>
-        <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200/60 flex items-center justify-between">
-          <div>
-            <p class="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Total Due Amount</p>
-            <p id="dash-due" class="text-xl font-black text-rose-600 mt-0.5">₹0</p>
+          <div class="mt-auto space-y-2 text-[9px] font-bold">
+            <div>
+              <div class="flex justify-between text-amber-600 mb-0.5"><span>Live</span><span id="dash-rec-live">₹0</span></div>
+              <div class="w-full bg-slate-100 rounded-full h-1.5"><div id="bar-rec-live" class="bg-amber-500 h-1.5 rounded-full transition-all duration-500" style="width: 0%"></div></div>
+            </div>
+            <div>
+              <div class="flex justify-between text-blue-600 mb-0.5"><span>Upcoming</span><span id="dash-rec-up">₹0</span></div>
+              <div class="w-full bg-slate-100 rounded-full h-1.5"><div id="bar-rec-up" class="bg-blue-500 h-1.5 rounded-full transition-all duration-500" style="width: 0%"></div></div>
+            </div>
+            <div>
+              <div class="flex justify-between text-emerald-600 mb-0.5"><span>Closed</span><span id="dash-rec-closed">₹0</span></div>
+              <div class="w-full bg-slate-100 rounded-full h-1.5"><div id="bar-rec-closed" class="bg-emerald-500 h-1.5 rounded-full transition-all duration-500" style="width: 0%"></div></div>
+            </div>
           </div>
-          <div class="p-3 bg-rose-50 text-rose-600 rounded-2xl"><i class="fa-solid fa-hand-holding-dollar text-base"></i></div>
         </div>
+
+        <!-- Box 3: Booking Amount -->
+        <div class="bg-white p-3.5 rounded-3xl shadow-sm border border-slate-200/60 flex flex-col h-full">
+          <div class="flex justify-between items-start mb-2">
+            <div>
+              <p class="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Booking Amount</p>
+              <p id="dash-total-amount" class="text-xl font-black text-slate-900 mt-0.5">₹0</p>
+            </div>
+            <div class="p-2 bg-indigo-50 text-indigo-600 rounded-xl"><i class="fa-solid fa-receipt"></i></div>
+          </div>
+          <div class="mt-auto space-y-2 text-[9px] font-bold">
+            <div>
+              <div class="flex justify-between text-amber-600 mb-0.5"><span>Live</span><span id="dash-amt-live">₹0</span></div>
+              <div class="w-full bg-slate-100 rounded-full h-1.5"><div id="bar-amt-live" class="bg-amber-500 h-1.5 rounded-full transition-all duration-500" style="width: 0%"></div></div>
+            </div>
+            <div>
+              <div class="flex justify-between text-blue-600 mb-0.5"><span>Upcoming</span><span id="dash-amt-up">₹0</span></div>
+              <div class="w-full bg-slate-100 rounded-full h-1.5"><div id="bar-amt-up" class="bg-blue-500 h-1.5 rounded-full transition-all duration-500" style="width: 0%"></div></div>
+            </div>
+            <div>
+              <div class="flex justify-between text-emerald-600 mb-0.5"><span>Closed</span><span id="dash-amt-closed">₹0</span></div>
+              <div class="w-full bg-slate-100 rounded-full h-1.5"><div id="bar-amt-closed" class="bg-emerald-500 h-1.5 rounded-full transition-all duration-500" style="width: 0%"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Box 4: Total Due -->
+        <div class="bg-white p-3.5 rounded-3xl shadow-sm border border-slate-200/60 flex flex-col h-full">
+          <div class="flex justify-between items-start mb-2">
+            <div>
+              <p class="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Total Due Amount</p>
+              <p id="dash-total-due" class="text-xl font-black text-slate-900 mt-0.5">₹0</p>
+            </div>
+            <div class="p-2 bg-rose-50 text-rose-600 rounded-xl"><i class="fa-solid fa-hand-holding-dollar"></i></div>
+          </div>
+          <div class="mt-auto space-y-2 text-[9px] font-bold">
+            <div>
+              <div class="flex justify-between text-amber-600 mb-0.5"><span>Live</span><span id="dash-due-live">₹0</span></div>
+              <div class="w-full bg-slate-100 rounded-full h-1.5"><div id="bar-due-live" class="bg-amber-500 h-1.5 rounded-full transition-all duration-500" style="width: 0%"></div></div>
+            </div>
+            <div>
+              <div class="flex justify-between text-blue-600 mb-0.5"><span>Upcoming</span><span id="dash-due-up">₹0</span></div>
+              <div class="w-full bg-slate-100 rounded-full h-1.5"><div id="bar-due-up" class="bg-blue-500 h-1.5 rounded-full transition-all duration-500" style="width: 0%"></div></div>
+            </div>
+            <div>
+              <div class="flex justify-between text-emerald-600 mb-0.5"><span>Closed</span><span id="dash-due-closed">₹0</span></div>
+              <div class="w-full bg-slate-100 rounded-full h-1.5"><div id="bar-due-closed" class="bg-emerald-500 h-1.5 rounded-full transition-all duration-500" style="width: 0%"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Box 5: Inactive Bookings -->
+        <div class="bg-white p-3.5 rounded-3xl shadow-sm border border-rose-200/60 flex flex-col h-full">
+          <div class="flex justify-between items-start mb-2">
+            <div>
+              <p class="text-[9px] uppercase font-bold text-rose-400 tracking-wider">Inactive Bookings</p>
+              <p id="dash-inactive-count" class="text-xl font-black text-slate-900 mt-0.5">0</p>
+              <p class="text-[8px] text-slate-400 font-semibold mt-1">Total Cancelled / Deleted</p>
+            </div>
+            <div class="p-2 bg-rose-100 text-rose-600 rounded-xl"><i class="fa-solid fa-ban"></i></div>
+          </div>
+          <div class="mt-auto space-y-2 text-[9px] font-bold pt-4">
+            <div>
+              <div class="flex justify-between text-rose-600 mb-0.5"><span>Lost Amount</span><span id="dash-inactive-amt">₹0</span></div>
+              <div class="w-full bg-slate-100 rounded-full h-1.5"><div class="bg-rose-500 h-1.5 rounded-full w-full"></div></div>
+            </div>
+          </div>
+        </div>
+
       </div>
 
       <!-- Active years Directory Table Hidden -->
@@ -2353,40 +2444,110 @@
       updateDashboardCards();
     }
 
-    function updateDashboardCards() {
-      const selectedFilter = state.dashSelectedYear;
-      const label = document.getElementById('dash-filter-label');
+    
+        function updateDashboardCards() {
+  const now = new Date().getTime();
+  
+  // Variables for active bookings
+  let bkLive = 0, bkUp = 0, bkClosed = 0;
+  let recLive = 0, recUp = 0, recClosed = 0;
+  let amtLive = 0, amtUp = 0, amtClosed = 0;
+  let dueLive = 0, dueUp = 0, dueClosed = 0;
 
-      let filteredBookings = [];
+  // Variables for inactive bookings
+  let inactiveCount = 0, inactiveAmt = 0;
 
-      if (selectedFilter === 'ALL' || !selectedFilter) {
-        filteredBookings = state.bookings.filter(b => !isInactiveBooking(b));
-        if (label) label.innerText = "Consolidated Summary (All Years)";
+  // Optional: Apply your dashboard year filter if required
+  let filteredBookings = state.bookings;
+  if (state.dashSelectedYear !== 'CURRENT' && state.dashSelectedYear !== 'ALL') {
+    filteredBookings = state.bookings.filter(b => {
+      if (!b.checkIn) return false;
+      return String(b.checkIn).startsWith(state.dashSelectedYear);
+    });
+  }
+
+  filteredBookings.forEach(b => {
+    let total = parseFloat(b.totalAmount) || 0;
+    let adv = parseFloat(b.initialAdv) || 0;
+    let cleared = parseFloat(b.clearedDue) || 0;
+    let received = adv + cleared;
+    let due = parseFloat(b.totalDue) || 0;
+
+    if (isInactiveBooking(b)) {
+      inactiveCount++;
+      inactiveAmt += total;
+    } else {
+      const cIn = parseDateMs(b.checkIn);
+      const cOut = getEffectiveCheckoutTime(b);
+      
+      if (now > cOut) {
+        // Closed
+        bkClosed++; recClosed += received; amtClosed += total; dueClosed += due;
+      } else if (now >= cIn && now <= cOut) {
+        // Live
+        bkLive++; recLive += received; amtLive += total; dueLive += due;
       } else {
-        const targetYear = parseInt(selectedFilter);
-        filteredBookings = state.bookings.filter(b => {
-          if (isInactiveBooking(b) || !b.checkIn) return false;
-          const yr = new Date(b.checkIn.replace(' ', 'T')).getFullYear();
-          return yr === targetYear;
-        });
-
-        if (label) {
-          label.innerText = targetYear === defaultAppYear 
-            ? `Year ${targetYear} (Current Year)` 
-            : `Year ${targetYear}`;
-        }
+        // Upcoming
+        bkUp++; recUp += received; amtUp += total; dueUp += due;
       }
-
-      const totalBookings = filteredBookings.length;
-      const totalAmt = filteredBookings.reduce((sum, b) => sum + (b.totalAmount || 0), 0);
-      const totalAdv = filteredBookings.reduce((sum, b) => sum + (b.initialAdv || 0) + (b.clearedDue || 0), 0);
-      const totalDue = filteredBookings.reduce((sum, b) => sum + (b.totalDue || 0), 0);
-
-      document.getElementById('dash-total-bookings').innerText = totalBookings;
-      document.getElementById('dash-total-amount').innerText = `₹${totalAmt.toLocaleString('en-IN')}`;
-      document.getElementById('dash-advanced').innerText = `₹${totalAdv.toLocaleString('en-IN')}`;
-      document.getElementById('dash-due').innerText = `₹${totalDue.toLocaleString('en-IN')}`;
     }
+  });
+
+  // Calculate Totals (Excluding Inactive)
+  const totalBk = bkLive + bkUp + bkClosed;
+  const totalRec = recLive + recUp + recClosed;
+  const totalAmt = amtLive + amtUp + amtClosed;
+  const totalDue = dueLive + dueUp + dueClosed;
+
+  // 1. Update Box 1 (Total Bookings)
+  document.getElementById('dash-total-bookings').innerText = totalBk;
+  document.getElementById('dash-bk-live').innerText = bkLive;
+  document.getElementById('dash-bk-up').innerText = bkUp;
+  document.getElementById('dash-bk-closed').innerText = bkClosed;
+  
+  // 2. Update Box 2 (Amount Received)
+  document.getElementById('dash-total-received').innerText = '₹' + totalRec;
+  document.getElementById('dash-rec-live').innerText = '₹' + recLive;
+  document.getElementById('dash-rec-up').innerText = '₹' + recUp;
+  document.getElementById('dash-rec-closed').innerText = '₹' + recClosed;
+
+  // 3. Update Box 3 (Booking Amount)
+  document.getElementById('dash-total-amount').innerText = '₹' + totalAmt;
+  document.getElementById('dash-amt-live').innerText = '₹' + amtLive;
+  document.getElementById('dash-amt-up').innerText = '₹' + amtUp;
+  document.getElementById('dash-amt-closed').innerText = '₹' + amtClosed;
+
+  // 4. Update Box 4 (Total Due)
+  document.getElementById('dash-total-due').innerText = '₹' + totalDue;
+  document.getElementById('dash-due-live').innerText = '₹' + dueLive;
+  document.getElementById('dash-due-up').innerText = '₹' + dueUp;
+  document.getElementById('dash-due-closed').innerText = '₹' + dueDueClosed = dueClosed; // Format Due Closed
+  document.getElementById('dash-due-closed').innerText = '₹' + dueClosed;
+
+  // 5. Update Box 5 (Inactive Bookings)
+  document.getElementById('dash-inactive-count').innerText = inactiveCount;
+  document.getElementById('dash-inactive-amt').innerText = '₹' + inactiveAmt;
+
+  // Utility to calculate percentage for CSS Width
+  const getPct = (val, max) => max > 0 ? ((val / max) * 100).toFixed(1) + '%' : '0%';
+
+  // Set Bar Chart Widths
+  document.getElementById('bar-bk-live').style.width = getPct(bkLive, totalBk);
+  document.getElementById('bar-bk-up').style.width = getPct(bkUp, totalBk);
+  document.getElementById('bar-bk-closed').style.width = getPct(bkClosed, totalBk);
+
+  document.getElementById('bar-rec-live').style.width = getPct(recLive, totalRec);
+  document.getElementById('bar-rec-up').style.width = getPct(recUp, totalRec);
+  document.getElementById('bar-rec-closed').style.width = getPct(recClosed, totalRec);
+
+  document.getElementById('bar-amt-live').style.width = getPct(amtLive, totalAmt);
+  document.getElementById('bar-amt-up').style.width = getPct(amtUp, totalAmt);
+  document.getElementById('bar-amt-closed').style.width = getPct(amtClosed, totalAmt);
+
+  document.getElementById('bar-due-live').style.width = getPct(dueLive, totalDue);
+  document.getElementById('bar-due-up').style.width = getPct(dueUp, totalDue);
+  document.getElementById('bar-due-closed').style.width = getPct(dueClosed, totalDue);
+}
 
     function sendReceiptViaWhatsApp() {
       if (!activeModalBooking) {

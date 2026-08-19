@@ -1037,7 +1037,7 @@
 
   <script>
     // System Constants & Robust Helpers
-    const MAX_SHEET_ROWS = 10000000;
+    const MAX_SHEET_ROWS = 21;
 
     function isTrue(val) {
       return val === true || val === 'true' || val === 'TRUE' || val === 1 || val === '1';

@@ -2430,7 +2430,7 @@
 
       updateDashboardCards();
     }
-
+  // Helper to render conic-gradient pie charts (Live = Amber, Upcoming = Blue, Closed = Emerald, Inactive = Slate)
 function updatePieChart(elementId, liveVal = null, upcomingVal = null, closedVal = null) {
   const elem = document.getElementById(elementId);
   if (!elem) return;

@@ -2577,8 +2577,12 @@ function updateDashboardCards() {
   updatePieChart('pie-due', stats.live.due, stats.upcoming.due, stats.closed.due, stats.inactive.due);
 
   // --- Inactive Card ---
-  setTxt('dash-inactive-count', `${stats.inactive.count} Bookings`);
-  setTxt('dash-inactive-amount', fmt(stats.inactive.amount));
+// Calculate or pass your inactive booking count
+const inactiveCount = inactiveBookings.length; 
+
+// Pluralization logic: '1 Booking' for 1, otherwise 'X Bookings' (or '0 Bookings')
+document.getElementById('dash-inactive-count').innerText = 
+  inactiveCount === 1 ? '1 Booking' : `${inactiveCount} Bookings`;
 }
     
     function sendReceiptViaWhatsApp() {

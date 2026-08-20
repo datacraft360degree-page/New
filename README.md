@@ -402,111 +402,111 @@
       </div>
 
       <!-- One UI Rounded Cards -->
-   <!-- Excel-style KPI Cards (4-Column Layout with Auto-Fit Text) -->
-<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+<!-- Excel-style KPI Cards (Expanded Cards Layout) -->
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
   
   <!-- 1. TOTAL BOOKINGS -->
-  <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200/80 flex items-center justify-between gap-3 min-w-0">
-    <div class="space-y-1 flex-1 min-w-0">
-      <div class="flex items-center gap-1.5">
-        <span class="p-1.5 bg-blue-50 text-blue-600 rounded-lg text-xs"><i class="fa-solid fa-bookmark"></i></span>
-        <p class="text-[10px] uppercase font-bold text-slate-400 tracking-wider truncate">Total Bookings</p>
+  <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200/80 flex items-center justify-between gap-4 min-w-0">
+    <div class="space-y-1.5 flex-1 min-w-0">
+      <div class="flex items-center gap-2">
+        <span class="p-2 bg-blue-50 text-blue-600 rounded-xl text-xs"><i class="fa-solid fa-bookmark"></i></span>
+        <p class="text-xs sm:text-sm font-bold text-slate-500 uppercase tracking-wider">Total Bookings</p>
       </div>
-      <p id="dash-total-bookings" class="text-xl font-black text-slate-900 leading-none truncate">0</p>
-      <div class="space-y-1 text-[11px] font-medium border-t border-slate-100 pt-2 mt-1">
+      <p id="dash-total-bookings" class="text-2xl font-black text-slate-900 leading-none">0</p>
+      <div class="space-y-1 text-xs font-medium border-t border-slate-100 pt-2.5 mt-2">
         <div class="flex justify-between items-center text-amber-700">
-          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-amber-500 flex-shrink-0"></span>Live:</span>
-          <strong id="dash-bookings-live" class="ml-1">0</strong>
+          <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-amber-500 flex-shrink-0"></span>Live:</span>
+          <strong id="dash-bookings-live" class="ml-2 font-bold">0</strong>
         </div>
         <div class="flex justify-between items-center text-blue-700">
-          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0"></span>Upcoming:</span>
-          <strong id="dash-bookings-upcoming" class="ml-1">0</strong>
+          <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0"></span>Upcoming:</span>
+          <strong id="dash-bookings-upcoming" class="ml-2 font-bold">0</strong>
         </div>
         <div class="flex justify-between items-center text-emerald-700">
-          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0"></span>Closed:</span>
-          <strong id="dash-bookings-closed" class="ml-1">0</strong>
+          <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0"></span>Closed:</span>
+          <strong id="dash-bookings-closed" class="ml-2 font-bold">0</strong>
         </div>
       </div>
     </div>
-    <div id="chart-total-bookings" class="w-14 h-14 flex-shrink-0 flex items-center justify-center"></div>
+    <div id="chart-total-bookings" class="w-16 h-16 flex-shrink-0 flex items-center justify-center"></div>
   </div>
 
   <!-- 2. BOOKING AMOUNT -->
-  <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200/80 flex items-center justify-between gap-3 min-w-0">
-    <div class="space-y-1 flex-1 min-w-0">
-      <div class="flex items-center gap-1.5">
-        <span class="p-1.5 bg-indigo-50 text-indigo-600 rounded-lg text-xs"><i class="fa-solid fa-receipt"></i></span>
-        <p class="text-[10px] uppercase font-bold text-slate-400 tracking-wider truncate">Booking Amount</p>
+  <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200/80 flex items-center justify-between gap-4 min-w-0">
+    <div class="space-y-1.5 flex-1 min-w-0">
+      <div class="flex items-center gap-2">
+        <span class="p-2 bg-indigo-50 text-indigo-600 rounded-xl text-xs"><i class="fa-solid fa-receipt"></i></span>
+        <p class="text-xs sm:text-sm font-bold text-slate-500 uppercase tracking-wider">Booking Amount</p>
       </div>
-      <p id="dash-total-amount" class="text-xl font-black text-slate-900 leading-none truncate">₹0</p>
-      <div class="space-y-1 text-[11px] font-medium border-t border-slate-100 pt-2 mt-1">
+      <p id="dash-total-amount" class="text-2xl font-black text-slate-900 leading-none">₹0</p>
+      <div class="space-y-1 text-xs font-medium border-t border-slate-100 pt-2.5 mt-2">
         <div class="flex justify-between items-center text-amber-700">
-          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-amber-500 flex-shrink-0"></span>Live:</span>
-          <strong id="dash-amount-live" class="ml-1">₹0</strong>
+          <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-amber-500 flex-shrink-0"></span>Live:</span>
+          <strong id="dash-amount-live" class="ml-2 font-bold">₹0</strong>
         </div>
         <div class="flex justify-between items-center text-blue-700">
-          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0"></span>Upcoming:</span>
-          <strong id="dash-amount-upcoming" class="ml-1">₹0</strong>
+          <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0"></span>Upcoming:</span>
+          <strong id="dash-amount-upcoming" class="ml-2 font-bold">₹0</strong>
         </div>
         <div class="flex justify-between items-center text-emerald-700">
-          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0"></span>Closed:</span>
-          <strong id="dash-amount-closed" class="ml-1">₹0</strong>
+          <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0"></span>Closed:</span>
+          <strong id="dash-amount-closed" class="ml-2 font-bold">₹0</strong>
         </div>
       </div>
     </div>
-    <div id="chart-booking-amount" class="w-14 h-14 flex-shrink-0 flex items-center justify-center"></div>
+    <div id="chart-booking-amount" class="w-16 h-16 flex-shrink-0 flex items-center justify-center"></div>
   </div>
 
   <!-- 3. AMOUNT RECEIVED -->
-  <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200/80 flex items-center justify-between gap-3 min-w-0">
-    <div class="space-y-1 flex-1 min-w-0">
-      <div class="flex items-center gap-1.5">
-        <span class="p-1.5 bg-emerald-50 text-emerald-600 rounded-lg text-xs"><i class="fa-solid fa-wallet"></i></span>
-        <p class="text-[10px] uppercase font-bold text-slate-400 tracking-wider truncate">Amount Received</p>
+  <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200/80 flex items-center justify-between gap-4 min-w-0">
+    <div class="space-y-1.5 flex-1 min-w-0">
+      <div class="flex items-center gap-2">
+        <span class="p-2 bg-emerald-50 text-emerald-600 rounded-xl text-xs"><i class="fa-solid fa-wallet"></i></span>
+        <p class="text-xs sm:text-sm font-bold text-slate-500 uppercase tracking-wider">Amount Received</p>
       </div>
-      <p id="dash-advanced" class="text-xl font-black text-emerald-600 leading-none truncate">₹0</p>
-      <div class="space-y-1 text-[11px] font-medium border-t border-slate-100 pt-2 mt-1">
+      <p id="dash-advanced" class="text-2xl font-black text-emerald-600 leading-none">₹0</p>
+      <div class="space-y-1 text-xs font-medium border-t border-slate-100 pt-2.5 mt-2">
         <div class="flex justify-between items-center text-amber-700">
-          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-amber-500 flex-shrink-0"></span>Live:</span>
-          <strong id="dash-received-live" class="ml-1">₹0</strong>
+          <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-amber-500 flex-shrink-0"></span>Live:</span>
+          <strong id="dash-received-live" class="ml-2 font-bold">₹0</strong>
         </div>
         <div class="flex justify-between items-center text-blue-700">
-          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0"></span>Upcoming:</span>
-          <strong id="dash-received-upcoming" class="ml-1">₹0</strong>
+          <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0"></span>Upcoming:</span>
+          <strong id="dash-received-upcoming" class="ml-2 font-bold">₹0</strong>
         </div>
         <div class="flex justify-between items-center text-emerald-700">
-          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0"></span>Closed:</span>
-          <strong id="dash-received-closed" class="ml-1">₹0</strong>
+          <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0"></span>Closed:</span>
+          <strong id="dash-received-closed" class="ml-2 font-bold">₹0</strong>
         </div>
       </div>
     </div>
-    <div id="chart-amount-received" class="w-14 h-14 flex-shrink-0 flex items-center justify-center"></div>
+    <div id="chart-amount-received" class="w-16 h-16 flex-shrink-0 flex items-center justify-center"></div>
   </div>
 
   <!-- 4. TOTAL DUE AMOUNT -->
-  <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200/80 flex items-center justify-between gap-3 min-w-0">
-    <div class="space-y-1 flex-1 min-w-0">
-      <div class="flex items-center gap-1.5">
-        <span class="p-1.5 bg-rose-50 text-rose-600 rounded-lg text-xs"><i class="fa-solid fa-hand-holding-dollar"></i></span>
-        <p class="text-[10px] uppercase font-bold text-slate-400 tracking-wider truncate">Total Due Amount</p>
+  <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200/80 flex items-center justify-between gap-4 min-w-0">
+    <div class="space-y-1.5 flex-1 min-w-0">
+      <div class="flex items-center gap-2">
+        <span class="p-2 bg-rose-50 text-rose-600 rounded-xl text-xs"><i class="fa-solid fa-hand-holding-dollar"></i></span>
+        <p class="text-xs sm:text-sm font-bold text-slate-500 uppercase tracking-wider">Total Due Amount</p>
       </div>
-      <p id="dash-due" class="text-xl font-black text-rose-600 leading-none truncate">₹0</p>
-      <div class="space-y-1 text-[11px] font-medium border-t border-slate-100 pt-2 mt-1">
+      <p id="dash-due" class="text-2xl font-black text-rose-600 leading-none">₹0</p>
+      <div class="space-y-1 text-xs font-medium border-t border-slate-100 pt-2.5 mt-2">
         <div class="flex justify-between items-center text-amber-700">
-          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-amber-500 flex-shrink-0"></span>Live:</span>
-          <strong id="dash-due-live" class="ml-1">₹0</strong>
+          <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-amber-500 flex-shrink-0"></span>Live:</span>
+          <strong id="dash-due-live" class="ml-2 font-bold">₹0</strong>
         </div>
         <div class="flex justify-between items-center text-blue-700">
-          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0"></span>Upcoming:</span>
-          <strong id="dash-due-upcoming" class="ml-1">₹0</strong>
+          <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0"></span>Upcoming:</span>
+          <strong id="dash-due-upcoming" class="ml-2 font-bold">₹0</strong>
         </div>
         <div class="flex justify-between items-center text-emerald-700">
-          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0"></span>Closed:</span>
-          <strong id="dash-due-closed" class="ml-1">₹0</strong>
+          <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0"></span>Closed:</span>
+          <strong id="dash-due-closed" class="ml-2 font-bold">₹0</strong>
         </div>
       </div>
     </div>
-    <div id="chart-total-due" class="w-14 h-14 flex-shrink-0 flex items-center justify-center"></div>
+    <div id="chart-total-due" class="w-16 h-16 flex-shrink-0 flex items-center justify-center"></div>
   </div>
 
 </div>
@@ -2430,7 +2430,7 @@
       updateDashboardCards();
     }
     
-// Safe number parser handling null, string numbers, commas, and currency signs
+// Robust number parser
 function parseNum(val) {
   if (val === null || val === undefined) return 0;
   if (typeof val === 'number') return isNaN(val) ? 0 : val;
@@ -2439,7 +2439,7 @@ function parseNum(val) {
   return isNaN(parsed) ? 0 : parsed;
 }
 
-// Helper to render responsive SVG Pie Charts
+// SVG Pie Generator
 function generatePieChartSVG(slices, radius = 28) {
   const total = slices.reduce((acc, s) => acc + (s.value || 0), 0);
   if (total <= 0) {
@@ -2487,7 +2487,7 @@ function generatePieChartSVG(slices, radius = 28) {
   </svg>`;
 }
 
-// Function to calculate metrics and update Dashboard cards
+// Calculate metrics & update cards
 function updateDashboardCards() {
   const now = new Date().getTime();
   const selectedYear = state.dashSelectedYear;
@@ -2506,41 +2506,60 @@ function updateDashboardCards() {
   let closed = { count: 0, amount: 0, received: 0, due: 0 };
 
   activeYearBookings.forEach(b => {
-    // Skip inactive bookings if predicate function exists
+    // Skip inactive bookings if helper exists
     if (typeof isInactiveBooking === 'function' && isInactiveBooking(b)) {
       return;
     }
 
-    // Property fallback checks for dynamic state structures
+    // 1. Calculate Booking Total Amount
     const bAmount = parseNum(b.totalPrice ?? b.totalAmount ?? b.grandTotal ?? b.price ?? 0);
-    const bAdvance = parseNum(b.advancePaid ?? b.advance ?? b.advanceAmount ?? 0);
-    const bClearBill = parseNum(b.clearBillPaid ?? b.clearBill ?? b.paidAmount ?? 0);
-    const bReceived = bAdvance + bClearBill;
+
+    // 2. Calculate Amount Received (Checks all potential payment attributes)
+    let bReceived = 0;
+    const bAdvance = parseNum(b.advancePaid ?? b.advance ?? b.advanceAmount ?? b.deposit ?? 0);
+    const bClear = parseNum(b.clearBillPaid ?? b.clearBill ?? b.paidAmount ?? b.amountPaid ?? b.paid ?? 0);
     
-    // Calculate due balance directly or fallback to math
-    let bDue = parseNum(b.dueBalance ?? b.due ?? b.balance);
-    if ((b.dueBalance === undefined && b.due === undefined && b.balance === undefined) || isNaN(bDue)) {
+    if (Array.isArray(b.payments) && b.payments.length > 0) {
+      bReceived = b.payments.reduce((sum, p) => sum + parseNum(p.amount ?? p.paid ?? p), 0);
+    } else {
+      bReceived = bAdvance + bClear;
+    }
+
+    // Direct fix for Received exceeding or matching when marked fully paid
+    const isFullyPaid = b.isPaid === true || 
+                        String(b.paymentStatus).toLowerCase() === 'paid' || 
+                        String(b.status).toLowerCase() === 'paid' ||
+                        String(b.paymentStatus).toLowerCase() === 'cleared';
+
+    if (isFullyPaid && bReceived < bAmount) {
+      bReceived = bAmount;
+    }
+
+    // 3. Calculate Due Amount accurately
+    let bDue = 0;
+    if (isFullyPaid || bReceived >= bAmount) {
+      bDue = 0; // STRICT ZERO: No due balance if paid or received >= amount
+    } else if (b.dueBalance !== undefined && b.dueBalance !== null && !isNaN(parseNum(b.dueBalance))) {
+      bDue = parseNum(b.dueBalance);
+    } else {
       bDue = Math.max(0, bAmount - bReceived);
     }
 
-    // Date parsing logic
+    // 4. Time categorization
     let cIn = typeof parseDateMs === 'function' ? parseDateMs(b.checkIn) : new Date(b.checkIn).getTime();
     let cOut = typeof getEffectiveCheckoutTime === 'function' ? getEffectiveCheckoutTime(b) : new Date(b.checkOut).getTime();
 
     if (now > cOut) {
-      // Closed Booking
       closed.count += 1;
       closed.amount += bAmount;
       closed.received += bReceived;
       closed.due += bDue;
     } else if (now >= cIn && now <= cOut) {
-      // Live Booking
       live.count += 1;
       live.amount += bAmount;
       live.received += bReceived;
       live.due += bDue;
     } else {
-      // Upcoming Booking
       upcoming.count += 1;
       upcoming.amount += bAmount;
       upcoming.received += bReceived;
@@ -2550,7 +2569,7 @@ function updateDashboardCards() {
 
   const COLORS = { live: '#f59e0b', upcoming: '#3b82f6', closed: '#10b981' };
 
-  // 1. Total Bookings
+  // Render Total Bookings
   const totalActiveBookings = live.count + upcoming.count + closed.count;
   document.getElementById('dash-total-bookings').innerText = totalActiveBookings.toLocaleString('en-IN');
   document.getElementById('dash-bookings-live').innerText = live.count.toLocaleString('en-IN');
@@ -2562,7 +2581,7 @@ function updateDashboardCards() {
     { value: closed.count, color: COLORS.closed }
   ]);
 
-  // 2. Booking Amount
+  // Render Booking Amount
   const totalBookingAmount = live.amount + upcoming.amount + closed.amount;
   document.getElementById('dash-total-amount').innerText = `₹${totalBookingAmount.toLocaleString('en-IN')}`;
   document.getElementById('dash-amount-live').innerText = `₹${live.amount.toLocaleString('en-IN')}`;
@@ -2574,7 +2593,7 @@ function updateDashboardCards() {
     { value: closed.amount, color: COLORS.closed }
   ]);
 
-  // 3. Amount Received
+  // Render Amount Received
   const totalAmountReceived = live.received + upcoming.received + closed.received;
   document.getElementById('dash-advanced').innerText = `₹${totalAmountReceived.toLocaleString('en-IN')}`;
   document.getElementById('dash-received-live').innerText = `₹${live.received.toLocaleString('en-IN')}`;
@@ -2586,7 +2605,7 @@ function updateDashboardCards() {
     { value: closed.received, color: COLORS.closed }
   ]);
 
-  // 4. Total Due Amount
+  // Render Total Due Amount
   const totalDueAmount = live.due + upcoming.due + closed.due;
   document.getElementById('dash-due').innerText = `₹${totalDueAmount.toLocaleString('en-IN')}`;
   document.getElementById('dash-due-live').innerText = `₹${live.due.toLocaleString('en-IN')}`;

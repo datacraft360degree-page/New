@@ -403,7 +403,7 @@
 
       <!-- One UI Rounded Cards -->
 <!-- Excel-style KPI Cards (2x2 Grid Layout) -->
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-5">
   
   <!-- 1. TOTAL BOOKINGS -->
   <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200/80 flex items-center justify-between gap-6 min-w-0">

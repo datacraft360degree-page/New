@@ -402,114 +402,37 @@
       </div>
 
       <!-- One UI Rounded Cards -->
-<!-- Excel-style KPI Cards (2x2 Grid Layout) -->
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-  
-  <!-- 1. TOTAL BOOKINGS -->
-  <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200/80 flex items-center justify-between gap-6 min-w-0">
-    <div class="space-y-2 flex-1 min-w-0">
-      <div class="flex items-center gap-2">
-        <span class="p-2.5 bg-blue-50 text-blue-600 rounded-2xl text-sm"><i class="fa-solid fa-bookmark"></i></span>
-        <p class="text-xs sm:text-sm font-bold text-slate-500 uppercase tracking-wider">Total Bookings</p>
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200/60 flex items-center justify-between">
+          <div>
+            <p class="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Total Bookings</p>
+            <p id="dash-total-bookings" class="text-xl font-black text-slate-900 mt-0.5">0</p>
+          </div>
+          <div class="p-3 bg-blue-50 text-blue-600 rounded-2xl"><i class="fa-solid fa-bookmark text-base"></i></div>
+        </div>
+        <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200/60 flex items-center justify-between">
+          <div>
+            <p class="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Booking Amount</p>
+            <p id="dash-total-amount" class="text-xl font-black text-slate-900 mt-0.5">₹0</p>
+          </div>
+          <div class="p-3 bg-indigo-50 text-indigo-600 rounded-2xl"><i class="fa-solid fa-receipt text-base"></i></div>
+        </div>
+        <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200/60 flex items-center justify-between">
+          <div>
+            <p class="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Amount Received</p>
+            <p id="dash-advanced" class="text-xl font-black text-emerald-600 mt-0.5">₹0</p>
+          </div>
+          <div class="p-3 bg-emerald-50 text-emerald-600 rounded-2xl"><i class="fa-solid fa-wallet text-base"></i></div>
+        </div>
+        <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200/60 flex items-center justify-between">
+          <div>
+            <p class="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Total Due Amount</p>
+            <p id="dash-due" class="text-xl font-black text-rose-600 mt-0.5">₹0</p>
+          </div>
+          <div class="p-3 bg-rose-50 text-rose-600 rounded-2xl"><i class="fa-solid fa-hand-holding-dollar text-base"></i></div>
+        </div>
       </div>
-      <p id="dash-total-bookings" class="text-3xl font-black text-slate-900 leading-none">0</p>
-      <div class="space-y-1.5 text-xs sm:text-sm font-medium border-t border-slate-100 pt-3 mt-2">
-        <div class="flex justify-between items-center text-amber-700">
-          <span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 flex-shrink-0"></span>Live:</span>
-          <strong id="dash-bookings-live" class="font-bold">0</strong>
-        </div>
-        <div class="flex justify-between items-center text-blue-700">
-          <span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-blue-500 flex-shrink-0"></span>Upcoming:</span>
-          <strong id="dash-bookings-upcoming" class="font-bold">0</strong>
-        </div>
-        <div class="flex justify-between items-center text-emerald-700">
-          <span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 flex-shrink-0"></span>Closed:</span>
-          <strong id="dash-bookings-closed" class="font-bold">0</strong>
-        </div>
-      </div>
-    </div>
-    <div id="chart-total-bookings" class="w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0 flex items-center justify-center"></div>
-  </div>
 
-  <!-- 2. BOOKING AMOUNT -->
-  <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200/80 flex items-center justify-between gap-6 min-w-0">
-    <div class="space-y-2 flex-1 min-w-0">
-      <div class="flex items-center gap-2">
-        <span class="p-2.5 bg-indigo-50 text-indigo-600 rounded-2xl text-sm"><i class="fa-solid fa-receipt"></i></span>
-        <p class="text-xs sm:text-sm font-bold text-slate-500 uppercase tracking-wider">Booking Amount</p>
-      </div>
-      <p id="dash-total-amount" class="text-3xl font-black text-slate-900 leading-none">₹0</p>
-      <div class="space-y-1.5 text-xs sm:text-sm font-medium border-t border-slate-100 pt-3 mt-2">
-        <div class="flex justify-between items-center text-amber-700">
-          <span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 flex-shrink-0"></span>Live:</span>
-          <strong id="dash-amount-live" class="font-bold">₹0</strong>
-        </div>
-        <div class="flex justify-between items-center text-blue-700">
-          <span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-blue-500 flex-shrink-0"></span>Upcoming:</span>
-          <strong id="dash-amount-upcoming" class="font-bold">₹0</strong>
-        </div>
-        <div class="flex justify-between items-center text-emerald-700">
-          <span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 flex-shrink-0"></span>Closed:</span>
-          <strong id="dash-amount-closed" class="font-bold">₹0</strong>
-        </div>
-      </div>
-    </div>
-    <div id="chart-booking-amount" class="w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0 flex items-center justify-center"></div>
-  </div>
-
-  <!-- 3. AMOUNT RECEIVED -->
-  <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200/80 flex items-center justify-between gap-6 min-w-0">
-    <div class="space-y-2 flex-1 min-w-0">
-      <div class="flex items-center gap-2">
-        <span class="p-2.5 bg-emerald-50 text-emerald-600 rounded-2xl text-sm"><i class="fa-solid fa-wallet"></i></span>
-        <p class="text-xs sm:text-sm font-bold text-slate-500 uppercase tracking-wider">Amount Received</p>
-      </div>
-      <p id="dash-advanced" class="text-3xl font-black text-emerald-600 leading-none">₹0</p>
-      <div class="space-y-1.5 text-xs sm:text-sm font-medium border-t border-slate-100 pt-3 mt-2">
-        <div class="flex justify-between items-center text-amber-700">
-          <span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 flex-shrink-0"></span>Live:</span>
-          <strong id="dash-received-live" class="font-bold">₹0</strong>
-        </div>
-        <div class="flex justify-between items-center text-blue-700">
-          <span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-blue-500 flex-shrink-0"></span>Upcoming:</span>
-          <strong id="dash-received-upcoming" class="font-bold">₹0</strong>
-        </div>
-        <div class="flex justify-between items-center text-emerald-700">
-          <span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 flex-shrink-0"></span>Closed:</span>
-          <strong id="dash-received-closed" class="font-bold">₹0</strong>
-        </div>
-      </div>
-    </div>
-    <div id="chart-amount-received" class="w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0 flex items-center justify-center"></div>
-  </div>
-
-  <!-- 4. TOTAL DUE AMOUNT -->
-  <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200/80 flex items-center justify-between gap-6 min-w-0">
-    <div class="space-y-2 flex-1 min-w-0">
-      <div class="flex items-center gap-2">
-        <span class="p-2.5 bg-rose-50 text-rose-600 rounded-2xl text-sm"><i class="fa-solid fa-hand-holding-dollar"></i></span>
-        <p class="text-xs sm:text-sm font-bold text-slate-500 uppercase tracking-wider">Total Due Amount</p>
-      </div>
-      <p id="dash-due" class="text-3xl font-black text-rose-600 leading-none">₹0</p>
-      <div class="space-y-1.5 text-xs sm:text-sm font-medium border-t border-slate-100 pt-3 mt-2">
-        <div class="flex justify-between items-center text-amber-700">
-          <span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 flex-shrink-0"></span>Live:</span>
-          <strong id="dash-due-live" class="font-bold">₹0</strong>
-        </div>
-        <div class="flex justify-between items-center text-blue-700">
-          <span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-blue-500 flex-shrink-0"></span>Upcoming:</span>
-          <strong id="dash-due-upcoming" class="font-bold">₹0</strong>
-        </div>
-        <div class="flex justify-between items-center text-emerald-700">
-          <span class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 flex-shrink-0"></span>Closed:</span>
-          <strong id="dash-due-closed" class="font-bold">₹0</strong>
-        </div>
-      </div>
-    </div>
-    <div id="chart-total-due" class="w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0 flex items-center justify-center"></div>
-  </div>
-
-</div>
       <!-- Active years Directory Table Hidden -->
       <div class="hidden bg-white rounded-3xl shadow-sm border border-slate-200/60 p-4">
         <div class="mb-3 flex justify-between items-center">
@@ -2430,140 +2353,41 @@
       updateDashboardCards();
     }
 
-// SVG Pie Chart Generator
-function generatePieChartSVG(slices, radius = 30) {
-  const total = slices.reduce((acc, s) => acc + (s.value || 0), 0);
-  if (total <= 0) {
-    return `<svg class="w-full h-full" viewBox="-40 -40 80 80">
-      <circle cx="0" cy="0" r="${radius}" fill="none" stroke="#e2e8f0" stroke-width="12" />
-      <text x="0" y="3" text-anchor="middle" font-size="10" fill="#94a3b8" font-weight="bold">0%</text>
-    </svg>`;
-  }
+    function updateDashboardCards() {
+      const selectedFilter = state.dashSelectedYear;
+      const label = document.getElementById('dash-filter-label');
 
-  let cumulativeAngle = 0;
-  const pathElements = slices.map(slice => {
-    const value = slice.value || 0;
-    if (value <= 0) return '';
-    
-    const sliceAngle = (value / total) * 360;
-    const startAngle = cumulativeAngle;
-    const endAngle = cumulativeAngle + sliceAngle;
-    cumulativeAngle = endAngle;
+      let filteredBookings = [];
 
-    if (sliceAngle >= 359.9) {
-      return `<circle cx="0" cy="0" r="${radius}" fill="none" stroke="${slice.color}" stroke-width="12" />`;
+      if (selectedFilter === 'ALL' || !selectedFilter) {
+        filteredBookings = state.bookings.filter(b => !isInactiveBooking(b));
+        if (label) label.innerText = "Consolidated Summary (All Years)";
+      } else {
+        const targetYear = parseInt(selectedFilter);
+        filteredBookings = state.bookings.filter(b => {
+          if (isInactiveBooking(b) || !b.checkIn) return false;
+          const yr = new Date(b.checkIn.replace(' ', 'T')).getFullYear();
+          return yr === targetYear;
+        });
+
+        if (label) {
+          label.innerText = targetYear === defaultAppYear 
+            ? `Year ${targetYear} (Current Year)` 
+            : `Year ${targetYear}`;
+        }
+      }
+
+      const totalBookings = filteredBookings.length;
+      const totalAmt = filteredBookings.reduce((sum, b) => sum + (b.totalAmount || 0), 0);
+      const totalAdv = filteredBookings.reduce((sum, b) => sum + (b.initialAdv || 0) + (b.clearedDue || 0), 0);
+      const totalDue = filteredBookings.reduce((sum, b) => sum + (b.totalDue || 0), 0);
+
+      document.getElementById('dash-total-bookings').innerText = totalBookings;
+      document.getElementById('dash-total-amount').innerText = `₹${totalAmt.toLocaleString('en-IN')}`;
+      document.getElementById('dash-advanced').innerText = `₹${totalAdv.toLocaleString('en-IN')}`;
+      document.getElementById('dash-due').innerText = `₹${totalDue.toLocaleString('en-IN')}`;
     }
 
-    const startRad = (startAngle - 90) * (Math.PI / 180);
-    const endRad = (endAngle - 90) * (Math.PI / 180);
-
-    const x1 = radius * Math.cos(startRad);
-    const y1 = radius * Math.sin(startRad);
-    const x2 = radius * Math.cos(endRad);
-    const y2 = radius * Math.sin(endRad);
-
-    const largeArcFlag = sliceAngle > 180 ? 1 : 0;
-
-    const pathData = [
-      `M ${x1} ${y1}`,
-      `A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2}`
-    ].join(' ');
-
-    return `<path d="${pathData}" fill="none" stroke="${slice.color}" stroke-width="12" stroke-linecap="round" />`;
-  }).join('');
-
-  return `<svg class="w-full h-full" viewBox="-40 -40 80 80">
-    <circle cx="0" cy="0" r="${radius}" fill="none" stroke="#f1f5f9" stroke-width="12" />
-    ${pathElements}
-  </svg>`;
-}
-
-// Function to calculate metrics and update Dashboard
-function updateDashboardCards() {
-  const selectedYear = state.dashSelectedYear;
-  const now = new Date().getTime();
-
-  // Filter non-deleted bookings by selected year
-  const activeBookings = state.bookings.filter(b => {
-    if (isInactiveBooking(b)) return false;
-    if (selectedYear === 'ALL') return true;
-    const bYear = new Date(parseDateMs(b.checkIn)).getFullYear();
-    return bYear === parseInt(selectedYear);
-  });
-
-  let totals = {
-    bookings: { total: 0, live: 0, upcoming: 0, closed: 0 },
-    amount: { total: 0, live: 0, upcoming: 0, closed: 0 },
-    received: { total: 0, live: 0, upcoming: 0, closed: 0 },
-    due: { total: 0, live: 0, upcoming: 0, closed: 0 }
-  };
-
-  activeBookings.forEach(b => {
-    const checkInMs = parseDateMs(b.checkIn);
-    const checkOutMs = getEffectiveCheckoutTime(b);
-
-    // Determine booking status
-    let status = 'upcoming';
-    if (now >= checkInMs && now <= checkOutMs) {
-      status = 'live';
-    } else if (now > checkOutMs) {
-      status = 'closed';
-    }
-
-    const totalAmt = Number(b.totalAmount) || 0;
-    const advAmt = Number(b.advance) || 0;
-    const clearAmt = Number(b.clearBill) || 0;
-    const receivedAmt = advAmt + clearAmt;
-    const dueAmt = Math.max(0, totalAmt - receivedAmt);
-
-    // Increment overall totals
-    totals.bookings.total++;
-    totals.bookings[status]++;
-
-    totals.amount.total += totalAmt;
-    totals.amount[status] += totalAmt;
-
-    totals.received.total += receivedAmt;
-    totals.received[status] += receivedAmt;
-
-    totals.due.total += dueAmt;
-    totals.due[status] += dueAmt;
-  });
-
-  // Update Total Bookings
-  document.getElementById('dash-total-bookings').innerText = totals.bookings.total;
-  document.getElementById('dash-bookings-live').innerText = totals.bookings.live;
-  document.getElementById('dash-bookings-upcoming').innerText = totals.bookings.upcoming;
-  document.getElementById('dash-bookings-closed').innerText = totals.bookings.closed;
-
-  // Update Booking Amount
-  document.getElementById('dash-total-amount').innerText = `₹${totals.amount.total.toLocaleString('en-IN')}`;
-  document.getElementById('dash-amount-live').innerText = `₹${totals.amount.live.toLocaleString('en-IN')}`;
-  document.getElementById('dash-amount-upcoming').innerText = `₹${totals.amount.upcoming.toLocaleString('en-IN')}`;
-  document.getElementById('dash-amount-closed').innerText = `₹${totals.amount.closed.toLocaleString('en-IN')}`;
-
-  // Update Amount Received
-  document.getElementById('dash-advanced').innerText = `₹${totals.received.total.toLocaleString('en-IN')}`;
-  document.getElementById('dash-received-live').innerText = `₹${totals.received.live.toLocaleString('en-IN')}`;
-  document.getElementById('dash-received-upcoming').innerText = `₹${totals.received.upcoming.toLocaleString('en-IN')}`;
-  document.getElementById('dash-received-closed').innerText = `₹${totals.received.closed.toLocaleString('en-IN')}`;
-
-  // Update Total Due Amount
-  document.getElementById('dash-due').innerText = `₹${totals.due.total.toLocaleString('en-IN')}`;
-  document.getElementById('dash-due-live').innerText = `₹${totals.due.live.toLocaleString('en-IN')}`;
-  document.getElementById('dash-due-upcoming').innerText = `₹${totals.due.upcoming.toLocaleString('en-IN')}`;
-  document.getElementById('dash-due-closed').innerText = `₹${totals.due.closed.toLocaleString('en-IN')}`;
-}
-
-function handleDashboardYearChange(year) {
-  state.dashSelectedYear = year === 'CURRENT' ? defaultAppYear : year;
-  const label = document.getElementById('dash-filter-label');
-  if (label) {
-    label.innerText = year === 'ALL' ? 'Consolidated (All Years)' : `Year ${state.dashSelectedYear}`;
-  }
-  updateDashboardCards();
-}
-    
     function sendReceiptViaWhatsApp() {
       if (!activeModalBooking) {
         alert("⚠️ Booking information not found!");

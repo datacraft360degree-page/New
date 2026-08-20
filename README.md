@@ -509,7 +509,7 @@
     <div id="chart-total-due" class="w-20 h-20 flex-shrink-0 flex items-center justify-center"></div>
   </div>
 
-  <!-- 5. INACTIVE BOOKINGS (NEW BOX) -->
+ <!-- <!-- 5. INACTIVE BOOKINGS (NEW BOX) -->
   <div class="bg-white p-3.5 rounded-3xl shadow-sm border border-slate-200/60 flex items-center justify-between gap-2">
     <div class="space-y-1 flex-1 min-w-0">
       <div class="flex items-center gap-1.5">
@@ -526,7 +526,7 @@
       </div>
     </div>
     <div id="chart-inactive-bookings" class="w-20 h-20 flex-shrink-0 flex items-center justify-center"></div>
-  </div>
+  </div> -->
 </div>
       <!-- Active years Directory Table Hidden -->
       <div class="hidden bg-white rounded-3xl shadow-sm border border-slate-200/60 p-4">

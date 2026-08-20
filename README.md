@@ -2431,7 +2431,7 @@
       updateDashboardCards();
     }
 
-   // Helper to render conic-gradient pie charts (Live = Amber, Upcoming = Blue, Closed = Emerald, Inactive = Slate)
+  // Helper to render conic-gradient pie charts (Live = Amber, Upcoming = Blue, Closed = Emerald, Inactive = Slate)
 function updatePieChart(elementId, liveVal, upcomingVal, closedVal, inactiveVal = 0) {
   const elem = document.getElementById(elementId);
   if (!elem) return;
@@ -2454,31 +2454,12 @@ function updatePieChart(elementId, liveVal, upcomingVal, closedVal, inactiveVal 
   )`;
 }
 
-// Updated Main Dashboard Function
-function updateDashboardCards() {
-  const selectedFilter = state.dashSelectedYear;
-  const label = document.getElementById('dash-filter-label');
-  const targetYear = (selectedFilter && selectedFilter !== 'ALL') ? parseInt(selectedFilter, 10) : null;
-
-  // 1. Update Filter Header Label
-  if (label) {
-    if (!targetYear) {
-      label.innerText = "Consolidated Summary (All Years)";
-    } else {
-      label.innerText = targetYear === defaultAppYear
-        ? `Year ${targetYear} (Current Year)`
-        : `Year ${targetYear}`;
-    }
-  }
-
-  const now = Date.now();
-
-  // Helper to update Box 6: Today's Live Booking Details Table
+// Helper to update Box 6: Today's Live Booking Details Table (Moved to Top-Level Scope)
 function updateDashboardLiveBookings(liveBookings) {
   const container = document.getElementById('dash-today-live-container');
   if (!container) return;
 
-  if (!liveBookings || liveBookings.length === 0) {
+  if (!liveBookings || !Array.isArray(liveBookings) || liveBookings.length === 0) {
     container.innerHTML = '<p class="text-[11px] text-slate-400 italic py-2 text-center">No live bookings active today.</p>';
     return;
   }
@@ -2497,17 +2478,19 @@ function updateDashboardLiveBookings(liveBookings) {
   `;
 
   liveBookings.forEach(b => {
-    const rooms = getBookingRooms(b).join(', ') || '-';
-    const outStr = b.hasExtendedCheckout && b.extendedCheckOut 
-      ? format24hDate(b.extendedCheckOut) 
-      : format24hDate(b.checkOut);
+    // Safe extraction for room numbers and formatted dates
+    const roomList = typeof getBookingRooms === 'function' ? getBookingRooms(b) : (b.rooms || []);
+    const roomsStr = Array.isArray(roomList) && roomList.length > 0 ? roomList.join(', ') : '-';
+
+    const rawOutDate = b.hasExtendedCheckout && b.extendedCheckOut ? b.extendedCheckOut : b.checkOut;
+    const outStr = typeof format24hDate === 'function' ? format24hDate(rawOutDate) : (rawOutDate || '-');
 
     html += `
       <tr class="hover:bg-amber-50/40 transition">
-        <td class="py-1 px-1.5 font-mono text-blue-600 font-bold">${b.name|| b.id}</td>
-        <td class="py-1 px-1.5 font-bold text-slate-800">${getBookingRooms(b).join(", ") || '-'}</td>
-        <td class="py-1 px-1.5"><span class="bg-amber-100 text-amber-800 font-bold px-1.5 py-0.5 rounded-md text-[9px]">₹ ${b.totalAmount}</span></td>
-        <td class="py-1 px-1.5 text-slate-600">${b.totalDue}</td>
+        <td class="py-1 px-1.5 font-mono text-blue-600 font-bold">${b.name || b.id || 'N/A'}</td>
+        <td class="py-1 px-1.5 font-bold text-slate-800">${roomsStr}</td>
+        <td class="py-1 px-1.5"><span class="bg-amber-100 text-amber-800 font-bold px-1.5 py-0.5 rounded-md text-[9px]">₹ ${Number(b.totalAmount || 0).toLocaleString('en-IN')}</span></td>
+        <td class="py-1 px-1.5 text-slate-600">₹ ${Number(b.totalDue || 0).toLocaleString('en-IN')}</td>
       </tr>
     `;
   });
@@ -2515,6 +2498,27 @@ function updateDashboardLiveBookings(liveBookings) {
   html += `</tbody></table>`;
   container.innerHTML = html;
 }
+
+// Main Dashboard Update Function
+function updateDashboardCards() {
+  const selectedFilter = typeof state !== 'undefined' ? state.dashSelectedYear : null;
+  const label = document.getElementById('dash-filter-label');
+  const targetYear = (selectedFilter && selectedFilter !== 'ALL') ? parseInt(selectedFilter, 10) : null;
+
+  // 1. Update Filter Header Label
+  if (label) {
+    if (!targetYear) {
+      label.innerText = "Consolidated Summary (All Years)";
+    } else {
+      const defaultYr = typeof defaultAppYear !== 'undefined' ? defaultAppYear : new Date().getFullYear();
+      label.innerText = targetYear === defaultYr
+        ? `Year ${targetYear} (Current Year)`
+        : `Year ${targetYear}`;
+    }
+  }
+
+  const now = Date.now();
+  const liveBookingsList = []; // Array to store live bookings for Box 6
 
   // 2. Initialize Metrics Object
   const stats = {
@@ -2530,7 +2534,9 @@ function updateDashboardLiveBookings(liveBookings) {
   };
 
   // 3. Loop and Categorize Bookings
-  (state.bookings || []).forEach(b => {
+  const bookings = (typeof state !== 'undefined' && Array.isArray(state.bookings)) ? state.bookings : [];
+
+  bookings.forEach(b => {
     const checkInMs = parseDate(b.checkIn);
     const checkOutMs = parseDate(b.checkOut);
 
@@ -2540,7 +2546,7 @@ function updateDashboardLiveBookings(liveBookings) {
       if (yr !== targetYear) return;
     }
 
-    // Amount extractions matching your property keys
+    // Amount extractions
     const amt = Number(b.totalAmount || 0);
     const adv = Number(b.initialAdv || 0) + Number(b.clearedDue || 0);
     const due = Number(b.totalDue || 0);
@@ -2561,6 +2567,7 @@ function updateDashboardLiveBookings(liveBookings) {
         stats.live.amount += amt;
         stats.live.adv += adv;
         stats.live.due += due;
+        liveBookingsList.push(b); // Collect live booking item
       } else if (now < checkInMs) {
         stats.upcoming.count++;
         stats.upcoming.amount += amt;
@@ -2587,7 +2594,7 @@ function updateDashboardLiveBookings(liveBookings) {
     if (el) el.innerText = text;
   };
 
-  const fmt = num => `₹${num.toLocaleString('en-IN')}`;
+  const fmt = num => `₹${Number(num || 0).toLocaleString('en-IN')}`;
 
   // 4. Update UI Elements & Pie Charts
 
@@ -2605,7 +2612,7 @@ function updateDashboardLiveBookings(liveBookings) {
   setTxt('dash-amount-closed', fmt(stats.closed.amount));
   updatePieChart('pie-amount', stats.live.amount, stats.upcoming.amount, stats.closed.amount, stats.inactive.amount);
 
-  // --- Total Advanced Card ---
+  // --- Box 3: Total Advanced / Received Card ---
   setTxt('dash-advanced', fmt(totalAdv));
   setTxt('dash-recv-live', fmt(stats.live.adv));
   setTxt('dash-recv-upcoming', fmt(stats.upcoming.adv));
@@ -2622,6 +2629,9 @@ function updateDashboardLiveBookings(liveBookings) {
   // --- Inactive Card ---
   setTxt('dash-inactive-count', `${stats.inactive.count} Bookings`);
   setTxt('dash-inactive-amount', fmt(stats.inactive.amount));
+
+  // --- Box 6: Live Bookings Table Update ---
+  updateDashboardLiveBookings(liveBookingsList);
 }
     
     function sendReceiptViaWhatsApp() {

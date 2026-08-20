@@ -2431,40 +2431,180 @@
       updateDashboardCards();
     }
 
-   function updateDashboardCards() {
-      const selectedFilter = state.dashSelectedYear;
-      const label = document.getElementById('dash-filter-label');
+   // Helper to render conic-gradient pie charts for Live (Amber), Upcoming (Blue), and Closed (Emerald)
+function updatePieChart(elementId, liveVal, upcomingVal, closedVal) {
+  const elem = document.getElementById(elementId);
+  if (!elem) return;
 
-      let filteredBookings = [];
+  const total = liveVal + upcomingVal + closedVal;
+  if (total <= 0) {
+    elem.style.background = 'conic-gradient(#E2E8F0 0% 100%)';
+    return;
+  }
 
-      if (selectedFilter === 'ALL' || !selectedFilter) {
-        filteredBookings = state.bookings.filter(b => !isInactiveBooking(b));
-        if (label) label.innerText = "Consolidated Summary (All Years)";
-      } else {
-        const targetYear = parseInt(selectedFilter);
-        filteredBookings = state.bookings.filter(b => {
-          if (isInactiveBooking(b) || !b.checkIn) return false;
-          const yr = new Date(b.checkIn.replace(' ', 'T')).getFullYear();
-          return yr === targetYear;
-        });
+  const livePct = (liveVal / total) * 100;
+  const upcomingPct = (upcomingVal / total) * 100;
+  const p1 = livePct.toFixed(2);
+  const p2 = (livePct + upcomingPct).toFixed(2);
 
-        if (label) {
-          label.innerText = targetYear === defaultAppYear 
-            ? `Year ${targetYear} (Current Year)` 
-            : `Year ${targetYear}`;
-        }
-      }
+  elem.style.background = `conic-gradient(#f59e0b 0% ${p1}%, #3b82f6 ${p1}% ${p2}%, #10b981 ${p2}% 100%)`;
+}
 
-      const totalBookings = filteredBookings.length;
-      const totalAmt = filteredBookings.reduce((sum, b) => sum + (b.totalAmount || 0), 0);
-      const totalAdv = filteredBookings.reduce((sum, b) => sum + (b.initialAdv || 0) + (b.clearedDue || 0), 0);
-      const totalDue = filteredBookings.reduce((sum, b) => sum + (b.totalDue || 0), 0);
+// Handler for Dashboard Year Filter Dropdown
+function handleDashboardYearChange(yearVal) {
+  if (yearVal === 'CURRENT') {
+    state.dashSelectedYear = new Date().getFullYear();
+  } else if (yearVal === 'ALL' || yearVal === 'CONSOLIDATED') {
+    state.dashSelectedYear = 'ALL';
+  } else {
+    state.dashSelectedYear = parseInt(yearVal, 10);
+  }
 
-      document.getElementById('dash-total-bookings').innerText = totalBookings;
-      document.getElementById('dash-total-amount').innerText = `₹${totalAmt.toLocaleString('en-IN')}`;
-      document.getElementById('dash-advanced').innerText = `₹${totalAdv.toLocaleString('en-IN')}`;
-      document.getElementById('dash-due').innerText = `₹${totalDue.toLocaleString('en-IN')}`;
+  const selectElem = document.getElementById('dash-year-select');
+  if (selectElem) selectElem.value = state.dashSelectedYear;
+
+  const labelElem = document.getElementById('dash-filter-label');
+  if (labelElem) {
+    labelElem.innerText = state.dashSelectedYear === 'ALL' 
+      ? 'Consolidated (All Years)' 
+      : `Year ${state.dashSelectedYear}`;
+  }
+
+  updateDashboardCards();
+}
+
+// Main Dashboard Update Function
+function updateDashboardCards() {
+  const now = Date.now();
+  const selectedYr = state.dashSelectedYear || 'ALL';
+
+  // Metrics Initialization
+  let countLive = 0, countUpcoming = 0, countClosed = 0;
+  let amountLive = 0, amountUpcoming = 0, amountClosed = 0;
+  let recvLive = 0, recvUpcoming = 0, recvClosed = 0;
+  let dueLive = 0, dueUpcoming = 0, dueClosed = 0;
+
+  let inactiveCount = 0;
+  let inactiveAmount = 0;
+
+  const todayLiveBookings = [];
+
+  (state.bookings || []).forEach(b => {
+    const inTime = parseDateMs(b.checkIn);
+    const outTime = getEffectiveCheckoutTime(b);
+    const bYear = new Date(inTime || Date.now()).getFullYear();
+
+    // Year Filter Check
+    if (selectedYr !== 'ALL' && bYear !== selectedYr) return;
+
+    // Handle Inactive Bookings
+    if (isInactiveBooking(b)) {
+      inactiveCount++;
+      inactiveAmount += Number(b.totalAmount || b.total || 0);
+      return;
     }
+
+    // Active Booking Calculations
+    const totalAmt = Number(b.totalAmount || b.total || 0);
+    const recvAmt = Number(b.advance || 0) + Number(b.clearBill || 0);
+    const dueAmt = Math.max(0, Number(b.dueAmount || b.due || (totalAmt - recvAmt)));
+
+    if (!isNaN(inTime) && !isNaN(outTime)) {
+      if (now >= inTime && now <= outTime) {
+        // LIVE
+        countLive++;
+        amountLive += totalAmt;
+        recvLive += recvAmt;
+        dueLive += dueAmt;
+        todayLiveBookings.push(b);
+      } else if (now < inTime) {
+        // UPCOMING
+        countUpcoming++;
+        amountUpcoming += totalAmt;
+        recvUpcoming += recvAmt;
+        dueUpcoming += dueAmt;
+      } else {
+        // CLOSED
+        countClosed++;
+        amountClosed += totalAmt;
+        recvClosed += recvAmt;
+        dueClosed += dueAmt;
+      }
+    }
+  });
+
+  // 1. BOX 1: TOTAL BOOKINGS
+  const totalBookingsCount = countLive + countUpcoming + countClosed;
+  document.getElementById('dash-total-bookings').innerText = totalBookingsCount;
+  document.getElementById('dash-count-live').innerText = countLive;
+  document.getElementById('dash-count-upcoming').innerText = countUpcoming;
+  document.getElementById('dash-count-closed').innerText = countClosed;
+  updatePieChart('pie-bookings', countLive, countUpcoming, countClosed);
+
+  // 2. BOX 2: BOOKING AMOUNT
+  const totalAmountSum = amountLive + amountUpcoming + amountClosed;
+  document.getElementById('dash-total-amount').innerText = `₹${totalAmountSum.toLocaleString('en-IN')}`;
+  document.getElementById('dash-amount-live').innerText = `₹${amountLive.toLocaleString('en-IN')}`;
+  document.getElementById('dash-amount-upcoming').innerText = `₹${amountUpcoming.toLocaleString('en-IN')}`;
+  document.getElementById('dash-amount-closed').innerText = `₹${amountClosed.toLocaleString('en-IN')}`;
+  updatePieChart('pie-amount', amountLive, amountUpcoming, amountClosed);
+
+  // 3. BOX 3: AMOUNT RECEIVED
+  const totalRecvSum = recvLive + recvUpcoming + recvClosed;
+  document.getElementById('dash-advanced').innerText = `₹${totalRecvSum.toLocaleString('en-IN')}`;
+  document.getElementById('dash-recv-live').innerText = `₹${recvLive.toLocaleString('en-IN')}`;
+  document.getElementById('dash-recv-upcoming').innerText = `₹${recvUpcoming.toLocaleString('en-IN')}`;
+  document.getElementById('dash-recv-closed').innerText = `₹${recvClosed.toLocaleString('en-IN')}`;
+  updatePieChart('pie-received', recvLive, recvUpcoming, recvClosed);
+
+  // 4. BOX 4: TOTAL DUE AMOUNT
+  const totalDueSum = dueLive + dueUpcoming + dueClosed;
+  document.getElementById('dash-due').innerText = `₹${totalDueSum.toLocaleString('en-IN')}`;
+  document.getElementById('dash-due-live').innerText = `₹${dueLive.toLocaleString('en-IN')}`;
+  document.getElementById('dash-due-upcoming').innerText = `₹${dueUpcoming.toLocaleString('en-IN')}`;
+  document.getElementById('dash-due-closed').innerText = `₹${dueClosed.toLocaleString('en-IN')}`;
+  updatePieChart('pie-due', dueLive, dueUpcoming, dueClosed);
+
+  // 5. BOX 5: INACTIVE BOOKINGS
+  document.getElementById('dash-inactive-count').innerText = `${inactiveCount} Bookings`;
+  document.getElementById('dash-inactive-amount').innerText = `₹${inactiveAmount.toLocaleString('en-IN')}`;
+
+  // 6. BOX 6: TODAY'S LIVE BOOKINGS DETAILS
+  const liveContainer = document.getElementById('dash-today-live-container');
+  if (liveContainer) {
+    if (todayLiveBookings.length === 0) {
+      liveContainer.innerHTML = `<p class="text-[11px] text-slate-400 italic py-2 text-center">No live bookings active today.</p>`;
+    } else {
+      liveContainer.innerHTML = `
+        <table class="w-full text-left text-[10px]">
+          <thead>
+            <tr class="text-slate-400 border-b border-slate-100 uppercase font-bold">
+              <th class="pb-1">Guest</th>
+              <th class="pb-1">Room</th>
+              <th class="pb-1 text-right">Due</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-50 font-medium text-slate-700">
+            ${todayLiveBookings.map(b => `
+              <tr>
+                <td class="py-1 font-bold text-slate-900">${b.guestName || b.name || '-'}</td>
+                <td class="py-1"><span class="bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-bold">Rm ${getBookingRooms(b).join(', ')}</span></td>
+                <td class="py-1 text-right font-bold ${Number(b.due || 0) > 0 ? 'text-rose-600' : 'text-emerald-600'}">₹${Number(b.due || 0).toLocaleString('en-IN')}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+  }
+}
+```[cite: 1]
+
+### Key Enhancements Made
+* **Pie Chart Conic-Gradients**: Dynamically calculates pie slice percentages for Live (Amber `#f59e0b`), Upcoming (Blue `#3b82f6`), and Closed (Emerald `#10b981`) categories[cite: 1].
+* **Breakup Calculations**: Accurately aggregates booking count, booking amount, amount received, and due amount across active status categories[cite: 1].
+* **Live Today Table**: Populates active live bookings directly inside `dash-today-live-container`[cite: 1].
+
 
     function sendReceiptViaWhatsApp() {
       if (!activeModalBooking) {

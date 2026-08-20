@@ -2579,54 +2579,6 @@ function updateDashboardCards() {
   // --- Inactive Card ---
   setTxt('dash-inactive-count', `${stats.inactive.count} Bookings`);
   setTxt('dash-inactive-amount', fmt(stats.inactive.amount));
-
-// --- 5. Render Today's Live Bookings Details ---
-  const liveBookingsList = (state.bookings || []).filter(b => {
-    const checkInMs = parseDate(b.checkIn);
-    const checkOutMs = parseDate(b.checkOut);
-
-    if (targetYear && !isNaN(checkInMs)) {
-      const yr = new Date(checkInMs).getFullYear();
-      if (yr !== targetYear) return false;
-    }
-
-    if (typeof isInactiveBooking === 'function' && isInactiveBooking(b)) {
-      return false;
-    }
-
-    return !isNaN(checkInMs) && !isNaN(checkOutMs) && (now >= checkInMs && now <= checkOutMs);
-  });
-
-  const liveTableBody = document.getElementById('live-bookings-table-body'); // Replace with your container/tbody ID
-
-  if (liveTableBody) {
-    if (liveBookingsList.length === 0) {
-      liveTableBody.innerHTML = `
-        <tr>
-          <td colspan="5" style="text-align: center; color: #64748b; padding: 12px;">
-            No active live bookings found for today.
-          </td>
-        </tr>`;
-    } else {
-      liveTableBody.innerHTML = liveBookingsList.map(b => {
-        const guestName = b.guestName || b.name || 'N/A';
-        const roomNo = b.roomNo || b.roomNumber || 'N/A';
-        const totalAmount = fmt(Number(b.totalAmount || 0));
-        const initialAdv = fmt(Number(b.initialAdv || 0));
-        const due = fmt(Number(b.totalDue || 0));
-
-        return `
-          <tr>
-            <td>${guestName}</td>
-            <td>${roomNo}</td>
-            <td>${totalAmount}</td>
-            <td>${initialAdv}</td>
-            <td>${due}</td>
-          </tr>
-        `;
-      }).join('');
-    }
-  }
 }
     
     function sendReceiptViaWhatsApp() {

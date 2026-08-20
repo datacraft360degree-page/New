@@ -2455,177 +2455,130 @@ function updatePieChart(elementId, liveVal, upcomingVal, closedVal, inactiveVal 
 }
 
 // Updated Main Dashboard Function
-// Helper to safely set element text content without null errors
-function setTxt(id, value) {
-  const elem = document.getElementById(id);
-  if (elem) elem.innerText = value;
-}
+function updateDashboardCards() {
+  const selectedFilter = state.dashSelectedYear;
+  const label = document.getElementById('dash-filter-label');
+  const targetYear = (selectedFilter && selectedFilter !== 'ALL') ? parseInt(selectedFilter, 10) : null;
 
-// Helper to update Box 6: Today's Live Booking Details Table
-function updateDashboardLiveBookings(liveBookings) {
-  const container = document.getElementById('dash-today-live-container');
-  if (!container) return;
-
-  if (!liveBookings || liveBookings.length === 0) {
-    container.innerHTML = '<p class="text-[11px] text-slate-400 italic py-2 text-center">No live bookings active today.</p>';
-    return;
+  // 1. Update Filter Header Label
+  if (label) {
+    if (!targetYear) {
+      label.innerText = "Consolidated Summary (All Years)";
+    } else {
+      label.innerText = targetYear === defaultAppYear
+        ? `Year ${targetYear} (Current Year)`
+        : `Year ${targetYear}`;
+    }
   }
 
-  let html = `
-    <table class="w-full text-left text-[10px] divide-y divide-slate-100">
-      <thead class="bg-amber-50/60 text-amber-900 font-bold sticky top-0 bg-white">
-        <tr>
-          <th class="py-1 px-1.5">Booking ID</th>
-          <th class="py-1 px-1.5">Guest</th>
-          <th class="py-1 px-1.5">Room</th>
-          <th class="py-1 px-1.5">Check-Out</th>
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-slate-100 font-medium text-slate-700">
-  `;
+  const now = Date.now();
 
-  liveBookings.forEach(b => {
-    const rooms = getBookingRooms(b).join(', ') || '-';
-    const outStr = b.hasExtendedCheckout && b.extendedCheckOut 
-      ? format24hDate(b.extendedCheckOut) 
-      : format24hDate(b.checkOut);
+  // 2. Initialize Metrics Object
+  const stats = {
+    live: { count: 0, amount: 0, adv: 0, due: 0 },
+    upcoming: { count: 0, amount: 0, adv: 0, due: 0 },
+    closed: { count: 0, amount: 0, adv: 0, due: 0 },
+    inactive: { count: 0, amount: 0, adv: 0, due: 0 }
+  };
 
-    html += `
-      <tr class="hover:bg-amber-50/40 transition">
-        <td class="py-1 px-1.5 font-mono text-blue-600 font-bold">${b.bookingCode || b.id}</td>
-        <td class="py-1 px-1.5 font-bold text-slate-800">${b.guestName || '-'}</td>
-        <td class="py-1 px-1.5"><span class="bg-amber-100 text-amber-800 font-bold px-1.5 py-0.5 rounded-md text-[9px]">Rm ${rooms}</span></td>
-        <td class="py-1 px-1.5 text-slate-600">${outStr}</td>
-      </tr>
-    `;
+  const parseDate = (dtStr) => {
+    if (!dtStr) return NaN;
+    return new Date(String(dtStr).replace(' ', 'T')).getTime();
+  };
+
+  // 3. Loop and Categorize Bookings
+  (state.bookings || []).forEach(b => {
+    const checkInMs = parseDate(b.checkIn);
+    const checkOutMs = parseDate(b.checkOut);
+
+    // Year Filter Validation
+    if (targetYear && !isNaN(checkInMs)) {
+      const yr = new Date(checkInMs).getFullYear();
+      if (yr !== targetYear) return;
+    }
+
+    // Amount extractions matching your property keys
+    const amt = Number(b.totalAmount || 0);
+    const adv = Number(b.initialAdv || 0) + Number(b.clearedDue || 0);
+    const due = Number(b.totalDue || 0);
+
+    // Check Inactive Status
+    if (typeof isInactiveBooking === 'function' && isInactiveBooking(b)) {
+      stats.inactive.count++;
+      stats.inactive.amount += amt;
+      stats.inactive.adv += adv;
+      stats.inactive.due += due;
+      return;
+    }
+
+    // Active Status Categorization (Live / Upcoming / Closed)
+    if (!isNaN(checkInMs) && !isNaN(checkOutMs)) {
+      if (now >= checkInMs && now <= checkOutMs) {
+        stats.live.count++;
+        stats.live.amount += amt;
+        stats.live.adv += adv;
+        stats.live.due += due;
+      } else if (now < checkInMs) {
+        stats.upcoming.count++;
+        stats.upcoming.amount += amt;
+        stats.upcoming.adv += adv;
+        stats.upcoming.due += due;
+      } else {
+        stats.closed.count++;
+        stats.closed.amount += amt;
+        stats.closed.adv += adv;
+        stats.closed.due += due;
+      }
+    }
   });
 
-  html += `</tbody></table>`;
-  container.innerHTML = html;
-}
+  // Calculate Active Totals
+  const totalBookings = stats.live.count + stats.upcoming.count + stats.closed.count;
+  const totalAmt = stats.live.amount + stats.upcoming.amount + stats.closed.amount;
+  const totalAdv = stats.live.adv + stats.upcoming.adv + stats.closed.adv;
+  const totalDue = stats.live.due + stats.upcoming.due + stats.closed.due;
 
-// Conic Gradient Pie Chart Renderer
-function updatePieChart(elementId, live, upcoming, closed, total) {
-  const elem = document.getElementById(elementId);
-  if (!elem) return;
-  if (!total || total === 0) {
-    elem.style.background = 'conic-gradient(#E2E8F0 0% 100%)';
-    return;
-  }
-  const pLive = (live / total) * 100;
-  const pUpcoming = (upcoming / total) * 100;
+  // DOM Safe Setters
+  const setTxt = (id, text) => {
+    const el = document.getElementById(id);
+    if (el) el.innerText = text;
+  };
 
-  const deg1 = pLive;
-  const deg2 = deg1 + pUpcoming;
+  const fmt = num => `₹${num.toLocaleString('en-IN')}`;
 
-  elem.style.background = `conic-gradient(
-    #F59E0B 0% ${deg1}%, 
-    #3B82F6 ${deg1}% ${deg2}%, 
-    #10B981 ${deg2}% 100%
-  )`;
-}
+  // 4. Update UI Elements & Pie Charts
 
-// Updated Dashboard Aggregator and Renderer using setTxt
-function updateDashboardCards(selectedYear = 'ALL') {
-  const now = Date.now();
-  
-  let totalBookings = 0;
-  let countLive = 0, countUpcoming = 0, countClosed = 0;
-  
-  let totalAmount = 0;
-  let amountLive = 0, amountUpcoming = 0, amountClosed = 0;
-  
-  let totalReceived = 0;
-  let recvLive = 0, recvUpcoming = 0, recvClosed = 0;
-  
-  let totalDue = 0;
-  let dueLive = 0, dueUpcoming = 0, dueClosed = 0;
-  
-  let inactiveCount = 0;
-  let inactiveAmount = 0;
-
-  const todayLiveBookings = [];
-
-  if (Array.isArray(state.bookings)) {
-    state.bookings.forEach(b => {
-      if (isInactiveBooking(b)) {
-        inactiveCount++;
-        inactiveAmount += Number(b.totalAmount || 0);
-        return;
-      }
-
-      const checkInMs = parseDateMs(b.checkIn);
-      const effOutMs = getEffectiveCheckoutTime(b);
-      
-      const bYear = new Date(checkInMs).getFullYear();
-      const currentYear = new Date().getFullYear();
-
-      if (selectedYear === 'CURRENT' && bYear !== currentYear) return;
-      if (selectedYear !== 'ALL' && selectedYear !== 'CURRENT' && String(bYear) !== String(selectedYear)) return;
-
-      const bTotal = Number(b.totalAmount || 0);
-      const bAdv = Number(b.advanceAmount || 0) + Number(b.clearBillAmount || 0);
-      const bDue = Math.max(0, bTotal - bAdv);
-
-      totalBookings++;
-      totalAmount += bTotal;
-      totalReceived += bAdv;
-      totalDue += bDue;
-
-      if (now < checkInMs) {
-        countUpcoming++;
-        amountUpcoming += bTotal;
-        recvUpcoming += bAdv;
-        dueUpcoming += bDue;
-      } else if (now >= checkInMs && now <= effOutMs) {
-        countLive++;
-        amountLive += bTotal;
-        recvLive += bAdv;
-        dueLive += bDue;
-        todayLiveBookings.push(b);
-      } else {
-        countClosed++;
-        amountClosed += bTotal;
-        recvClosed += bAdv;
-        dueClosed += bDue;
-      }
-    });
-  }
-
-  // Update Summary Counts
+  // --- Total Bookings Card ---
   setTxt('dash-total-bookings', totalBookings);
-  setTxt('dash-count-live', countLive);
-  setTxt('dash-count-upcoming', countUpcoming);
-  setTxt('dash-count-closed', countClosed);
+  setTxt('dash-count-live', stats.live.count);
+  setTxt('dash-count-upcoming', stats.upcoming.count);
+  setTxt('dash-count-closed', stats.closed.count);
+  updatePieChart('pie-bookings', stats.live.count, stats.upcoming.count, stats.closed.count, stats.inactive.count);
 
-  // Update Financial Metrics
-  setTxt('dash-total-amount', `₹${totalAmount.toLocaleString('en-IN')}`);
-  setTxt('dash-amount-live', `₹${amountLive.toLocaleString('en-IN')}`);
-  setTxt('dash-amount-upcoming', `₹${amountUpcoming.toLocaleString('en-IN')}`);
-  setTxt('dash-amount-closed', `₹${amountClosed.toLocaleString('en-IN')}`);
+  // --- Total Booking Amount Card ---
+  setTxt('dash-total-amount', fmt(totalAmt));
+  setTxt('dash-amount-live', fmt(stats.live.amount));
+  setTxt('dash-amount-upcoming', fmt(stats.upcoming.amount));
+  setTxt('dash-amount-closed', fmt(stats.closed.amount));
+  updatePieChart('pie-amount', stats.live.amount, stats.upcoming.amount, stats.closed.amount, stats.inactive.amount);
 
-  setTxt('dash-advanced', `₹${totalReceived.toLocaleString('en-IN')}`);
-  setTxt('dash-recv-live', `₹${recvLive.toLocaleString('en-IN')}`);
-  setTxt('dash-recv-upcoming', `₹${recvUpcoming.toLocaleString('en-IN')}`);
-  setTxt('dash-recv-closed', `₹${recvClosed.toLocaleString('en-IN')}`);
+  // --- Total Advanced Card ---
+  setTxt('dash-advanced', fmt(totalAdv));
+  setTxt('dash-recv-live', fmt(stats.live.adv));
+  setTxt('dash-recv-upcoming', fmt(stats.upcoming.adv));
+  setTxt('dash-recv-closed', fmt(stats.closed.adv));
+  updatePieChart('pie-received', stats.live.adv, stats.upcoming.adv, stats.closed.adv, stats.inactive.adv);
 
-  setTxt('dash-due', `₹${totalDue.toLocaleString('en-IN')}`);
-  setTxt('dash-due-live', `₹${dueLive.toLocaleString('en-IN')}`);
-  setTxt('dash-due-upcoming', `₹${dueUpcoming.toLocaleString('en-IN')}`);
-  setTxt('dash-due-closed', `₹${dueClosed.toLocaleString('en-IN')}`);
+  // --- Total Due Card ---
+  setTxt('dash-due', fmt(totalDue));
+  setTxt('dash-due-live', fmt(stats.live.due));
+  setTxt('dash-due-upcoming', fmt(stats.upcoming.due));
+  setTxt('dash-due-closed', fmt(stats.closed.due));
+  updatePieChart('pie-due', stats.live.due, stats.upcoming.due, stats.closed.due, stats.inactive.due);
 
-  // Update Inactive Metrics
-  setTxt('dash-inactive-count', `${inactiveCount} Bookings`);
-  setTxt('dash-inactive-amount', `₹${inactiveAmount.toLocaleString('en-IN')}`);
-
-  // Refresh Conic Chart Gradients
-  updatePieChart('pie-bookings', countLive, countUpcoming, countClosed, totalBookings);
-  updatePieChart('pie-amount', amountLive, amountUpcoming, amountClosed, totalAmount);
-  updatePieChart('pie-received', recvLive, recvUpcoming, recvClosed, totalReceived);
-  updatePieChart('pie-due', dueLive, dueUpcoming, dueClosed, totalDue);
-
-  // Refresh Box 6 Live Details Table
-  updateDashboardLiveBookings(todayLiveBookings);
+  // --- Inactive Card ---
+  setTxt('dash-inactive-count', `${stats.inactive.count} Bookings`);
+  setTxt('dash-inactive-amount', fmt(stats.inactive.amount));
 }
     
     function sendReceiptViaWhatsApp() {

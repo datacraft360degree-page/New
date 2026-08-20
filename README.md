@@ -2430,73 +2430,78 @@
       updateDashboardCards();
     }
     
-// Number parser
-function parseNum(val) {
-  if (val === null || val === undefined) return 0;
-  if (typeof val === 'number') return isNaN(val) ? 0 : val;
-  const cleaned = String(val).replace(/[^0-9.-]/g, '');
-  const parsed = parseFloat(cleaned);
-  return isNaN(parsed) ? 0 : parsed;
-}
+// Deep parser to extract received payments regardless of database property names
+function extractAmountReceived(b) {
+  if (!b || typeof b !== 'object') return 0;
 
-// SVG Pie Chart Generator
-function generatePieChartSVG(slices, radius = 30) {
-  const total = slices.reduce((acc, s) => acc + (s.value || 0), 0);
-  if (total <= 0) {
-    return `<svg class="w-full h-full" viewBox="-40 -40 80 80">
-      <circle cx="0" cy="0" r="${radius}" fill="none" stroke="#e2e8f0" stroke-width="12" />
-      <text x="0" y="3" text-anchor="middle" font-size="10" fill="#94a3b8" font-weight="bold">0%</text>
-    </svg>`;
+  // 1. Check direct keys on the booking object
+  const directKeys = [
+    'amountReceived', 'amount_received', 'receivedAmount', 'received_amount',
+    'advancePaid', 'advance_paid', 'advanceAmount', 'advance_amount', 
+    'clearBillPaid', 'clear_bill_paid', 'clearBill', 'clear_bill',
+    'paidAmount', 'paid_amount', 'amountPaid', 'amount_paid',
+    'advance', 'deposit', 'paid', 'totalReceived', 'total_received'
+  ];
+
+  let calculatedTotal = 0;
+  let keyFound = false;
+
+  // Sum up explicit advance + clear bill fields if present
+  const advance = parseNum(b.advancePaid ?? b.advance_paid ?? b.advanceAmount ?? b.advance_amount ?? b.advance ?? b.deposit);
+  const clearBill = parseNum(b.clearBillPaid ?? b.clear_bill_paid ?? b.clearBill ?? b.clear_bill ?? b.clearPayment ?? b.clear_payment);
+  
+  if (advance > 0 || clearBill > 0) {
+    return advance + clearBill;
   }
 
-  let cumulativeAngle = 0;
-  const pathElements = slices.map(slice => {
-    const value = slice.value || 0;
-    if (value <= 0) return '';
-    
-    const sliceAngle = (value / total) * 360;
-    const startAngle = cumulativeAngle;
-    const endAngle = cumulativeAngle + sliceAngle;
-    cumulativeAngle = endAngle;
-
-    if (sliceAngle >= 359.9) {
-      return `<circle cx="0" cy="0" r="${radius}" fill="none" stroke="${slice.color}" stroke-width="12" />`;
+  // Check single consolidated received fields
+  for (const key of directKeys) {
+    if (b[key] !== undefined && b[key] !== null && b[key] !== '') {
+      const val = parseNum(b[key]);
+      if (val > 0) return val;
     }
+  }
 
-    const startRad = (startAngle - 90) * (Math.PI / 180);
-    const endRad = (endAngle - 90) * (Math.PI / 180);
+  // 2. Check nested payment objects (e.g., b.payment.received or b.financials.paid)
+  const nestedObjects = [b.payment, b.payments, b.financials, b.billing, b.transaction];
+  for (const obj of nestedObjects) {
+    if (obj && typeof obj === 'object' && !Array.isArray(obj)) {
+      const nestedVal = parseNum(
+        obj.received ?? obj.amountReceived ?? obj.paid ?? obj.paidAmount ?? 
+        obj.advance ?? obj.totalReceived ?? obj.amount_received
+      );
+      if (nestedVal > 0) return nestedVal;
+    }
+  }
 
-    const x1 = radius * Math.cos(startRad);
-    const y1 = radius * Math.sin(startRad);
-    const x2 = radius * Math.cos(endRad);
-    const y2 = radius * Math.sin(endRad);
+  // 3. Check transaction arrays (e.g., b.payments = [{ amount: 5000 }, ...])
+  const paymentArrays = [b.payments, b.transactions, b.paymentHistory, b.payment_history, b.history];
+  for (const arr of paymentArrays) {
+    if (Array.isArray(arr) && arr.length > 0) {
+      const arrayTotal = arr.reduce((sum, item) => {
+        if (typeof item === 'number') return sum + item;
+        if (typeof item === 'string') return sum + parseNum(item);
+        if (item && typeof item === 'object') {
+          return sum + parseNum(item.amount ?? item.paid ?? item.value ?? item.price ?? 0);
+        }
+        return sum;
+      }, 0);
+      if (arrayTotal > 0) return arrayTotal;
+    }
+  }
 
-    const largeArcFlag = sliceAngle > 180 ? 1 : 0;
-
-    const pathData = [
-      `M ${x1} ${y1}`,
-      `A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2}`
-    ].join(' ');
-
-    return `<path d="${pathData}" fill="none" stroke="${slice.color}" stroke-width="12" stroke-linecap="round" />`;
-  }).join('');
-
-  return `<svg class="w-full h-full" viewBox="-40 -40 80 80">
-    <circle cx="0" cy="0" r="${radius}" fill="none" stroke="#f1f5f9" stroke-width="12" />
-    ${pathElements}
-  </svg>`;
+  return 0;
 }
 
-// Function to calculate metrics and update Dashboard
+// Updated Dashboard Card Calculation Logic
 function updateDashboardCards() {
   const now = new Date().getTime();
   const selectedYear = state.dashSelectedYear;
 
-  // FIX 3: Consolidated Year Filter Handling
+  // Filter bookings based on selected year (including Consolidated/All)
   const activeYearBookings = (state.bookings || []).filter(b => {
     if (!b || !b.checkIn) return false;
     
-    // Support "CONSOLIDATED", "ALL", "CURRENT", or empty/null selectedYear
     if (!selectedYear || 
         selectedYear === 'CONSOLIDATED' || 
         selectedYear === 'CURRENT' || 
@@ -2509,7 +2514,6 @@ function updateDashboardCards() {
     return checkInDate.getFullYear() === parseInt(selectedYear);
   });
 
-  // Aggregators
   let live = { count: 0, amount: 0, received: 0, due: 0 };
   let upcoming = { count: 0, amount: 0, received: 0, due: 0 };
   let closed = { count: 0, amount: 0, received: 0, due: 0 };
@@ -2519,18 +2523,28 @@ function updateDashboardCards() {
       return;
     }
 
-    // Total booking amount
-    const bAmount = parseNum(b.totalPrice ?? b.totalAmount ?? b.grandTotal ?? b.price ?? 0);
+    // Extract total booking amount
+    const bAmount = parseNum(
+      b.totalPrice ?? b.total_price ?? b.totalAmount ?? b.total_amount ?? 
+      b.grandTotal ?? b.grand_total ?? b.price ?? b.amount ?? 0
+    );
 
-    // FIX 2: Strict Amount Received Calculation (Advance Payment + Cleared Payment)
-    const bAdvance = parseNum(b.advancePaid ?? b.advance ?? b.advanceAmount ?? b.deposit ?? 0);
-    const bClear = parseNum(b.clearBillPaid ?? b.clearBill ?? b.paidAmount ?? b.amountPaid ?? b.clearPayment ?? 0);
-    const bReceived = bAdvance + bClear;
+    // Extract amount received using multi-key search helper
+    let bReceived = extractAmountReceived(b);
 
-    // Strict Due Amount Calculation: Zero if received >= booking amount, else remaining balance
+    // Auto-fill full amount if booking is marked fully paid
+    const isPaidStatus = b.isPaid === true || 
+                        String(b.paymentStatus || b.payment_status || b.status).toLowerCase().includes('paid') ||
+                        String(b.paymentStatus || b.payment_status || b.status).toLowerCase().includes('cleared');
+
+    if (isPaidStatus && bReceived < bAmount) {
+      bReceived = bAmount;
+    }
+
+    // Calculate due amount
     const bDue = Math.max(0, bAmount - bReceived);
 
-    // Time Categorization
+    // Time categorization
     let cIn = typeof parseDateMs === 'function' ? parseDateMs(b.checkIn) : new Date(b.checkIn).getTime();
     let cOut = typeof getEffectiveCheckoutTime === 'function' ? getEffectiveCheckoutTime(b) : new Date(b.checkOut).getTime();
 

@@ -2447,42 +2447,170 @@
 
       updateDashboardCards();
     }
+// Helper to render dynamic Excel-style SVG Pie Charts
+function generatePieChartSVG(slices, radius = 32) {
+  const total = slices.reduce((acc, s) => acc + (s.value || 0), 0);
+  if (total <= 0) {
+    return `<svg width="70" height="70" viewBox="-40 -40 80 80">
+      <circle cx="0" cy="0" r="${radius}" fill="none" stroke="#e2e8f0" stroke-width="12" />
+      <text x="0" y="3" text-anchor="middle" font-size="10" fill="#94a3b8" font-weight="bold">N/A</text>
+    </svg>`;
+  }
 
-    function updateDashboardCards() {
-      const selectedFilter = state.dashSelectedYear;
-      const label = document.getElementById('dash-filter-label');
+  let cumulativeAngle = 0;
+  const pathElements = slices.map(slice => {
+    const value = slice.value || 0;
+    if (value <= 0) return '';
+    
+    const sliceAngle = (value / total) * 360;
+    const startAngle = cumulativeAngle;
+    const endAngle = cumulativeAngle + sliceAngle;
+    cumulativeAngle = endAngle;
 
-      let filteredBookings = [];
-
-      if (selectedFilter === 'ALL' || !selectedFilter) {
-        filteredBookings = state.bookings.filter(b => !isInactiveBooking(b));
-        if (label) label.innerText = "Consolidated Summary (All Years)";
-      } else {
-        const targetYear = parseInt(selectedFilter);
-        filteredBookings = state.bookings.filter(b => {
-          if (isInactiveBooking(b) || !b.checkIn) return false;
-          const yr = new Date(b.checkIn.replace(' ', 'T')).getFullYear();
-          return yr === targetYear;
-        });
-
-        if (label) {
-          label.innerText = targetYear === defaultAppYear 
-            ? `Year ${targetYear} (Current Year)` 
-            : `Year ${targetYear}`;
-        }
-      }
-
-      const totalBookings = filteredBookings.length;
-      const totalAmt = filteredBookings.reduce((sum, b) => sum + (b.totalAmount || 0), 0);
-      const totalAdv = filteredBookings.reduce((sum, b) => sum + (b.initialAdv || 0) + (b.clearedDue || 0), 0);
-      const totalDue = filteredBookings.reduce((sum, b) => sum + (b.totalDue || 0), 0);
-
-      document.getElementById('dash-total-bookings').innerText = totalBookings;
-      document.getElementById('dash-total-amount').innerText = `₹${totalAmt.toLocaleString('en-IN')}`;
-      document.getElementById('dash-advanced').innerText = `₹${totalAdv.toLocaleString('en-IN')}`;
-      document.getElementById('dash-due').innerText = `₹${totalDue.toLocaleString('en-IN')}`;
+    // Handle full 360 circle case
+    if (sliceAngle >= 359.9) {
+      return `<circle cx="0" cy="0" r="${radius}" fill="none" stroke="${slice.color}" stroke-width="12" />`;
     }
 
+    const startRad = (startAngle - 90) * (Math.PI / 180);
+    const endRad = (endAngle - 90) * (Math.PI / 180);
+
+    const x1 = radius * Math.cos(startRad);
+    const y1 = radius * Math.sin(startRad);
+    const x2 = radius * Math.cos(endRad);
+    const y2 = radius * Math.sin(endRad);
+
+    const largeArcFlag = sliceAngle > 180 ? 1 : 0;
+
+    const pathData = [
+      `M ${x1} ${y1}`,
+      `A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2}`
+    ].join(' ');
+
+    return `<path d="${pathData}" fill="none" stroke="${slice.color}" stroke-width="12" />`;
+  }).join('');
+
+  return `<svg width="70" height="70" viewBox="-40 -40 80 80">
+    <circle cx="0" cy="0" r="${radius}" fill="none" stroke="#f1f5f9" stroke-width="12" />
+    ${pathElements}
+  </svg>`;
+}
+
+// Function to calculate metrics and update Dashboard cards
+function updateDashboardCards() {
+  const now = new Date().getTime();
+  const selectedYear = state.dashSelectedYear;
+
+  // Filter bookings based on selected year
+  const activeYearBookings = state.bookings.filter(b => {
+    if (!b || !b.checkIn) return false;
+    if (selectedYear === 'CURRENT' || !selectedYear) return true;
+    const checkInDate = new Date(String(b.checkIn).replace(' ', 'T'));
+    return checkInDate.getFullYear() === parseInt(selectedYear);
+  });
+
+  // Category aggregators
+  let live = { count: 0, amount: 0, received: 0, due: 0 };
+  let upcoming = { count: 0, amount: 0, received: 0, due: 0 };
+  let closed = { count: 0, amount: 0, received: 0, due: 0 };
+  let inactive = { count: 0, amount: 0 };
+
+  activeYearBookings.forEach(b => {
+    const bAmount = parseFloat(b.totalPrice) || 0;
+    const bAdvance = parseFloat(b.advancePaid) || 0;
+    const bClearBill = parseFloat(b.clearBillPaid) || 0;
+    const bReceived = bAdvance + bClearBill;
+    const bDue = parseFloat(b.dueBalance) || 0;
+
+    if (isInactiveBooking(b)) {
+      inactive.count += 1;
+      inactive.amount += bAmount;
+    } else {
+      const cIn = parseDateMs(b.checkIn);
+      const cOut = getEffectiveCheckoutTime(b);
+
+      if (now > cOut) {
+        // Closed Booking
+        closed.count += 1;
+        closed.amount += bAmount;
+        closed.received += bReceived;
+        closed.due += bDue;
+      } else if (now >= cIn && now <= cOut) {
+        // Live Booking
+        live.count += 1;
+        live.amount += bAmount;
+        live.received += bReceived;
+        live.due += bDue;
+      } else {
+        // Upcoming Booking
+        upcoming.count += 1;
+        upcoming.amount += bAmount;
+        upcoming.received += bReceived;
+        upcoming.due += bDue;
+      }
+    }
+  });
+
+  // Colors for chart slices (Live: Amber, Upcoming: Blue, Closed: Emerald)
+  const COLORS = { live: '#f59e0b', upcoming: '#3b82f6', closed: '#10b981', inactive: '#f43f5e' };
+
+  // 1. Total Bookings
+  const totalActiveBookings = live.count + upcoming.count + closed.count;
+  document.getElementById('dash-total-bookings').innerText = totalActiveBookings;
+  document.getElementById('dash-bookings-live').innerText = live.count;
+  document.getElementById('dash-bookings-upcoming').innerText = upcoming.count;
+  document.getElementById('dash-bookings-closed').innerText = closed.count;
+  document.getElementById('chart-total-bookings').innerHTML = generatePieChartSVG([
+    { value: live.count, color: COLORS.live },
+    { value: upcoming.count, color: COLORS.upcoming },
+    { value: closed.count, color: COLORS.closed }
+  ]);
+
+  // 2. Booking Amount
+  const totalBookingAmount = live.amount + upcoming.amount + closed.amount;
+  document.getElementById('dash-total-amount').innerText = `₹${totalBookingAmount.toLocaleString('en-IN')}`;
+  document.getElementById('dash-amount-live').innerText = `₹${live.amount.toLocaleString('en-IN')}`;
+  document.getElementById('dash-amount-upcoming').innerText = `₹${upcoming.amount.toLocaleString('en-IN')}`;
+  document.getElementById('dash-amount-closed').innerText = `₹${closed.amount.toLocaleString('en-IN')}`;
+  document.getElementById('chart-booking-amount').innerHTML = generatePieChartSVG([
+    { value: live.amount, color: COLORS.live },
+    { value: upcoming.amount, color: COLORS.upcoming },
+    { value: closed.amount, color: COLORS.closed }
+  ]);
+
+  // 3. Amount Received
+  const totalAmountReceived = live.received + upcoming.received + closed.received;
+  document.getElementById('dash-advanced').innerText = `₹${totalAmountReceived.toLocaleString('en-IN')}`;
+  document.getElementById('dash-received-live').innerText = `₹${live.received.toLocaleString('en-IN')}`;
+  document.getElementById('dash-received-upcoming').innerText = `₹${upcoming.received.toLocaleString('en-IN')}`;
+  document.getElementById('dash-received-closed').innerText = `₹${closed.received.toLocaleString('en-IN')}`;
+  document.getElementById('chart-amount-received').innerHTML = generatePieChartSVG([
+    { value: live.received, color: COLORS.live },
+    { value: upcoming.received, color: COLORS.upcoming },
+    { value: closed.received, color: COLORS.closed }
+  ]);
+
+  // 4. Total Due Amount
+  const totalDueAmount = live.due + upcoming.due + closed.due;
+  document.getElementById('dash-due').innerText = `₹${totalDueAmount.toLocaleString('en-IN')}`;
+  document.getElementById('dash-due-live').innerText = `₹${live.due.toLocaleString('en-IN')}`;
+  document.getElementById('dash-due-upcoming').innerText = `₹${upcoming.due.toLocaleString('en-IN')}`;
+  document.getElementById('dash-due-closed').innerText = `₹${closed.due.toLocaleString('en-IN')}`;
+  document.getElementById('chart-total-due').innerHTML = generatePieChartSVG([
+    { value: live.due, color: COLORS.live },
+    { value: upcoming.due, color: COLORS.upcoming },
+    { value: closed.due, color: COLORS.closed }
+  ]);
+
+  // 5. Inactive Bookings
+  document.getElementById('dash-inactive-count').innerText = inactive.count;
+  document.getElementById('dash-inactive-amount').innerText = `₹${inactive.amount.toLocaleString('en-IN')}`;
+  document.getElementById('chart-inactive-bookings').innerHTML = generatePieChartSVG([
+    { value: inactive.count, color: COLORS.inactive },
+    { value: totalActiveBookings, color: '#e2e8f0' }
+  ]);
+}
+    
     function sendReceiptViaWhatsApp() {
       if (!activeModalBooking) {
         alert("⚠️ Booking information not found!");

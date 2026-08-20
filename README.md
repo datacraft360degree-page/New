@@ -2431,26 +2431,35 @@
       updateDashboardCards();
     }
 
-  // Helper to render conic-gradient pie charts (Live = Amber, Upcoming = Blue, Closed = Emerald, Inactive = Slate)
-function updatePieChart(elementId, liveVal, upcomingVal, closedVal, inactiveVal = 0) {
+function updatePieChart(elementId, liveVal = null, upcomingVal = null, closedVal = null) {
   const elem = document.getElementById(elementId);
   if (!elem) return;
 
-  const total = liveVal + upcomingVal + closedVal + inactiveVal;
+  // 1. Until data is fetched (null/undefined), display grey placeholder
+  if (liveVal === null || upcomingVal === null || closedVal === null) {
+    elem.style.background = 'conic-gradient(#e2e8f0 0% 100%)';
+    return;
+  }
+
+  const live = Number(liveVal) || 0;
+  const upcoming = Number(upcomingVal) || 0;
+  const closed = Number(closedVal) || 0;
+  const total = live + upcoming + closed;
+
+  // 2. If data is fetched but blank (total is 0), keep grey placeholder
   if (total <= 0) {
     elem.style.background = 'conic-gradient(#e2e8f0 0% 100%)';
     return;
   }
 
-  const p1 = ((liveVal / total) * 100).toFixed(2);
-  const p2 = (((liveVal + upcomingVal) / total) * 100).toFixed(2);
-  const p3 = (((liveVal + upcomingVal + closedVal) / total) * 100).toFixed(2);
+  // 3. Active state: Render exclusively Yellow, Blue, and Green
+  const p1 = ((live / total) * 100).toFixed(2);
+  const p2 = (((live + upcoming) / total) * 100).toFixed(2);
 
   elem.style.background = `conic-gradient(
     #f59e0b 0% ${p1}%,
     #3b82f6 ${p1}% ${p2}%,
-    #10b981 ${p2}% ${p3}%,
-    #94a3b8 ${p3}% 100%
+    #10b981 ${p2}% 100%
   )`;
 }
 

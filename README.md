@@ -402,111 +402,111 @@
       </div>
 
       <!-- One UI Rounded Cards -->
-    <!-- Excel-style KPI Cards with Pie Chart Beside Data (4 Cards) -->
-<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3.5">
+   <!-- Excel-style KPI Cards (4-Column Layout with Auto-Fit Text) -->
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
   
   <!-- 1. TOTAL BOOKINGS -->
-  <div class="bg-white p-3.5 rounded-3xl shadow-sm border border-slate-200/60 flex items-center justify-between gap-2">
+  <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200/80 flex items-center justify-between gap-3 min-w-0">
     <div class="space-y-1 flex-1 min-w-0">
       <div class="flex items-center gap-1.5">
-        <span class="p-1.5 bg-blue-50 text-blue-600 rounded-xl text-xs"><i class="fa-solid fa-bookmark"></i></span>
-        <p class="text-[9px] uppercase font-bold text-slate-400 tracking-wider truncate">Total Bookings</p>
+        <span class="p-1.5 bg-blue-50 text-blue-600 rounded-lg text-xs"><i class="fa-solid fa-bookmark"></i></span>
+        <p class="text-[10px] uppercase font-bold text-slate-400 tracking-wider truncate">Total Bookings</p>
       </div>
-      <p id="dash-total-bookings" class="text-lg font-black text-slate-900 leading-tight">0</p>
-      <div class="space-y-0.5 text-[10px] font-medium border-t border-slate-100 pt-1.5">
+      <p id="dash-total-bookings" class="text-xl font-black text-slate-900 leading-none truncate">0</p>
+      <div class="space-y-1 text-[11px] font-medium border-t border-slate-100 pt-2 mt-1">
         <div class="flex justify-between items-center text-amber-700">
-          <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>Live:</span>
-          <strong id="dash-bookings-live">0</strong>
+          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-amber-500 flex-shrink-0"></span>Live:</span>
+          <strong id="dash-bookings-live" class="ml-1">0</strong>
         </div>
         <div class="flex justify-between items-center text-blue-700">
-          <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>Upcoming:</span>
-          <strong id="dash-bookings-upcoming">0</strong>
+          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0"></span>Upcoming:</span>
+          <strong id="dash-bookings-upcoming" class="ml-1">0</strong>
         </div>
         <div class="flex justify-between items-center text-emerald-700">
-          <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Closed:</span>
-          <strong id="dash-bookings-closed">0</strong>
+          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0"></span>Closed:</span>
+          <strong id="dash-bookings-closed" class="ml-1">0</strong>
         </div>
       </div>
     </div>
-    <div id="chart-total-bookings" class="w-20 h-20 flex-shrink-0 flex items-center justify-center"></div>
+    <div id="chart-total-bookings" class="w-14 h-14 flex-shrink-0 flex items-center justify-center"></div>
   </div>
 
   <!-- 2. BOOKING AMOUNT -->
-  <div class="bg-white p-3.5 rounded-3xl shadow-sm border border-slate-200/60 flex items-center justify-between gap-2">
+  <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200/80 flex items-center justify-between gap-3 min-w-0">
     <div class="space-y-1 flex-1 min-w-0">
       <div class="flex items-center gap-1.5">
-        <span class="p-1.5 bg-indigo-50 text-indigo-600 rounded-xl text-xs"><i class="fa-solid fa-receipt"></i></span>
-        <p class="text-[9px] uppercase font-bold text-slate-400 tracking-wider truncate">Booking Amount</p>
+        <span class="p-1.5 bg-indigo-50 text-indigo-600 rounded-lg text-xs"><i class="fa-solid fa-receipt"></i></span>
+        <p class="text-[10px] uppercase font-bold text-slate-400 tracking-wider truncate">Booking Amount</p>
       </div>
-      <p id="dash-total-amount" class="text-lg font-black text-slate-900 leading-tight">₹0</p>
-      <div class="space-y-0.5 text-[10px] font-medium border-t border-slate-100 pt-1.5">
+      <p id="dash-total-amount" class="text-xl font-black text-slate-900 leading-none truncate">₹0</p>
+      <div class="space-y-1 text-[11px] font-medium border-t border-slate-100 pt-2 mt-1">
         <div class="flex justify-between items-center text-amber-700">
-          <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>Live:</span>
-          <strong id="dash-amount-live">₹0</strong>
+          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-amber-500 flex-shrink-0"></span>Live:</span>
+          <strong id="dash-amount-live" class="ml-1">₹0</strong>
         </div>
         <div class="flex justify-between items-center text-blue-700">
-          <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>Upcoming:</span>
-          <strong id="dash-amount-upcoming">₹0</strong>
+          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0"></span>Upcoming:</span>
+          <strong id="dash-amount-upcoming" class="ml-1">₹0</strong>
         </div>
         <div class="flex justify-between items-center text-emerald-700">
-          <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Closed:</span>
-          <strong id="dash-amount-closed">₹0</strong>
+          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0"></span>Closed:</span>
+          <strong id="dash-amount-closed" class="ml-1">₹0</strong>
         </div>
       </div>
     </div>
-    <div id="chart-booking-amount" class="w-20 h-20 flex-shrink-0 flex items-center justify-center"></div>
+    <div id="chart-booking-amount" class="w-14 h-14 flex-shrink-0 flex items-center justify-center"></div>
   </div>
 
   <!-- 3. AMOUNT RECEIVED -->
-  <div class="bg-white p-3.5 rounded-3xl shadow-sm border border-slate-200/60 flex items-center justify-between gap-2">
+  <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200/80 flex items-center justify-between gap-3 min-w-0">
     <div class="space-y-1 flex-1 min-w-0">
       <div class="flex items-center gap-1.5">
-        <span class="p-1.5 bg-emerald-50 text-emerald-600 rounded-xl text-xs"><i class="fa-solid fa-wallet"></i></span>
-        <p class="text-[9px] uppercase font-bold text-slate-400 tracking-wider truncate">Amount Received</p>
+        <span class="p-1.5 bg-emerald-50 text-emerald-600 rounded-lg text-xs"><i class="fa-solid fa-wallet"></i></span>
+        <p class="text-[10px] uppercase font-bold text-slate-400 tracking-wider truncate">Amount Received</p>
       </div>
-      <p id="dash-advanced" class="text-lg font-black text-emerald-600 leading-tight">₹0</p>
-      <div class="space-y-0.5 text-[10px] font-medium border-t border-slate-100 pt-1.5">
+      <p id="dash-advanced" class="text-xl font-black text-emerald-600 leading-none truncate">₹0</p>
+      <div class="space-y-1 text-[11px] font-medium border-t border-slate-100 pt-2 mt-1">
         <div class="flex justify-between items-center text-amber-700">
-          <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>Live:</span>
-          <strong id="dash-received-live">₹0</strong>
+          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-amber-500 flex-shrink-0"></span>Live:</span>
+          <strong id="dash-received-live" class="ml-1">₹0</strong>
         </div>
         <div class="flex justify-between items-center text-blue-700">
-          <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>Upcoming:</span>
-          <strong id="dash-received-upcoming">₹0</strong>
+          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0"></span>Upcoming:</span>
+          <strong id="dash-received-upcoming" class="ml-1">₹0</strong>
         </div>
         <div class="flex justify-between items-center text-emerald-700">
-          <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Closed:</span>
-          <strong id="dash-received-closed">₹0</strong>
+          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0"></span>Closed:</span>
+          <strong id="dash-received-closed" class="ml-1">₹0</strong>
         </div>
       </div>
     </div>
-    <div id="chart-amount-received" class="w-20 h-20 flex-shrink-0 flex items-center justify-center"></div>
+    <div id="chart-amount-received" class="w-14 h-14 flex-shrink-0 flex items-center justify-center"></div>
   </div>
 
   <!-- 4. TOTAL DUE AMOUNT -->
-  <div class="bg-white p-3.5 rounded-3xl shadow-sm border border-slate-200/60 flex items-center justify-between gap-2">
+  <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200/80 flex items-center justify-between gap-3 min-w-0">
     <div class="space-y-1 flex-1 min-w-0">
       <div class="flex items-center gap-1.5">
-        <span class="p-1.5 bg-rose-50 text-rose-600 rounded-xl text-xs"><i class="fa-solid fa-hand-holding-dollar"></i></span>
-        <p class="text-[9px] uppercase font-bold text-slate-400 tracking-wider truncate">Total Due Amount</p>
+        <span class="p-1.5 bg-rose-50 text-rose-600 rounded-lg text-xs"><i class="fa-solid fa-hand-holding-dollar"></i></span>
+        <p class="text-[10px] uppercase font-bold text-slate-400 tracking-wider truncate">Total Due Amount</p>
       </div>
-      <p id="dash-due" class="text-lg font-black text-rose-600 leading-tight">₹0</p>
-      <div class="space-y-0.5 text-[10px] font-medium border-t border-slate-100 pt-1.5">
+      <p id="dash-due" class="text-xl font-black text-rose-600 leading-none truncate">₹0</p>
+      <div class="space-y-1 text-[11px] font-medium border-t border-slate-100 pt-2 mt-1">
         <div class="flex justify-between items-center text-amber-700">
-          <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>Live:</span>
-          <strong id="dash-due-live">₹0</strong>
+          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-amber-500 flex-shrink-0"></span>Live:</span>
+          <strong id="dash-due-live" class="ml-1">₹0</strong>
         </div>
         <div class="flex justify-between items-center text-blue-700">
-          <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>Upcoming:</span>
-          <strong id="dash-due-upcoming">₹0</strong>
+          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0"></span>Upcoming:</span>
+          <strong id="dash-due-upcoming" class="ml-1">₹0</strong>
         </div>
         <div class="flex justify-between items-center text-emerald-700">
-          <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Closed:</span>
-          <strong id="dash-due-closed">₹0</strong>
+          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0"></span>Closed:</span>
+          <strong id="dash-due-closed" class="ml-1">₹0</strong>
         </div>
       </div>
     </div>
-    <div id="chart-total-due" class="w-20 h-20 flex-shrink-0 flex items-center justify-center"></div>
+    <div id="chart-total-due" class="w-14 h-14 flex-shrink-0 flex items-center justify-center"></div>
   </div>
 
 </div>
@@ -2429,13 +2429,23 @@
 
       updateDashboardCards();
     }
-// Helper to render dynamic Excel-style SVG Pie Charts
-function generatePieChartSVG(slices, radius = 32) {
+    
+// Safe number parser handling null, string numbers, commas, and currency signs
+function parseNum(val) {
+  if (val === null || val === undefined) return 0;
+  if (typeof val === 'number') return isNaN(val) ? 0 : val;
+  const cleaned = String(val).replace(/[^0-9.-]/g, '');
+  const parsed = parseFloat(cleaned);
+  return isNaN(parsed) ? 0 : parsed;
+}
+
+// Helper to render responsive SVG Pie Charts
+function generatePieChartSVG(slices, radius = 28) {
   const total = slices.reduce((acc, s) => acc + (s.value || 0), 0);
   if (total <= 0) {
-    return `<svg width="70" height="70" viewBox="-40 -40 80 80">
-      <circle cx="0" cy="0" r="${radius}" fill="none" stroke="#e2e8f0" stroke-width="12" />
-      <text x="0" y="3" text-anchor="middle" font-size="10" fill="#94a3b8" font-weight="bold">N/A</text>
+    return `<svg class="w-full h-full" viewBox="-36 -36 72 72">
+      <circle cx="0" cy="0" r="${radius}" fill="none" stroke="#e2e8f0" stroke-width="10" />
+      <text x="0" y="3" text-anchor="middle" font-size="9" fill="#94a3b8" font-weight="bold">0%</text>
     </svg>`;
   }
 
@@ -2449,9 +2459,8 @@ function generatePieChartSVG(slices, radius = 32) {
     const endAngle = cumulativeAngle + sliceAngle;
     cumulativeAngle = endAngle;
 
-    // Handle full 360 circle case
     if (sliceAngle >= 359.9) {
-      return `<circle cx="0" cy="0" r="${radius}" fill="none" stroke="${slice.color}" stroke-width="12" />`;
+      return `<circle cx="0" cy="0" r="${radius}" fill="none" stroke="${slice.color}" stroke-width="10" />`;
     }
 
     const startRad = (startAngle - 90) * (Math.PI / 180);
@@ -2469,11 +2478,11 @@ function generatePieChartSVG(slices, radius = 32) {
       `A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2}`
     ].join(' ');
 
-    return `<path d="${pathData}" fill="none" stroke="${slice.color}" stroke-width="12" />`;
+    return `<path d="${pathData}" fill="none" stroke="${slice.color}" stroke-width="10" stroke-linecap="round" />`;
   }).join('');
 
-  return `<svg width="70" height="70" viewBox="-40 -40 80 80">
-    <circle cx="0" cy="0" r="${radius}" fill="none" stroke="#f1f5f9" stroke-width="12" />
+  return `<svg class="w-full h-full" viewBox="-36 -36 72 72">
+    <circle cx="0" cy="0" r="${radius}" fill="none" stroke="#f1f5f9" stroke-width="10" />
     ${pathElements}
   </svg>`;
 }
@@ -2484,32 +2493,39 @@ function updateDashboardCards() {
   const selectedYear = state.dashSelectedYear;
 
   // Filter bookings based on selected year
-  const activeYearBookings = state.bookings.filter(b => {
+  const activeYearBookings = (state.bookings || []).filter(b => {
     if (!b || !b.checkIn) return false;
     if (selectedYear === 'CURRENT' || !selectedYear) return true;
     const checkInDate = new Date(String(b.checkIn).replace(' ', 'T'));
     return checkInDate.getFullYear() === parseInt(selectedYear);
   });
 
-  // Category aggregators
+  // Aggregators
   let live = { count: 0, amount: 0, received: 0, due: 0 };
   let upcoming = { count: 0, amount: 0, received: 0, due: 0 };
   let closed = { count: 0, amount: 0, received: 0, due: 0 };
 
   activeYearBookings.forEach(b => {
-    // Skip inactive bookings from calculations
+    // Skip inactive bookings if predicate function exists
     if (typeof isInactiveBooking === 'function' && isInactiveBooking(b)) {
       return;
     }
 
-    const bAmount = parseFloat(b.totalPrice) || 0;
-    const bAdvance = parseFloat(b.advancePaid) || 0;
-    const bClearBill = parseFloat(b.clearBillPaid) || 0;
+    // Property fallback checks for dynamic state structures
+    const bAmount = parseNum(b.totalPrice ?? b.totalAmount ?? b.grandTotal ?? b.price ?? 0);
+    const bAdvance = parseNum(b.advancePaid ?? b.advance ?? b.advanceAmount ?? 0);
+    const bClearBill = parseNum(b.clearBillPaid ?? b.clearBill ?? b.paidAmount ?? 0);
     const bReceived = bAdvance + bClearBill;
-    const bDue = parseFloat(b.dueBalance) || 0;
+    
+    // Calculate due balance directly or fallback to math
+    let bDue = parseNum(b.dueBalance ?? b.due ?? b.balance);
+    if ((b.dueBalance === undefined && b.due === undefined && b.balance === undefined) || isNaN(bDue)) {
+      bDue = Math.max(0, bAmount - bReceived);
+    }
 
-    const cIn = parseDateMs(b.checkIn);
-    const cOut = getEffectiveCheckoutTime(b);
+    // Date parsing logic
+    let cIn = typeof parseDateMs === 'function' ? parseDateMs(b.checkIn) : new Date(b.checkIn).getTime();
+    let cOut = typeof getEffectiveCheckoutTime === 'function' ? getEffectiveCheckoutTime(b) : new Date(b.checkOut).getTime();
 
     if (now > cOut) {
       // Closed Booking
@@ -2532,15 +2548,14 @@ function updateDashboardCards() {
     }
   });
 
-  // Pie Chart Colors (Live: Amber, Upcoming: Blue, Closed: Emerald)
   const COLORS = { live: '#f59e0b', upcoming: '#3b82f6', closed: '#10b981' };
 
   // 1. Total Bookings
   const totalActiveBookings = live.count + upcoming.count + closed.count;
-  document.getElementById('dash-total-bookings').innerText = totalActiveBookings;
-  document.getElementById('dash-bookings-live').innerText = live.count;
-  document.getElementById('dash-bookings-upcoming').innerText = upcoming.count;
-  document.getElementById('dash-bookings-closed').innerText = closed.count;
+  document.getElementById('dash-total-bookings').innerText = totalActiveBookings.toLocaleString('en-IN');
+  document.getElementById('dash-bookings-live').innerText = live.count.toLocaleString('en-IN');
+  document.getElementById('dash-bookings-upcoming').innerText = upcoming.count.toLocaleString('en-IN');
+  document.getElementById('dash-bookings-closed').innerText = closed.count.toLocaleString('en-IN');
   document.getElementById('chart-total-bookings').innerHTML = generatePieChartSVG([
     { value: live.count, color: COLORS.live },
     { value: upcoming.count, color: COLORS.upcoming },

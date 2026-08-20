@@ -402,37 +402,132 @@
       </div>
 
       <!-- One UI Rounded Cards -->
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200/60 flex items-center justify-between">
-          <div>
-            <p class="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Total Bookings</p>
-            <p id="dash-total-bookings" class="text-xl font-black text-slate-900 mt-0.5">0</p>
-          </div>
-          <div class="p-3 bg-blue-50 text-blue-600 rounded-2xl"><i class="fa-solid fa-bookmark text-base"></i></div>
+     <!-- Excel-style KPI Cards with Pie Chart Beside Data -->
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-3.5">
+  
+  <!-- 1. TOTAL BOOKINGS -->
+  <div class="bg-white p-3.5 rounded-3xl shadow-sm border border-slate-200/60 flex items-center justify-between gap-2">
+    <div class="space-y-1 flex-1 min-w-0">
+      <div class="flex items-center gap-1.5">
+        <span class="p-1.5 bg-blue-50 text-blue-600 rounded-xl text-xs"><i class="fa-solid fa-bookmark"></i></span>
+        <p class="text-[9px] uppercase font-bold text-slate-400 tracking-wider truncate">Total Bookings</p>
+      </div>
+      <p id="dash-total-bookings" class="text-lg font-black text-slate-900 leading-tight">0</p>
+      <div class="space-y-0.5 text-[10px] font-medium border-t border-slate-100 pt-1.5">
+        <div class="flex justify-between items-center text-amber-700">
+          <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>Live:</span>
+          <strong id="dash-bookings-live">0</strong>
         </div>
-        <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200/60 flex items-center justify-between">
-          <div>
-            <p class="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Booking Amount</p>
-            <p id="dash-total-amount" class="text-xl font-black text-slate-900 mt-0.5">₹0</p>
-          </div>
-          <div class="p-3 bg-indigo-50 text-indigo-600 rounded-2xl"><i class="fa-solid fa-receipt text-base"></i></div>
+        <div class="flex justify-between items-center text-blue-700">
+          <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>Upcoming:</span>
+          <strong id="dash-bookings-upcoming">0</strong>
         </div>
-        <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200/60 flex items-center justify-between">
-          <div>
-            <p class="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Amount Received</p>
-            <p id="dash-advanced" class="text-xl font-black text-emerald-600 mt-0.5">₹0</p>
-          </div>
-          <div class="p-3 bg-emerald-50 text-emerald-600 rounded-2xl"><i class="fa-solid fa-wallet text-base"></i></div>
-        </div>
-        <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200/60 flex items-center justify-between">
-          <div>
-            <p class="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Total Due Amount</p>
-            <p id="dash-due" class="text-xl font-black text-rose-600 mt-0.5">₹0</p>
-          </div>
-          <div class="p-3 bg-rose-50 text-rose-600 rounded-2xl"><i class="fa-solid fa-hand-holding-dollar text-base"></i></div>
+        <div class="flex justify-between items-center text-emerald-700">
+          <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Closed:</span>
+          <strong id="dash-bookings-closed">0</strong>
         </div>
       </div>
+    </div>
+    <div id="chart-total-bookings" class="w-20 h-20 flex-shrink-0 flex items-center justify-center"></div>
+  </div>
 
+  <!-- 2. BOOKING AMOUNT -->
+  <div class="bg-white p-3.5 rounded-3xl shadow-sm border border-slate-200/60 flex items-center justify-between gap-2">
+    <div class="space-y-1 flex-1 min-w-0">
+      <div class="flex items-center gap-1.5">
+        <span class="p-1.5 bg-indigo-50 text-indigo-600 rounded-xl text-xs"><i class="fa-solid fa-receipt"></i></span>
+        <p class="text-[9px] uppercase font-bold text-slate-400 tracking-wider truncate">Booking Amount</p>
+      </div>
+      <p id="dash-total-amount" class="text-lg font-black text-slate-900 leading-tight">₹0</p>
+      <div class="space-y-0.5 text-[10px] font-medium border-t border-slate-100 pt-1.5">
+        <div class="flex justify-between items-center text-amber-700">
+          <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>Live:</span>
+          <strong id="dash-amount-live">₹0</strong>
+        </div>
+        <div class="flex justify-between items-center text-blue-700">
+          <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>Upcoming:</span>
+          <strong id="dash-amount-upcoming">₹0</strong>
+        </div>
+        <div class="flex justify-between items-center text-emerald-700">
+          <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Closed:</span>
+          <strong id="dash-amount-closed">₹0</strong>
+        </div>
+      </div>
+    </div>
+    <div id="chart-booking-amount" class="w-20 h-20 flex-shrink-0 flex items-center justify-center"></div>
+  </div>
+
+  <!-- 3. AMOUNT RECEIVED -->
+  <div class="bg-white p-3.5 rounded-3xl shadow-sm border border-slate-200/60 flex items-center justify-between gap-2">
+    <div class="space-y-1 flex-1 min-w-0">
+      <div class="flex items-center gap-1.5">
+        <span class="p-1.5 bg-emerald-50 text-emerald-600 rounded-xl text-xs"><i class="fa-solid fa-wallet"></i></span>
+        <p class="text-[9px] uppercase font-bold text-slate-400 tracking-wider truncate">Amount Received</p>
+      </div>
+      <p id="dash-advanced" class="text-lg font-black text-emerald-600 leading-tight">₹0</p>
+      <div class="space-y-0.5 text-[10px] font-medium border-t border-slate-100 pt-1.5">
+        <div class="flex justify-between items-center text-amber-700">
+          <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>Live:</span>
+          <strong id="dash-received-live">₹0</strong>
+        </div>
+        <div class="flex justify-between items-center text-blue-700">
+          <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>Upcoming:</span>
+          <strong id="dash-received-upcoming">₹0</strong>
+        </div>
+        <div class="flex justify-between items-center text-emerald-700">
+          <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Closed:</span>
+          <strong id="dash-received-closed">₹0</strong>
+        </div>
+      </div>
+    </div>
+    <div id="chart-amount-received" class="w-20 h-20 flex-shrink-0 flex items-center justify-center"></div>
+  </div>
+
+  <!-- 4. TOTAL DUE AMOUNT -->
+  <div class="bg-white p-3.5 rounded-3xl shadow-sm border border-slate-200/60 flex items-center justify-between gap-2">
+    <div class="space-y-1 flex-1 min-w-0">
+      <div class="flex items-center gap-1.5">
+        <span class="p-1.5 bg-rose-50 text-rose-600 rounded-xl text-xs"><i class="fa-solid fa-hand-holding-dollar"></i></span>
+        <p class="text-[9px] uppercase font-bold text-slate-400 tracking-wider truncate">Total Due Amount</p>
+      </div>
+      <p id="dash-due" class="text-lg font-black text-rose-600 leading-tight">₹0</p>
+      <div class="space-y-0.5 text-[10px] font-medium border-t border-slate-100 pt-1.5">
+        <div class="flex justify-between items-center text-amber-700">
+          <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>Live:</span>
+          <strong id="dash-due-live">₹0</strong>
+        </div>
+        <div class="flex justify-between items-center text-blue-700">
+          <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>Upcoming:</span>
+          <strong id="dash-due-upcoming">₹0</strong>
+        </div>
+        <div class="flex justify-between items-center text-emerald-700">
+          <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Closed:</span>
+          <strong id="dash-due-closed">₹0</strong>
+        </div>
+      </div>
+    </div>
+    <div id="chart-total-due" class="w-20 h-20 flex-shrink-0 flex items-center justify-center"></div>
+  </div>
+
+  <!-- 5. INACTIVE BOOKINGS (NEW BOX) -->
+  <div class="bg-white p-3.5 rounded-3xl shadow-sm border border-slate-200/60 flex items-center justify-between gap-2">
+    <div class="space-y-1 flex-1 min-w-0">
+      <div class="flex items-center gap-1.5">
+        <span class="p-1.5 bg-slate-100 text-slate-600 rounded-xl text-xs"><i class="fa-solid fa-ban"></i></span>
+        <p class="text-[9px] uppercase font-bold text-slate-400 tracking-wider truncate">Inactive Bookings</p>
+      </div>
+      <p id="dash-inactive-count" class="text-lg font-black text-slate-700 leading-tight">0</p>
+      <div class="space-y-0.5 text-[10px] font-medium border-t border-slate-100 pt-1.5">
+        <div class="flex justify-between items-center text-slate-600">
+          <span>Inactive Amount:</span>
+          <strong id="dash-inactive-amount" class="text-rose-600">₹0</strong>
+        </div>
+        <div class="text-[9px] text-slate-400 italic">Excluded from totals</div>
+      </div>
+    </div>
+    <div id="chart-inactive-bookings" class="w-20 h-20 flex-shrink-0 flex items-center justify-center"></div>
+  </div>
+</div>
       <!-- Active years Directory Table Hidden -->
       <div class="hidden bg-white rounded-3xl shadow-sm border border-slate-200/60 p-4">
         <div class="mb-3 flex justify-between items-center">

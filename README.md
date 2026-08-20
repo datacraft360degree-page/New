@@ -401,114 +401,38 @@
         </button>
       </div>
 
-      <!-- 5-Box Excel-Style Pie Chart Dashboard -->
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-  
-  <!-- Box 1: Total Bookings -->
-  <div class="bg-white p-3.5 rounded-3xl shadow-sm border border-slate-200/60 flex flex-col justify-between h-full">
-    <div>
-      <div class="flex justify-between items-start mb-1">
-        <div>
-          <p class="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Total Bookings</p>
-          <p id="dash-total-bookings" class="text-lg font-black text-slate-900 mt-0.5">0</p>
+      <!-- One UI Rounded Cards -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200/60 flex items-center justify-between">
+          <div>
+            <p class="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Total Bookings</p>
+            <p id="dash-total-bookings" class="text-xl font-black text-slate-900 mt-0.5">0</p>
+          </div>
+          <div class="p-3 bg-blue-50 text-blue-600 rounded-2xl"><i class="fa-solid fa-bookmark text-base"></i></div>
         </div>
-        <div class="p-2 bg-slate-50 text-slate-500 rounded-xl"><i class="fa-solid fa-bookmark"></i></div>
-      </div>
-    </div>
-    <div class="flex items-center justify-between gap-2 mt-3 pt-2 border-t border-slate-100">
-      <div class="space-y-1 text-[9px] font-bold flex-1">
-        <div class="flex justify-between text-amber-600"><span>Live</span><span id="dash-bk-live">0</span></div>
-        <div class="flex justify-between text-blue-600"><span>Upcoming</span><span id="dash-bk-up">0</span></div>
-        <div class="flex justify-between text-emerald-600"><span>Closed</span><span id="dash-bk-closed">0</span></div>
-      </div>
-      <div id="pie-bk" class="w-12 h-12 rounded-full border-2 border-white shadow-sm flex-shrink-0" style="background: conic-gradient(#e2e8f0 0% 100%);"></div>
-    </div>
-  </div>
-
-  <!-- Box 2: Amount Received -->
-  <div class="bg-white p-3.5 rounded-3xl shadow-sm border border-slate-200/60 flex flex-col justify-between h-full">
-    <div>
-      <div class="flex justify-between items-start mb-1">
-        <div>
-          <p class="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Amount Received</p>
-          <p id="dash-total-received" class="text-lg font-black text-slate-900 mt-0.5">₹0</p>
+        <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200/60 flex items-center justify-between">
+          <div>
+            <p class="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Booking Amount</p>
+            <p id="dash-total-amount" class="text-xl font-black text-slate-900 mt-0.5">₹0</p>
+          </div>
+          <div class="p-3 bg-indigo-50 text-indigo-600 rounded-2xl"><i class="fa-solid fa-receipt text-base"></i></div>
         </div>
-        <div class="p-2 bg-emerald-50 text-emerald-600 rounded-xl"><i class="fa-solid fa-wallet"></i></div>
-      </div>
-    </div>
-    <div class="flex items-center justify-between gap-2 mt-3 pt-2 border-t border-slate-100">
-      <div class="space-y-1 text-[9px] font-bold flex-1">
-        <div class="flex justify-between text-amber-600"><span>Live</span><span id="dash-rec-live">₹0</span></div>
-        <div class="flex justify-between text-blue-600"><span>Upcoming</span><span id="dash-rec-up">₹0</span></div>
-        <div class="flex justify-between text-emerald-600"><span>Closed</span><span id="dash-rec-closed">₹0</span></div>
-      </div>
-      <div id="pie-rec" class="w-12 h-12 rounded-full border-2 border-white shadow-sm flex-shrink-0" style="background: conic-gradient(#e2e8f0 0% 100%);"></div>
-    </div>
-  </div>
-
-  <!-- Box 3: Booking Amount -->
-  <div class="bg-white p-3.5 rounded-3xl shadow-sm border border-slate-200/60 flex flex-col justify-between h-full">
-    <div>
-      <div class="flex justify-between items-start mb-1">
-        <div>
-          <p class="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Booking Amount</p>
-          <p id="dash-total-amount" class="text-lg font-black text-slate-900 mt-0.5">₹0</p>
+        <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200/60 flex items-center justify-between">
+          <div>
+            <p class="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Amount Received</p>
+            <p id="dash-advanced" class="text-xl font-black text-emerald-600 mt-0.5">₹0</p>
+          </div>
+          <div class="p-3 bg-emerald-50 text-emerald-600 rounded-2xl"><i class="fa-solid fa-wallet text-base"></i></div>
         </div>
-        <div class="p-2 bg-indigo-50 text-indigo-600 rounded-xl"><i class="fa-solid fa-receipt"></i></div>
-      </div>
-    </div>
-    <div class="flex items-center justify-between gap-2 mt-3 pt-2 border-t border-slate-100">
-      <div class="space-y-1 text-[9px] font-bold flex-1">
-        <div class="flex justify-between text-amber-600"><span>Live</span><span id="dash-amt-live">₹0</span></div>
-        <div class="flex justify-between text-blue-600"><span>Upcoming</span><span id="dash-amt-up">₹0</span></div>
-        <div class="flex justify-between text-emerald-600"><span>Closed</span><span id="dash-amt-closed">₹0</span></div>
-      </div>
-      <div id="pie-amt" class="w-12 h-12 rounded-full border-2 border-white shadow-sm flex-shrink-0" style="background: conic-gradient(#e2e8f0 0% 100%);"></div>
-    </div>
-  </div>
-
-  <!-- Box 4: Total Due -->
-  <div class="bg-white p-3.5 rounded-3xl shadow-sm border border-slate-200/60 flex flex-col justify-between h-full">
-    <div>
-      <div class="flex justify-between items-start mb-1">
-        <div>
-          <p class="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Total Due Amount</p>
-          <p id="dash-total-due" class="text-lg font-black text-slate-900 mt-0.5">₹0</p>
+        <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200/60 flex items-center justify-between">
+          <div>
+            <p class="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Total Due Amount</p>
+            <p id="dash-due" class="text-xl font-black text-rose-600 mt-0.5">₹0</p>
+          </div>
+          <div class="p-3 bg-rose-50 text-rose-600 rounded-2xl"><i class="fa-solid fa-hand-holding-dollar text-base"></i></div>
         </div>
-        <div class="p-2 bg-rose-50 text-rose-600 rounded-xl"><i class="fa-solid fa-hand-holding-dollar"></i></div>
       </div>
-    </div>
-    <div class="flex items-center justify-between gap-2 mt-3 pt-2 border-t border-slate-100">
-      <div class="space-y-1 text-[9px] font-bold flex-1">
-        <div class="flex justify-between text-amber-600"><span>Live</span><span id="dash-due-live">₹0</span></div>
-        <div class="flex justify-between text-blue-600"><span>Upcoming</span><span id="dash-due-up">₹0</span></div>
-        <div class="flex justify-between text-emerald-600"><span>Closed</span><span id="dash-due-closed">₹0</span></div>
-      </div>
-      <div id="pie-due" class="w-12 h-12 rounded-full border-2 border-white shadow-sm flex-shrink-0" style="background: conic-gradient(#e2e8f0 0% 100%);"></div>
-    </div>
-  </div>
 
-  <!-- Box 5: Inactive Bookings (Count & Total Amount Side-by-Side with Pie Chart) -->
-  <div class="bg-white p-3.5 rounded-3xl shadow-sm border border-rose-200/60 flex flex-col justify-between h-full">
-    <div>
-      <div class="flex justify-between items-start mb-1">
-        <div>
-          <p class="text-[9px] uppercase font-bold text-rose-400 tracking-wider">Inactive Bookings</p>
-          <p id="dash-inactive-count" class="text-lg font-black text-slate-900 mt-0.5">0</p>
-        </div>
-        <div class="p-2 bg-rose-100 text-rose-600 rounded-xl"><i class="fa-solid fa-ban"></i></div>
-      </div>
-    </div>
-    <div class="flex items-center justify-between gap-2 mt-3 pt-2 border-t border-slate-100">
-      <div class="space-y-1 text-[9px] font-bold flex-1">
-        <div class="text-slate-400 font-semibold text-[8px]">Cancelled/Deleted</div>
-        <div class="flex justify-between text-rose-600"><span>Total Amt</span><span id="dash-inactive-amt">₹0</span></div>
-      </div>
-      <div id="pie-inactive" class="w-12 h-12 rounded-full border-2 border-white shadow-sm flex-shrink-0" style="background: conic-gradient(#e2e8f0 0% 100%);"></div>
-    </div>
-  </div>
-
-</div>
       <!-- Active years Directory Table Hidden -->
       <div class="hidden bg-white rounded-3xl shadow-sm border border-slate-200/60 p-4">
         <div class="mb-3 flex justify-between items-center">
@@ -2428,148 +2352,41 @@
 
       updateDashboardCards();
     }
-// Helper to safely extract numbers from formatted strings (e.g., "₹1,500" -> 1500)
-const parseNum = (val) => {
-  if (val === null || val === undefined) return 0;
-  if (typeof val === 'number') return isNaN(val) ? 0 : val;
-  const cleaned = String(val).replace(/[^0-9.-]+/g, '');
-  return parseFloat(cleaned) || 0;
-};
 
-function getPieGradient(c1, c2, c3, v1, v2, v3) {
-  const total = v1 + v2 + v3;
-  if (total <= 0) return 'conic-gradient(#e2e8f0 0% 100%)';
-  const p1 = (v1 / total) * 100;
-  const p2 = (v2 / total) * 100;
-  return `conic-gradient(${c1} 0% ${p1}%, ${c2} ${p1}% ${p1 + p2}%, ${c3} ${p1 + p2}% 100%)`;
-}
+    function updateDashboardCards() {
+      const selectedFilter = state.dashSelectedYear;
+      const label = document.getElementById('dash-filter-label');
 
-function updateDashboardCards() {
-  const now = Date.now();
-  
-  let targetYear = state.dashSelectedYear;
-  let filteredBookings = state.bookings || [];
-  
-  if (targetYear && targetYear !== 'ALL') {
-    const yearNum = parseInt(targetYear);
-    filteredBookings = filteredBookings.filter(b => {
-      const checkInDate = typeof parseDateMs === 'function' ? parseDateMs(b.checkIn) : new Date(b.checkIn).getTime();
-      return new Date(checkInDate).getFullYear() === yearNum;
-    });
-  }
+      let filteredBookings = [];
 
-  // Split Active and Inactive bookings
-  const activeBookings = filteredBookings.filter(b => !isInactiveBooking(b));
-  const inactiveBookings = filteredBookings.filter(b => isInactiveBooking(b));
+      if (selectedFilter === 'ALL' || !selectedFilter) {
+        filteredBookings = state.bookings.filter(b => !isInactiveBooking(b));
+        if (label) label.innerText = "Consolidated Summary (All Years)";
+      } else {
+        const targetYear = parseInt(selectedFilter);
+        filteredBookings = state.bookings.filter(b => {
+          if (isInactiveBooking(b) || !b.checkIn) return false;
+          const yr = new Date(b.checkIn.replace(' ', 'T')).getFullYear();
+          return yr === targetYear;
+        });
 
-  let bkLive = 0, bkUp = 0, bkClosed = 0;
-  let recLive = 0, recUp = 0, recClosed = 0;
-  let amtLive = 0, amtUp = 0, amtClosed = 0;
-  let dueLive = 0, dueUp = 0, dueClosed = 0;
+        if (label) {
+          label.innerText = targetYear === defaultAppYear 
+            ? `Year ${targetYear} (Current Year)` 
+            : `Year ${targetYear}`;
+        }
+      }
 
-  activeBookings.forEach(b => {
-    const checkInTime = typeof parseDateMs === 'function' ? parseDateMs(b.checkIn) : new Date(b.checkIn).getTime();
-    const checkOutTime = typeof getEffectiveCheckoutTime === 'function' 
-      ? getEffectiveCheckoutTime(b) 
-      : (typeof parseDateMs === 'function' ? parseDateMs(b.checkOut) : new Date(b.checkOut).getTime());
-    
-    // Safely parse amounts with multi-property fallbacks
-    const totalAmt = parseNum(b.totalAmount || b.total || b.amount);
-    const advanceAmt = parseNum(b.advancePayment || b.amountReceived || b.receivedAmount || b.paidAmount || b.advance);
-    
-    // If dueAmount isn't explicitly defined on the object, calculate totalAmt - advanceAmt
-    const rawDue = (b.dueAmount !== undefined && b.dueAmount !== null) 
-      ? b.dueAmount 
-      : (totalAmt - advanceAmt);
-    const dueAmt = Math.max(0, parseNum(rawDue));
+      const totalBookings = filteredBookings.length;
+      const totalAmt = filteredBookings.reduce((sum, b) => sum + (b.totalAmount || 0), 0);
+      const totalAdv = filteredBookings.reduce((sum, b) => sum + (b.initialAdv || 0) + (b.clearedDue || 0), 0);
+      const totalDue = filteredBookings.reduce((sum, b) => sum + (b.totalDue || 0), 0);
 
-    if (now >= checkInTime && now <= checkOutTime) {
-      // Live
-      bkLive++;
-      recLive += advanceAmt;
-      amtLive += totalAmt;
-      dueLive += dueAmt;
-    } else if (now < checkInTime) {
-      // Upcoming
-      bkUp++;
-      recUp += advanceAmt;
-      amtUp += totalAmt;
-      dueUp += dueAmt;
-    } else {
-      // Closed
-      bkClosed++;
-      recClosed += advanceAmt;
-      amtClosed += totalAmt;
-      dueClosed += dueAmt;
+      document.getElementById('dash-total-bookings').innerText = totalBookings;
+      document.getElementById('dash-total-amount').innerText = `₹${totalAmt.toLocaleString('en-IN')}`;
+      document.getElementById('dash-advanced').innerText = `₹${totalAdv.toLocaleString('en-IN')}`;
+      document.getElementById('dash-due').innerText = `₹${totalDue.toLocaleString('en-IN')}`;
     }
-  });
-
-  // Calculate Inactive Metrics
-  const inactiveCount = inactiveBookings.length;
-  const inactiveAmt = inactiveBookings.reduce((sum, b) => sum + parseNum(b.totalAmount || b.total || b.amount), 0);
-
-  // Grand Totals
-  const totalBookings = bkLive + bkUp + bkClosed;
-  const totalReceived = recLive + recUp + recClosed;
-  const totalAmount = amtLive + amtUp + amtClosed;
-  const totalDue = dueLive + dueUp + dueClosed;
-
-  // Safe DOM updater
-  const setTxt = (id, val) => {
-    const el = document.getElementById(id);
-    if (el) el.innerText = val;
-  };
-
-  // 1. Total Bookings
-  setTxt('dash-total-bookings', totalBookings);
-  setTxt('dash-bk-live', bkLive);
-  setTxt('dash-bk-up', bkUp);
-  setTxt('dash-bk-closed', bkClosed);
-
-  // 2. Amount Received
-  setTxt('dash-total-received', '₹' + totalReceived.toLocaleString('en-IN'));
-  setTxt('dash-rec-live', '₹' + recLive.toLocaleString('en-IN'));
-  setTxt('dash-rec-up', '₹' + recUp.toLocaleString('en-IN'));
-  setTxt('dash-rec-closed', '₹' + recClosed.toLocaleString('en-IN'));
-
-  // 3. Booking Amount
-  setTxt('dash-total-amount', '₹' + totalAmount.toLocaleString('en-IN'));
-  setTxt('dash-amt-live', '₹' + amtLive.toLocaleString('en-IN'));
-  setTxt('dash-amt-up', '₹' + amtUp.toLocaleString('en-IN'));
-  setTxt('dash-amt-closed', '₹' + amtClosed.toLocaleString('en-IN'));
-
-  // 4. Total Due
-  setTxt('dash-total-due', '₹' + totalDue.toLocaleString('en-IN'));
-  setTxt('dash-due-live', '₹' + dueLive.toLocaleString('en-IN'));
-  setTxt('dash-due-up', '₹' + dueUp.toLocaleString('en-IN'));
-  setTxt('dash-due-closed', '₹' + dueClosed.toLocaleString('en-IN'));
-
-  // 5. Inactive Bookings
-  setTxt('dash-inactive-count', inactiveCount);
-  setTxt('dash-inactive-amt', '₹' + inactiveAmt.toLocaleString('en-IN'));
-
-  // Render Pie Charts
-  const setPie = (id, v1, v2, v3) => {
-    const el = document.getElementById(id);
-    if (el) el.style.background = getPieGradient('#f59e0b', '#3b82f6', '#10b981', v1, v2, v3);
-  };
-
-  setPie('pie-bk', bkLive, bkUp, bkClosed);
-  setPie('pie-rec', recLive, recUp, recClosed);
-  setPie('pie-amt', amtLive, amtUp, amtClosed);
-  setPie('pie-due', dueLive, dueUp, dueClosed);
-
-  const pieInactiveElem = document.getElementById('pie-inactive');
-  if (pieInactiveElem) {
-    const grandTotalCount = totalBookings + inactiveCount;
-    if (grandTotalCount <= 0) {
-      pieInactiveElem.style.background = 'conic-gradient(#e2e8f0 0% 100%)';
-    } else {
-      const pInactive = (inactiveCount / grandTotalCount) * 100;
-      pieInactiveElem.style.background = `conic-gradient(#f43f5e 0% ${pInactive}%, #cbd5e1 ${pInactive}% 100%)`;
-    }
-  }
-}
 
     function sendReceiptViaWhatsApp() {
       if (!activeModalBooking) {

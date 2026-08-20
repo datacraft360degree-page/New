@@ -402,7 +402,7 @@
       </div>
 
       <!-- One UI Rounded Cards -->
-     <!-- 6-Box Grid Layout (Line 1: 3 Boxes | Line 2: 3 Boxes) -->
+    <!-- 6-Box Grid Layout (Line 1: 3 Boxes | Line 2: 3 Boxes) -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
 
         <!-- BOX 1: TOTAL BOOKINGS (COUNT PIE CHART) -->
@@ -412,13 +412,13 @@
               <p class="text-[10px] uppercase font-bold text-slate-400 tracking-wider break-words">Total Bookings</p>
               <p id="dash-total-bookings" class="text-lg font-black text-slate-900 leading-tight">0</p>
             </div>
-            <div class="p-2.5 bg-blue-50 text-blue-600 rounded-2xl"><i class="fa-solid fa-bookmark text-sm"></i></div>
+            <div class="p-2.5 bg-amber-50 text-amber-600 rounded-2xl"><i class="fa-solid fa-bookmark text-sm"></i></div>
           </div>
           <div class="flex items-center space-x-3">
             <div id="pie-bookings" class="w-16 h-16 rounded-full shrink-0 shadow-inner border border-slate-100" style="background: conic-gradient(#E2E8F0 0% 100%);"></div>
             <div class="text-[11px] space-y-1 font-semibold text-slate-700 w-full">
-              <div class="flex items-center justify-between"><span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block"></span>Live:</span> <strong id="dash-count-live" class="text-blue-600 font-bold">0</strong></div>
-              <div class="flex items-center justify-between"><span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-indigo-500 inline-block"></span>Upcoming:</span> <strong id="dash-count-upcoming" class="text-indigo-600 font-bold">0</strong></div>
+              <div class="flex items-center justify-between"><span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span>Live:</span> <strong id="dash-count-live" class="text-amber-600 font-bold">0</strong></div>
+              <div class="flex items-center justify-between"><span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block"></span>Upcoming:</span> <strong id="dash-count-upcoming" class="text-blue-600 font-bold">0</strong></div>
               <div class="flex items-center justify-between"><span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span>Closed:</span> <strong id="dash-count-closed" class="text-emerald-600 font-bold">0</strong></div>
             </div>
           </div>
@@ -431,13 +431,13 @@
               <p class="text-[10px] uppercase font-bold text-slate-400 tracking-wider break-words">Booking Amount</p>
               <p id="dash-total-amount" class="text-lg font-black text-slate-900 leading-tight">₹0</p>
             </div>
-            <div class="p-2.5 bg-indigo-50 text-indigo-600 rounded-2xl"><i class="fa-solid fa-receipt text-sm"></i></div>
+            <div class="p-2.5 bg-blue-50 text-blue-600 rounded-2xl"><i class="fa-solid fa-receipt text-sm"></i></div>
           </div>
           <div class="flex items-center space-x-3">
             <div id="pie-amount" class="w-16 h-16 rounded-full shrink-0 shadow-inner border border-slate-100" style="background: conic-gradient(#E2E8F0 0% 100%);"></div>
             <div class="text-[11px] space-y-1 font-semibold text-slate-700 w-full">
-              <div class="flex items-center justify-between"><span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block"></span>Live:</span> <strong id="dash-amount-live" class="text-blue-600 font-bold">₹0</strong></div>
-              <div class="flex items-center justify-between"><span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-indigo-500 inline-block"></span>Upcoming:</span> <strong id="dash-amount-upcoming" class="text-indigo-600 font-bold">₹0</strong></div>
+              <div class="flex items-center justify-between"><span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span>Live:</span> <strong id="dash-amount-live" class="text-amber-600 font-bold">₹0</strong></div>
+              <div class="flex items-center justify-between"><span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block"></span>Upcoming:</span> <strong id="dash-amount-upcoming" class="text-blue-600 font-bold">₹0</strong></div>
               <div class="flex items-center justify-between"><span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span>Closed:</span> <strong id="dash-amount-closed" class="text-emerald-600 font-bold">₹0</strong></div>
             </div>
           </div>
@@ -455,8 +455,8 @@
           <div class="flex items-center space-x-3">
             <div id="pie-received" class="w-16 h-16 rounded-full shrink-0 shadow-inner border border-slate-100" style="background: conic-gradient(#E2E8F0 0% 100%);"></div>
             <div class="text-[11px] space-y-1 font-semibold text-slate-700 w-full">
-              <div class="flex items-center justify-between"><span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block"></span>Live:</span> <strong id="dash-recv-live" class="text-blue-600 font-bold">₹0</strong></div>
-              <div class="flex items-center justify-between"><span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-indigo-500 inline-block"></span>Upcoming:</span> <strong id="dash-recv-upcoming" class="text-indigo-600 font-bold">₹0</strong></div>
+              <div class="flex items-center justify-between"><span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span>Live:</span> <strong id="dash-recv-live" class="text-amber-600 font-bold">₹0</strong></div>
+              <div class="flex items-center justify-between"><span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block"></span>Upcoming:</span> <strong id="dash-recv-upcoming" class="text-blue-600 font-bold">₹0</strong></div>
               <div class="flex items-center justify-between"><span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span>Closed:</span> <strong id="dash-recv-closed" class="text-emerald-600 font-bold">₹0</strong></div>
             </div>
           </div>
@@ -474,34 +474,34 @@
           <div class="flex items-center space-x-3">
             <div id="pie-due" class="w-16 h-16 rounded-full shrink-0 shadow-inner border border-slate-100" style="background: conic-gradient(#E2E8F0 0% 100%);"></div>
             <div class="text-[11px] space-y-1 font-semibold text-slate-700 w-full">
-              <div class="flex items-center justify-between"><span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block"></span>Live Due:</span> <strong id="dash-due-live" class="text-blue-600 font-bold">₹0</strong></div>
-              <div class="flex items-center justify-between"><span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-indigo-500 inline-block"></span>Upcoming Due:</span> <strong id="dash-due-upcoming" class="text-indigo-600 font-bold">₹0</strong></div>
+              <div class="flex items-center justify-between"><span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span>Live Due:</span> <strong id="dash-due-live" class="text-amber-600 font-bold">₹0</strong></div>
+              <div class="flex items-center justify-between"><span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block"></span>Upcoming Due:</span> <strong id="dash-due-upcoming" class="text-blue-600 font-bold">₹0</strong></div>
               <div class="flex items-center justify-between"><span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span>Closed Due:</span> <strong id="dash-due-closed" class="text-emerald-600 font-bold">₹0</strong></div>
             </div>
           </div>
         </div>
 
-        <!-- BOX 5: INACTIVE BOOKINGS SUMMARY -->
+        <!-- BOX 5: INACTIVE BOOKINGS SUMMARY (RED THEME) -->
         <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200/60 flex flex-col justify-between space-y-3">
           <div class="flex justify-between items-center border-b border-slate-100 pb-2">
             <div>
-              <p class="text-[10px] uppercase font-bold text-rose-400 tracking-wider break-words">Inactive Bookings</p>
-              <p id="dash-inactive-count" class="text-lg font-black text-rose-600 leading-tight">0 Bookings</p>
+              <p class="text-[10px] uppercase font-bold text-red-500 tracking-wider break-words">Inactive Bookings</p>
+              <p id="dash-inactive-count" class="text-lg font-black text-red-600 leading-tight">0 Bookings</p>
             </div>
-            <div class="p-2.5 bg-rose-50 text-rose-600 rounded-2xl"><i class="fa-solid fa-ban text-sm"></i></div>
+            <div class="p-2.5 bg-red-50 text-red-600 rounded-2xl"><i class="fa-solid fa-ban text-sm"></i></div>
           </div>
-          <div class="bg-rose-50/50 p-3 rounded-2xl border border-rose-100 text-[11px] space-y-1">
+          <div class="bg-red-50/50 p-3 rounded-2xl border border-red-100 text-[11px] space-y-1">
             <p class="text-slate-500 font-medium">Inactive Total Booking Amount:</p>
-            <p id="dash-inactive-amount" class="text-lg font-black text-rose-700">₹0</p>
+            <p id="dash-inactive-amount" class="text-lg font-black text-red-600">₹0</p>
           </div>
         </div>
 
-        <!-- BOX 6: TODAY'S LIVE BOOKING DETAILS (NO PIE CHART) -->
+        <!-- BOX 6: TODAY'S LIVE BOOKING DETAILS (YELLOW/AMBER THEME) -->
         <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200/60 flex flex-col justify-between space-y-2">
           <div class="flex justify-between items-center border-b border-slate-100 pb-2">
             <p class="text-[10px] uppercase font-bold text-slate-400 tracking-wider break-words">Today's Live Bookings Details</p>
-            <span class="px-2 py-0.5 text-[9px] font-bold bg-blue-50 text-blue-600 rounded-full border border-blue-100 flex items-center gap-1">
-              <span class="w-1.5 h-1.5 bg-blue-600 rounded-full animate-ping"></span> Live Today
+            <span class="px-2 py-0.5 text-[9px] font-bold bg-amber-50 text-amber-600 rounded-full border border-amber-200 flex items-center gap-1">
+              <span class="w-1.5 h-1.5 bg-amber-500 rounded-full animate-ping"></span> Live Today
             </span>
           </div>
           <div id="dash-today-live-container" class="overflow-x-auto max-h-32 overflow-y-auto">

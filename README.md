@@ -402,8 +402,8 @@
       </div>
 
       <!-- One UI Rounded Cards -->
-     <!-- Excel-style KPI Cards with Pie Chart Beside Data -->
-<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-3.5">
+    <!-- Excel-style KPI Cards with Pie Chart Beside Data (4 Cards) -->
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3.5">
   
   <!-- 1. TOTAL BOOKINGS -->
   <div class="bg-white p-3.5 rounded-3xl shadow-sm border border-slate-200/60 flex items-center justify-between gap-2">
@@ -509,24 +509,6 @@
     <div id="chart-total-due" class="w-20 h-20 flex-shrink-0 flex items-center justify-center"></div>
   </div>
 
- <!-- <!-- 5. INACTIVE BOOKINGS (NEW BOX) -->
-  <div class="bg-white p-3.5 rounded-3xl shadow-sm border border-slate-200/60 flex items-center justify-between gap-2">
-    <div class="space-y-1 flex-1 min-w-0">
-      <div class="flex items-center gap-1.5">
-        <span class="p-1.5 bg-slate-100 text-slate-600 rounded-xl text-xs"><i class="fa-solid fa-ban"></i></span>
-        <p class="text-[9px] uppercase font-bold text-slate-400 tracking-wider truncate">Inactive Bookings</p>
-      </div>
-      <p id="dash-inactive-count" class="text-lg font-black text-slate-700 leading-tight">0</p>
-      <div class="space-y-0.5 text-[10px] font-medium border-t border-slate-100 pt-1.5">
-        <div class="flex justify-between items-center text-slate-600">
-          <span>Inactive Amount:</span>
-          <strong id="dash-inactive-amount" class="text-rose-600">₹0</strong>
-        </div>
-        <div class="text-[9px] text-slate-400 italic">Excluded from totals</div>
-      </div>
-    </div>
-    <div id="chart-inactive-bookings" class="w-20 h-20 flex-shrink-0 flex items-center justify-center"></div>
-  </div> -->
 </div>
       <!-- Active years Directory Table Hidden -->
       <div class="hidden bg-white rounded-3xl shadow-sm border border-slate-200/60 p-4">
@@ -2513,46 +2495,45 @@ function updateDashboardCards() {
   let live = { count: 0, amount: 0, received: 0, due: 0 };
   let upcoming = { count: 0, amount: 0, received: 0, due: 0 };
   let closed = { count: 0, amount: 0, received: 0, due: 0 };
-  let inactive = { count: 0, amount: 0 };
 
   activeYearBookings.forEach(b => {
+    // Skip inactive bookings from calculations
+    if (typeof isInactiveBooking === 'function' && isInactiveBooking(b)) {
+      return;
+    }
+
     const bAmount = parseFloat(b.totalPrice) || 0;
     const bAdvance = parseFloat(b.advancePaid) || 0;
     const bClearBill = parseFloat(b.clearBillPaid) || 0;
     const bReceived = bAdvance + bClearBill;
     const bDue = parseFloat(b.dueBalance) || 0;
 
-    if (isInactiveBooking(b)) {
-      inactive.count += 1;
-      inactive.amount += bAmount;
-    } else {
-      const cIn = parseDateMs(b.checkIn);
-      const cOut = getEffectiveCheckoutTime(b);
+    const cIn = parseDateMs(b.checkIn);
+    const cOut = getEffectiveCheckoutTime(b);
 
-      if (now > cOut) {
-        // Closed Booking
-        closed.count += 1;
-        closed.amount += bAmount;
-        closed.received += bReceived;
-        closed.due += bDue;
-      } else if (now >= cIn && now <= cOut) {
-        // Live Booking
-        live.count += 1;
-        live.amount += bAmount;
-        live.received += bReceived;
-        live.due += bDue;
-      } else {
-        // Upcoming Booking
-        upcoming.count += 1;
-        upcoming.amount += bAmount;
-        upcoming.received += bReceived;
-        upcoming.due += bDue;
-      }
+    if (now > cOut) {
+      // Closed Booking
+      closed.count += 1;
+      closed.amount += bAmount;
+      closed.received += bReceived;
+      closed.due += bDue;
+    } else if (now >= cIn && now <= cOut) {
+      // Live Booking
+      live.count += 1;
+      live.amount += bAmount;
+      live.received += bReceived;
+      live.due += bDue;
+    } else {
+      // Upcoming Booking
+      upcoming.count += 1;
+      upcoming.amount += bAmount;
+      upcoming.received += bReceived;
+      upcoming.due += bDue;
     }
   });
 
-  // Colors for chart slices (Live: Amber, Upcoming: Blue, Closed: Emerald)
-  const COLORS = { live: '#f59e0b', upcoming: '#3b82f6', closed: '#10b981', inactive: '#f43f5e' };
+  // Pie Chart Colors (Live: Amber, Upcoming: Blue, Closed: Emerald)
+  const COLORS = { live: '#f59e0b', upcoming: '#3b82f6', closed: '#10b981' };
 
   // 1. Total Bookings
   const totalActiveBookings = live.count + upcoming.count + closed.count;
@@ -2600,14 +2581,6 @@ function updateDashboardCards() {
     { value: live.due, color: COLORS.live },
     { value: upcoming.due, color: COLORS.upcoming },
     { value: closed.due, color: COLORS.closed }
-  ]);
-
-  // 5. Inactive Bookings
-  document.getElementById('dash-inactive-count').innerText = inactive.count;
-  document.getElementById('dash-inactive-amount').innerText = `₹${inactive.amount.toLocaleString('en-IN')}`;
-  document.getElementById('chart-inactive-bookings').innerHTML = generatePieChartSVG([
-    { value: inactive.count, color: COLORS.inactive },
-    { value: totalActiveBookings, color: '#e2e8f0' }
   ]);
 }
     

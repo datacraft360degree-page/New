@@ -486,7 +486,7 @@
           <div class="flex justify-between items-center border-b border-slate-100 pb-2">
             <div>
               <p class="text-[10px] uppercase font-bold text-red-500 tracking-wider break-words">Inactive Bookings</p>
-           <p id="dash-inactive-count" class="text-lg font-black text-red-600 leading-tight">0 Bookings</p>
+              <p id="dash-inactive-count" class="text-lg font-black text-red-600 leading-tight">0 Bookings</p>
             </div>
             <div class="p-2.5 bg-red-50 text-red-600 rounded-2xl"><i class="fa-solid fa-ban text-sm"></i></div>
           </div>
@@ -2578,13 +2578,6 @@ function updateDashboardCards() {
 
   // --- Inactive Card ---
   setTxt('dash-inactive-count', `${stats.inactive.count} Bookings`);
-  // Calculate or pass your inactive booking count
-const inactiveCount = inactiveBookings.length; 
-
-// Pluralization logic: '1 Booking' for 1, otherwise 'X Bookings' (or '0 Bookings')
-document.getElementById('dash-inactive-count').innerText = 
-  inactiveCount === 1 ? '1 Booking' : `${inactiveCount} Bookings`;
-  
   setTxt('dash-inactive-amount', fmt(stats.inactive.amount));
 }
     

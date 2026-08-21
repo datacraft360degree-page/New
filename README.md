@@ -64,8 +64,6 @@
       border-style: solid;
       border-color: transparent transparent #1E293B transparent;
     }
-
-<style>
     /* Floating Balloons & Ribbons Keyframe Animations */
     @keyframes floatUp {
       0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }

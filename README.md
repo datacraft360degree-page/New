@@ -1189,89 +1189,35 @@
 
   <script>
 
-// Function to spawn floating festive balloons
-function createBalloons() {
-  const container = document.getElementById('balloon-container');
-  if (!container) return;
-  container.innerHTML = ''; 
-  const balloonEmojis = ['🎈', '🎉', '✨', '🎁', '⭐'];
-  
-  for (let i = 0; i < 25; i++) {
-    const balloon = document.createElement('div');
-    balloon.className = 'absolute text-3xl sm:text-5xl animate-float';
-    balloon.innerText = balloonEmojis[Math.floor(Math.random() * balloonEmojis.length)];
-    balloon.style.left = `${Math.random() * 95}%`;
-    balloon.style.animationDuration = `${5 + Math.random() * 5}s`;
-    balloon.style.animationDelay = `${Math.random() * 3}s`;
-    container.appendChild(balloon);
-  }
-}
+// Function to check and display the birthday animation on August 20th
+    function checkBirthdayTrigger() {
+      const now = new Date();
+      const currentMonth = now.getMonth() + 1; // August is month 8
+      const currentDay = now.getDate();        // 20th day
 
-// Safely toggle modal visibility without throwing uncaught errors
-function safeShowModal(elementId) {
-  const modal = document.getElementById(elementId);
-  if (modal) {
-    modal.classList.remove('hidden');
-  } else {
-    console.warn(`Element with ID '${elementId}' was not found in the DOM.`);
-  }
-}
+      // Check if today is August 20th
+      if (currentMonth === 8 && currentDay === 20) {
+        // Optional: Ensure it triggers once per session or day using localStorage/sessionStorage
+        const lastShownYear = sessionStorage.getItem('birthday_shown_year');
+        const currentYear = now.getFullYear();
 
-// Check and trigger birthday celebration modal
-function checkAndShowBirthdayModal() {
-  const today = new Date();
-  const month = today.getMonth() + 1; // August = 8
-  const day = today.getDate();
-
-  // Trigger on August 21st (or change to 'true' to force test right now)
-  if (month === 8 && day === 21) {
-    createBalloons();
-    safeShowModal('birthday-overlay');
-  } else {
-    safeShowModal('login-alert-modal');
-  }
-}
-
-function closeBirthdayOverlay() {
-  const overlay = document.getElementById('birthday-overlay');
-  if (overlay) {
-    overlay.classList.add('hidden');
-  }
-  // Safely show guidelines modal if it exists
-  safeShowModal('login-alert-modal');
-}
-
-// Login Handler
-function handleLogin(e) {
-  if (e && e.preventDefault) e.preventDefault();
-
-  const userElem = document.getElementById('login-userid');
-  const passElem = document.getElementById('login-password');
-  
-  const user = userElem ? userElem.value.trim() : '';
-  const pass = passElem ? passElem.value.trim() : '';
-
-  if (user === DEFAULT_USER_ID && pass === DEFAULT_PASSWORD) {
-    isLoggedIn = true;
-    sessionStorage.setItem('app_authenticated', 'true');
-    
-    const loginOverlay = document.getElementById('login-overlay');
-    const loginError = document.getElementById('login-error');
-    
-    if (loginOverlay) loginOverlay.classList.add('hidden');
-    if (loginError) loginError.classList.add('hidden');
-    
-    if (typeof startInactivityMonitoring === 'function') {
-      startInactivityMonitoring();
+        if (lastShownYear !== String(currentYear)) {
+          const bModal = document.getElementById('birthday-hurray-modal');
+          if (bModal) {
+            bModal.classList.remove('hidden');
+            sessionStorage.setItem('birthday_shown_year', String(currentYear));
+          }
+        }
+      }
     }
-    
-    // Trigger birthday check
-    checkAndShowBirthdayModal();
-  } else {
-    const loginError = document.getElementById('login-error');
-    if (loginError) loginError.classList.remove('hidden');
-  }
-}
+
+    function closeBirthdayModal() {
+      const bModal = document.getElementById('birthday-hurray-modal');
+      if (bModal) {
+        bModal.classList.add('hidden');
+      }
+    }
+
 
     // System Constants & Robust Helpers
     const MAX_SHEET_ROWS = 10000000;
@@ -1701,7 +1647,7 @@ function handleLogin(e) {
       }
     }
 
-    function handleLogin(e) {
+ function handleLogin(e) {
       e.preventDefault();
       const user = document.getElementById('login-userid').value.trim();
       const pass = document.getElementById('login-password').value.trim();
@@ -1713,6 +1659,10 @@ function handleLogin(e) {
         document.getElementById('login-error').classList.add('hidden');
         startInactivityMonitoring();
         document.getElementById('login-alert-modal').classList.remove('hidden');
+        
+        // ---> ADD THIS LINE HERE TO TRIGGER BIRTHDAY CHECK ON LOGIN <---
+        checkBirthdayTrigger();
+
       } else {
         document.getElementById('login-error').classList.remove('hidden');
       }

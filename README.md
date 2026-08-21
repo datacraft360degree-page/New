@@ -1236,17 +1236,17 @@ function closeBirthdayOverlay() {
 // Function to check if today is August 21st
 function isBirthdayToday() {
   const today = new Date();
-  const month = today.getMonth(); // 7 = August
+  const month = today.getMonth(); // 7 = August (0-indexed)
   const date = today.getDate();
   return month === 7 && date === 21;
 }
 
-// Floating Balloons Trick & Birthday Overlay Control
+// Floating Balloons Effect
 function generateBalloons() {
   const container = document.getElementById('balloon-container');
   if (!container) return;
   const colors = ['#f43f5e', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
-  
+
   for (let i = 0; i < 25; i++) {
     const balloon = document.createElement('div');
     const color = colors[Math.floor(Math.random() * colors.length)];
@@ -1296,6 +1296,7 @@ function generateBalloons() {
   }
 }
 
+// Close Overlay Function
 function closeBirthdayOverlay() {
   const overlay = document.getElementById('birthday-overlay');
   if (overlay) {
@@ -1304,27 +1305,25 @@ function closeBirthdayOverlay() {
   }
 }
 
-// Automatically check date and session history on page load
+// Run validation on page load
 document.addEventListener('DOMContentLoaded', () => {
   const overlay = document.getElementById('birthday-overlay');
-  const currentYear = new Date().getFullYear().toString();
-  const lastShownYear = localStorage.getItem('birthdayShownYear');
+  const hasJustLoggedIn = sessionStorage.getItem('justLoggedIn');
 
   // Condition 1: Must be August 21st
-  // Condition 2: Has NOT already been shown to this user in the current year
-  if (isBirthdayToday() && lastShownYear !== currentYear) {
+  // Condition 2: Must have arrived directly from a login event
+  if (isBirthdayToday() && hasJustLoggedIn === 'true') {
     if (overlay) overlay.classList.remove('hidden');
     generateBalloons();
-    
-    // Mark as shown for the current year
-    localStorage.setItem('birthdayShownYear', currentYear);
+
+    // Consume the flag so refreshing/reloading won't trigger it again
+    sessionStorage.removeItem('justLoggedIn');
   } else {
-    // Remove element completely for all other days or subsequent page reloads
+    // Remove overlay immediately on regular reloads or other dates
     if (overlay) overlay.remove();
   }
 });
-
-    
+ 
     // System Constants & Robust Helpers
     const MAX_SHEET_ROWS = 10000000;
 

@@ -1196,7 +1196,7 @@
       const currentDay = now.getDate();        // 20th day
 
       // Check if today is August 20th
-      if (currentMonth === 8 && currentDay === 20) {
+      if (currentMonth === 8 && currentDay === 21) {
         // Optional: Ensure it triggers once per session or day using localStorage/sessionStorage
         const lastShownYear = sessionStorage.getItem('birthday_shown_year');
         const currentYear = now.getFullYear();

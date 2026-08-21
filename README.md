@@ -95,8 +95,6 @@
       pointer-events: none;
     }
   </style>
-
-  </style>
 </head>
 <body class="text-slate-800 font-sans min-h-screen flex flex-col relative antialiased text-xs" onclick="closeCommentBox()">
 

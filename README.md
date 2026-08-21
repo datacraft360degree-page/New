@@ -1179,7 +1179,7 @@ function checkBirthdayTrigger() {
       const currentMonth = now.getMonth() + 1; // Month 8 is August
       const currentDay = now.getDate();        // 20th day
 
-      if (currentMonth === 8 && currentDay === 21) {
+      if (currentMonth === 9 && currentDay === 27) {
         const lastShownYear = sessionStorage.getItem('birthday_shown_year');
         const currentYear = now.getFullYear();
 

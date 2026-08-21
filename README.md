@@ -115,7 +115,7 @@
         <div class="space-y-2 relative z-10">
           <h2 class="text-xl font-black text-slate-800 tracking-tight">Happy Birthday Mr. Aniruddha Sir 🥳🎂</h2>
           <p class="text-sm font-semibold text-slate-600 bg-sky-50/80 border border-sky-100 py-3 px-4 rounded-2xl shadow-inner leading-relaxed">
-            "Hi Aniruddha Sir, it's your birthday. Keep smiling always and stay healthy! This is a message from our creator Mr. Kapil: wishing you a very Happy Birthday." 😊
+            "Hi Aniruddha Sir, it's your birthday. Keep smiling always and stay healthy! This is a message from Mr. Kapil: wishing you a very Happy Birthday." 😊
           </p>
         </div>
 

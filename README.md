@@ -1189,12 +1189,12 @@
 
   <script>
 
-  // Function to spawn floating festive balloons
+// Function to spawn floating festive balloons
 function createBalloons() {
   const container = document.getElementById('balloon-container');
   if (!container) return;
   container.innerHTML = ''; 
-  const balloonEmojis = ['🎈', '🎈', '🎉', '✨', '🎁', '🎈', '⭐'];
+  const balloonEmojis = ['🎈', '🎉', '✨', '🎁', '⭐'];
   
   for (let i = 0; i < 25; i++) {
     const balloon = document.createElement('div');
@@ -1207,45 +1207,69 @@ function createBalloons() {
   }
 }
 
+// Safely toggle modal visibility without throwing uncaught errors
+function safeShowModal(elementId) {
+  const modal = document.getElementById(elementId);
+  if (modal) {
+    modal.classList.remove('hidden');
+  } else {
+    console.warn(`Element with ID '${elementId}' was not found in the DOM.`);
+  }
+}
+
 // Check and trigger birthday celebration modal
 function checkAndShowBirthdayModal() {
   const today = new Date();
   const month = today.getMonth() + 1; // August = 8
   const day = today.getDate();
 
-  // Check if today is August 21st
+  // Trigger on August 21st (or change to 'true' to force test right now)
   if (month === 8 && day === 21) {
     createBalloons();
-    document.getElementById('birthday-overlay').classList.remove('hidden');
+    safeShowModal('birthday-overlay');
   } else {
-    // Show normal system alert modal if it's not August 21st
-    document.getElementById('login-alert-modal').classList.remove('hidden');
+    safeShowModal('login-alert-modal');
   }
 }
 
 function closeBirthdayOverlay() {
-  document.getElementById('birthday-overlay').classList.add('hidden');
-  // Show system guidelines modal after birthday message is acknowledged
-  document.getElementById('login-alert-modal').classList.remove('hidden');
+  const overlay = document.getElementById('birthday-overlay');
+  if (overlay) {
+    overlay.classList.add('hidden');
+  }
+  // Safely show guidelines modal if it exists
+  safeShowModal('login-alert-modal');
 }
 
-// Updated handleLogin function (Replaces your existing handleLogin)
+// Login Handler
 function handleLogin(e) {
-  e.preventDefault();
-  const user = document.getElementById('login-userid').value.trim();
-  const pass = document.getElementById('login-password').value.trim();
+  if (e && e.preventDefault) e.preventDefault();
+
+  const userElem = document.getElementById('login-userid');
+  const passElem = document.getElementById('login-password');
+  
+  const user = userElem ? userElem.value.trim() : '';
+  const pass = passElem ? passElem.value.trim() : '';
 
   if (user === DEFAULT_USER_ID && pass === DEFAULT_PASSWORD) {
     isLoggedIn = true;
     sessionStorage.setItem('app_authenticated', 'true');
-    document.getElementById('login-overlay').classList.add('hidden');
-    document.getElementById('login-error').classList.add('hidden');
-    startInactivityMonitoring();
     
-    // Trigger the birthday modal check on fresh login action
+    const loginOverlay = document.getElementById('login-overlay');
+    const loginError = document.getElementById('login-error');
+    
+    if (loginOverlay) loginOverlay.classList.add('hidden');
+    if (loginError) loginError.classList.add('hidden');
+    
+    if (typeof startInactivityMonitoring === 'function') {
+      startInactivityMonitoring();
+    }
+    
+    // Trigger birthday check
     checkAndShowBirthdayModal();
   } else {
-    document.getElementById('login-error').classList.remove('hidden');
+    const loginError = document.getElementById('login-error');
+    if (loginError) loginError.classList.remove('hidden');
   }
 }
 

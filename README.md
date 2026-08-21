@@ -80,9 +80,9 @@
         </div>
         
         <div class="space-y-2 relative z-10">
-          <h2 class="text-xl font-black text-slate-900 tracking-tight">Happy Birthday 🥳🎂</h2>
+          <h2 class="text-xl font-black text-slate-900 tracking-tight">Happy Birthday Mr. Aniruddha Sir 🥳🎂</h2>
           <p class="text-sm font-bold text-slate-700 bg-slate-50 border border-slate-100 py-2.5 px-4 rounded-2xl shadow-inner">
-            Don’t forget to smile 😊
+            "Hi Aniruddha Sir, it's your birthday. Keep smiling always and stay healthy! This is a message from our creator Mr. Kapil: wishing you a very Happy Birthday." 😊
           </p>
         </div>
 

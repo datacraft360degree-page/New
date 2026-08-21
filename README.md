@@ -64,83 +64,34 @@
       border-style: solid;
       border-color: transparent transparent #1E293B transparent;
     }
-
-/* Birthday Overlay & Animations */
-@keyframes floatUp {
-  0% { transform: translateY(100vh) rotate(0deg); opacity: 1; }
-  100% { transform: translateY(-120vh) rotate(360deg); opacity: 0.8; }
-}
-@keyframes sway {
-  0%, 100% { transform: rotate(-5deg); }
-  50% { transform: rotate(5deg); }
-}
-@keyframes popIn {
-  0% { transform: scale(0.5); opacity: 0; }
-  80% { transform: scale(1.05); opacity: 1; }
-  100% { transform: scale(1); opacity: 1; }
-}
-.animate-float {
-  animation: floatUp 8s linear infinite;
-}
-.animate-sway {
-  transform-origin: top center;
-  animation: sway 3s ease-in-out infinite;
-}
-.animate-pop {
-  animation: popIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-}
-
   </style>
 </head>
 <body class="text-slate-800 font-sans min-h-screen flex flex-col relative antialiased text-xs" onclick="closeCommentBox()">
 
-<!-- BIRTHDAY CELEBRATION MODAL OVERLAY -->
-<div id="birthday-overlay" class="hidden fixed inset-0 z-[100] bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 overflow-hidden no-print">
-  
-  <!-- Hanging Ribbon Banners -->
-  <div class="absolute top-0 left-0 w-full flex justify-between pointer-events-none px-4 z-10">
-    <div class="animate-sway text-4xl sm:text-6xl">🚩✨🎉</div>
-    <div class="animate-sway text-4xl sm:text-6xl" style="animation-delay: 0.5s;">🎊🎈✨</div>
-    <div class="animate-sway text-4xl sm:text-6xl" style="animation-delay: 1s;">🚩🎉✨</div>
-    <div class="animate-sway text-4xl sm:text-6xl" style="animation-delay: 1.5s;">🎊🎈🎉</div>
-  </div>
+<!-- BIRTHDAY HURRAY ANIMATION MODAL (TRIGGERS ON 20TH AUGUST) -->
+  <div id="birthday-hurray-modal" class="hidden fixed inset-0 z-[110] bg-slate-950/80 backdrop-blur-lg flex items-center justify-center p-4 no-print overflow-hidden">
+    <div class="bg-gradient-to-br from-amber-400 via-rose-500 to-purple-600 rounded-3xl p-1 shadow-2xl max-w-md w-full animate-pulse">
+      <div class="bg-white rounded-[22px] p-6 text-center space-y-4 relative overflow-hidden">
+        <div class="absolute -top-10 -right-10 w-32 h-32 bg-amber-200 rounded-full blur-2xl opacity-50"></div>
+        <div class="absolute -bottom-10 -left-10 w-32 h-32 bg-pink-200 rounded-full blur-2xl opacity-50"></div>
+        
+        <div class="text-6xl animate-bounce">
+          🎉🥳🎂
+        </div>
+        
+        <div class="space-y-2 relative z-10">
+          <h2 class="text-xl font-black text-slate-900 tracking-tight">Happy Birthday 🥳🎂</h2>
+          <p class="text-sm font-bold text-slate-700 bg-slate-50 border border-slate-100 py-2.5 px-4 rounded-2xl shadow-inner">
+            Don’t forget to smile 😊
+          </p>
+        </div>
 
-  <!-- Floating Balloons Container -->
-  <div id="balloon-container" class="absolute inset-0 pointer-events-none overflow-hidden z-0"></div>
-
-  <!-- Festive Content Card -->
-  <div class="relative z-20 bg-gradient-to-b from-amber-100 via-white to-amber-50 rounded-3xl shadow-2xl border-4 border-amber-300 max-w-lg w-full p-8 text-center space-y-6 animate-pop">
-    
-    <!-- Top Decorative Badge -->
-    <div class="inline-block bg-amber-500 text-white font-black text-xs uppercase px-4 py-1.5 rounded-full shadow-md tracking-widest">
-      👑 Special Birthday Celebration 👑
-    </div>
-
-    <!-- Celebration Icons -->
-    <div class="text-6xl animate-bounce">
-      🎂 🥳 🎁
-    </div>
-
-    <!-- Personalized Message -->
-    <div class="space-y-3">
-      <h2 class="text-2xl font-black text-slate-900 tracking-tight leading-snug">
-        Hi Aniruddha Sir, it's your birthday!
-      </h2>
-      <p class="text-sm font-semibold text-slate-700 leading-relaxed">
-        Keep smiling always and stay healthy!
-      </p>
-      <div class="bg-amber-100/80 border border-amber-200 p-3.5 rounded-2xl text-xs font-bold text-amber-900 shadow-inner">
-        💬 This is a message from our creator <span class="text-blue-700">Mr. Kapil</span>: <br/>
-        <span class="text-sm font-black text-amber-900">"Wishing you a very Happy Birthday!"</span>
+        <button onclick="closeBirthdayModal()" class="w-full bg-gradient-to-r from-rose-600 to-purple-600 hover:from-rose-700 hover:to-purple-700 text-white font-black py-3 rounded-2xl shadow-lg shadow-rose-500/30 transition text-xs relative z-10 cursor-pointer active:scale-95">
+          Hurray! Let's Celebrate 🚀
+        </button>
       </div>
     </div>
-
-    <!-- Close / Hurray Button -->
-    <button onclick="closeBirthdayOverlay()" class="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-black py-3 rounded-2xl shadow-lg transition transform active:scale-95 text-sm uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer">
-      <span>Hurray! Thank You</span> 🎉
-    </button>
   </div>
-</div>
 
   <!-- LOGIN MODAL OVERLAY -->
   <div id="login-overlay" class="fixed inset-0 z-[60] bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-4">

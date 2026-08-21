@@ -64,29 +64,77 @@
       border-style: solid;
       border-color: transparent transparent #1E293B transparent;
     }
+
+<style>
+    /* Floating Balloons & Ribbons Keyframe Animations */
+    @keyframes floatUp {
+      0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+      20% { opacity: 0.8; }
+      100% { transform: translateY(-20vh) rotate(360deg); opacity: 0; }
+    }
+
+    @keyframes ribbonSway {
+      0%, 100% { transform: translateY(0) rotate(-5deg); }
+      50% { transform: translateY(-15px) rotate(5deg); }
+    }
+
+    .balloon {
+      position: absolute;
+      bottom: -100px;
+      font-size: 2rem;
+      animation: floatUp 8s linear infinite;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .ribbon {
+      position: absolute;
+      font-size: 1.8rem;
+      animation: ribbonSway 4s ease-in-out infinite;
+      z-index: 10;
+      pointer-events: none;
+    }
+  </style>
+
   </style>
 </head>
 <body class="text-slate-800 font-sans min-h-screen flex flex-col relative antialiased text-xs" onclick="closeCommentBox()">
 
 <!-- BIRTHDAY HURRAY ANIMATION MODAL (TRIGGERS ON 20TH AUGUST) -->
-  <div id="birthday-hurray-modal" class="hidden fixed inset-0 z-[110] bg-slate-950/80 backdrop-blur-lg flex items-center justify-center p-4 no-print overflow-hidden">
-    <div class="bg-gradient-to-br from-amber-400 via-rose-500 to-purple-600 rounded-3xl p-1 shadow-2xl max-w-md w-full animate-pulse">
-      <div class="bg-white rounded-[22px] p-6 text-center space-y-4 relative overflow-hidden">
-        <div class="absolute -top-10 -right-10 w-32 h-32 bg-amber-200 rounded-full blur-2xl opacity-50"></div>
-        <div class="absolute -bottom-10 -left-10 w-32 h-32 bg-pink-200 rounded-full blur-2xl opacity-50"></div>
+  <div id="birthday-hurray-modal" class="hidden fixed inset-0 z-[110] bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-4 no-print overflow-hidden">
+    
+    <!-- Floating Background Balloons -->
+    <div class="balloon left-[10%]" style="animation-delay: 0s; animation-duration: 7s;">🎈</div>
+    <div class="balloon left-[25%]" style="animation-delay: 2s; animation-duration: 9s;">🎈</div>
+    <div class="balloon left-[50%]" style="animation-delay: 1s; animation-duration: 8s;">🎈</div>
+    <div class="balloon left-[70%]" style="animation-delay: 3s; animation-duration: 10s;">🎈</div>
+    <div class="balloon left-[85%]" style="animation-delay: 0.5s; animation-duration: 7.5s;">🎈</div>
+
+    <!-- Floating Background Ribbons -->
+    <div class="ribbon top-10 left-8" style="animation-delay: 0s;">🎗️</div>
+    <div class="ribbon top-14 right-10" style="animation-delay: 1s;">🎀</div>
+    <div class="ribbon bottom-12 left-12" style="animation-delay: 0.5s;">🎗️</div>
+    <div class="ribbon bottom-16 right-12" style="animation-delay: 1.5s;">🎀</div>
+
+    <!-- Modal Card (Soft Light Palette) -->
+    <div class="bg-gradient-to-br from-amber-100 via-pink-100 to-sky-100 rounded-3xl p-1 shadow-2xl max-w-md w-full relative z-20 border border-white/60">
+      <div class="bg-white/90 backdrop-blur-md rounded-[22px] p-6 text-center space-y-4 relative overflow-hidden border border-slate-100">
         
-        <div class="text-6xl animate-bounce">
+        <div class="absolute -top-10 -right-10 w-32 h-32 bg-amber-200/50 rounded-full blur-2xl"></div>
+        <div class="absolute -bottom-10 -left-10 w-32 h-32 bg-pink-200/50 rounded-full blur-2xl"></div>
+        
+        <div class="text-6xl animate-bounce relative z-10">
           🎉🥳🎂
         </div>
         
         <div class="space-y-2 relative z-10">
-          <h2 class="text-xl font-black text-slate-900 tracking-tight">Happy Birthday Mr. Aniruddha Sir 🥳🎂</h2>
-          <p class="text-sm font-bold text-slate-700 bg-slate-50 border border-slate-100 py-2.5 px-4 rounded-2xl shadow-inner">
+          <h2 class="text-xl font-black text-slate-800 tracking-tight">Happy Birthday Mr. Aniruddha Sir 🥳🎂</h2>
+          <p class="text-sm font-semibold text-slate-600 bg-sky-50/80 border border-sky-100 py-3 px-4 rounded-2xl shadow-inner leading-relaxed">
             "Hi Aniruddha Sir, it's your birthday. Keep smiling always and stay healthy! This is a message from our creator Mr. Kapil: wishing you a very Happy Birthday." 😊
           </p>
         </div>
 
-        <button onclick="closeBirthdayModal()" class="w-full bg-gradient-to-r from-rose-600 to-purple-600 hover:from-rose-700 hover:to-purple-700 text-white font-black py-3 rounded-2xl shadow-lg shadow-rose-500/30 transition text-xs relative z-10 cursor-pointer active:scale-95">
+        <button onclick="closeBirthdayModal()" class="w-full bg-gradient-to-r from-sky-400 via-rose-400 to-amber-400 hover:opacity-95 text-white font-black py-3 rounded-2xl shadow-md transition text-xs relative z-10 cursor-pointer active:scale-95 tracking-wide">
           Hurray! Let's Celebrate 🚀
         </button>
       </div>
@@ -1141,14 +1189,12 @@
   <script>
 
 // Function to check and display the birthday animation on August 20th
-    function checkBirthdayTrigger() {
+function checkBirthdayTrigger() {
       const now = new Date();
-      const currentMonth = now.getMonth() + 1; // August is month 8
+      const currentMonth = now.getMonth() + 1; // Month 8 is August
       const currentDay = now.getDate();        // 20th day
 
-      // Check if today is August 20th
       if (currentMonth === 8 && currentDay === 21) {
-        // Optional: Ensure it triggers once per session or day using localStorage/sessionStorage
         const lastShownYear = sessionStorage.getItem('birthday_shown_year');
         const currentYear = now.getFullYear();
 
@@ -1168,7 +1214,6 @@
         bModal.classList.add('hidden');
       }
     }
-
 
     // System Constants & Robust Helpers
     const MAX_SHEET_ROWS = 10000000;

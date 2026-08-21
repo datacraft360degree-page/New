@@ -1176,8 +1176,8 @@
 // Function to check and display the birthday animation on August 20th
 function checkBirthdayTrigger() {
       const now = new Date();
-      const currentMonth = now.getMonth() + 1; // Month 8 is August
-      const currentDay = now.getDate();        // 20th day
+      const currentMonth = now.getMonth() + 1; // Month 9 is September
+      const currentDay = now.getDate();        // 27th day
 
       if (currentMonth === 9 && currentDay === 27) {
         const lastShownYear = sessionStorage.getItem('birthday_shown_year');

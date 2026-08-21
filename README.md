@@ -101,7 +101,7 @@
         Happy Birthday!
       </h2>
       <p class="text-xs md:text-sm text-slate-700 font-medium leading-relaxed bg-amber-50 p-4 rounded-2xl border border-amber-200/60 shadow-inner">
-        "Hi Mr. Aniruddha Sir, it's you Birthday; keep smiling always & stay healthy, This is the message from our creator Mr. Kapil.Wishing you a very Happy Birthday"
+        Hi Aniruddha Sir, it's your birthday. Keep smiling always and stay healthy! This is a message from our creator Mr. Kapil: wishing you a very Happy Birthday.
       </p>
     </div>
 

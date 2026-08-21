@@ -1233,20 +1233,97 @@ function closeBirthdayOverlay() {
     setTimeout(() => overlay.remove(), 500);
   }
 }
+// Function to check if today is August 21st
+function isBirthdayToday() {
+  const today = new Date();
+  const month = today.getMonth(); // 7 = August
+  const date = today.getDate();
+  return month === 7 && date === 21;
+}
 
-// Automatically check date on load
+// Floating Balloons Trick & Birthday Overlay Control
+function generateBalloons() {
+  const container = document.getElementById('balloon-container');
+  if (!container) return;
+  const colors = ['#f43f5e', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
+  
+  for (let i = 0; i < 25; i++) {
+    const balloon = document.createElement('div');
+    const color = colors[Math.floor(Math.random() * colors.length)];
+    const left = Math.random() * 100;
+    const duration = 4 + Math.random() * 5;
+    const delay = Math.random() * 3;
+    const size = 30 + Math.random() * 25;
+
+    balloon.style.cssText = `
+      position: absolute;
+      bottom: -60px;
+      left: ${left}%;
+      width: ${size}px;
+      height: ${size * 1.2}px;
+      background-color: ${color};
+      border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
+      opacity: 0.85;
+      box-shadow: inset -5px -5px 10px rgba(0,0,0,0.15);
+      animation: floatUp ${duration}s ease-in-out ${delay}s infinite;
+    `;
+
+    const string = document.createElement('div');
+    string.style.cssText = `
+      position: absolute;
+      bottom: -12px;
+      left: 50%;
+      width: 1.5px;
+      height: 12px;
+      background-color: rgba(255,255,255,0.6);
+      transform: translateX(-50%);
+    `;
+    balloon.appendChild(string);
+    container.appendChild(balloon);
+  }
+
+  if (!document.getElementById('balloon-style')) {
+    const style = document.createElement('style');
+    style.id = 'balloon-style';
+    style.innerHTML = `
+      @keyframes floatUp {
+        0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+        10% { opacity: 0.85; }
+        100% { transform: translateY(-110vh) rotate(${Math.random() > 0.5 ? 20 : -20}deg); opacity: 0; }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+}
+
+function closeBirthdayOverlay() {
+  const overlay = document.getElementById('birthday-overlay');
+  if (overlay) {
+    overlay.classList.add('opacity-0', 'pointer-events-none');
+    setTimeout(() => overlay.remove(), 500);
+  }
+}
+
+// Automatically check date and session history on page load
 document.addEventListener('DOMContentLoaded', () => {
   const overlay = document.getElementById('birthday-overlay');
-  
-  if (isBirthdayToday()) {
-    // Show overlay and generate floating balloons on Aug 21st
+  const currentYear = new Date().getFullYear().toString();
+  const lastShownYear = localStorage.getItem('birthdayShownYear');
+
+  // Condition 1: Must be August 21st
+  // Condition 2: Has NOT already been shown to this user in the current year
+  if (isBirthdayToday() && lastShownYear !== currentYear) {
     if (overlay) overlay.classList.remove('hidden');
     generateBalloons();
+    
+    // Mark as shown for the current year
+    localStorage.setItem('birthdayShownYear', currentYear);
   } else {
-    // Hide and remove overlay for all other days of the year
+    // Remove element completely for all other days or subsequent page reloads
     if (overlay) overlay.remove();
   }
 });
+
     
     // System Constants & Robust Helpers
     const MAX_SHEET_ROWS = 10000000;

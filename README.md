@@ -102,19 +102,6 @@
 
 <!-- BIRTHDAY HURRAY ANIMATION MODAL (TRIGGERS ON 20TH AUGUST) -->
   <div id="birthday-hurray-modal" class="hidden fixed inset-0 z-[110] bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-4 no-print overflow-hidden">
-    
-    <!-- Floating Background Balloons -->
-    <div class="balloon left-[10%]" style="animation-delay: 0s; animation-duration: 7s;">🎈</div>
-    <div class="balloon left-[25%]" style="animation-delay: 2s; animation-duration: 9s;">🎈</div>
-    <div class="balloon left-[50%]" style="animation-delay: 1s; animation-duration: 8s;">🎈</div>
-    <div class="balloon left-[70%]" style="animation-delay: 3s; animation-duration: 10s;">🎈</div>
-    <div class="balloon left-[85%]" style="animation-delay: 0.5s; animation-duration: 7.5s;">🎈</div>
-
-    <!-- Floating Background Ribbons -->
-    <div class="ribbon top-10 left-8" style="animation-delay: 0s;">🎗️</div>
-    <div class="ribbon top-14 right-10" style="animation-delay: 1s;">🎀</div>
-    <div class="ribbon bottom-12 left-12" style="animation-delay: 0.5s;">🎗️</div>
-    <div class="ribbon bottom-16 right-12" style="animation-delay: 1.5s;">🎀</div>
 
     <!-- Modal Card (Soft Light Palette) -->
     <div class="bg-gradient-to-br from-amber-100 via-pink-100 to-sky-100 rounded-3xl p-1 shadow-2xl max-w-md w-full relative z-20 border border-white/60">

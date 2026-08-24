@@ -2635,7 +2635,7 @@ function updateDashboardCards() {
 
   bookings.forEach(b => {
     const checkInMs = parseDate(b.checkIn);
-    const checkOutMs = parseDate(b.checkOut);
+    const checkOutMs = getEffectiveCheckoutTime(b);
 
     // Year Filter Validation
     if (targetYear && !isNaN(checkInMs)) {

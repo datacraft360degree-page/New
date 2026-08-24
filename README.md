@@ -2356,7 +2356,7 @@ function checkBirthdayTrigger() {
 
       let selArr = [];
       if (Array.isArray(selectedRoomNos)) selArr = selectedRoomNos.map(String);
-      else if (selectedRoomNos) selArr = String(selectedRoomNos).split(',').map(s => s.trim());
+      else if (selectedRoomNos) selArr = String(selectedRoomNos).split(/[,|]/).map(s => s.trim());
 
       const allDiv = document.createElement('div');
       allDiv.className = "flex items-center gap-2 mb-1.5 pb-1.5 border-b border-slate-100";

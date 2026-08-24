@@ -555,7 +555,7 @@
         <!-- BOX 6: All LIVE BOOKING DETAILS (YELLOW/AMBER THEME) -->
         <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200/60 flex flex-col justify-between space-y-2">
           <div class="flex justify-between items-center border-b border-slate-100 pb-2">
-            <p class="text-[10px] uppercase font-bold text-slate-400 tracking-wider break-words">Today's Live Bookings Details</p>
+            <p class="text-[10px] uppercase font-bold text-slate-400 tracking-wider break-words">All Live Bookings Details</p>
             <span class="px-2 py-0.5 text-[9px] font-bold bg-amber-50 text-amber-600 rounded-full border border-amber-200 flex items-center gap-1">
               <span class="w-1.5 h-1.5 bg-amber-500 rounded-full animate-ping"></span> Live Today
             </span>

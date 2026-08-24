@@ -552,7 +552,7 @@
           </div>
         </div>
 
-        <!-- BOX 6: TODAY'S LIVE BOOKING DETAILS (YELLOW/AMBER THEME) -->
+        <!-- BOX 6: All LIVE BOOKING DETAILS (YELLOW/AMBER THEME) -->
         <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200/60 flex flex-col justify-between space-y-2">
           <div class="flex justify-between items-center border-b border-slate-100 pb-2">
             <p class="text-[10px] uppercase font-bold text-slate-400 tracking-wider break-words">Today's Live Bookings Details</p>
@@ -2551,7 +2551,7 @@ function updatePieChart(elementId, liveVal = null, upcomingVal = null, closedVal
   )`;
 }
 
-// Helper to update Box 6: Today's Live Booking Details Table (Moved to Top-Level Scope)
+// Helper to update Box 6: All Live Booking Details Table (Moved to Top-Level Scope)
 function updateDashboardLiveBookings(liveBookings) {
   const container = document.getElementById('dash-today-live-container');
   if (!container) return;

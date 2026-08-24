@@ -1913,7 +1913,7 @@ function checkBirthdayTrigger() {
           "State": b.state || "",
           "Country": b.country || "",
           "Pin/Zip Code": b.zipCode || "",
-          "Room No(s)": getBookingRooms(b).join("|"),
+          "Room No(s)": getBookingRooms(b).join(" | "),
           "Capacity": b.capacity || 1,
           "Extra Persons": b.extraPersons || 0,
           "Extra Person Joined": format24hDate(b.extraPersonJoined),

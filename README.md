@@ -903,12 +903,20 @@
               </div>
             </div>
 
-            <!-- EXTRA PERSON(S) COUNT FIELD -->
+          <!-- EXTRA PERSON(S) COUNT FIELD -->
             <div>
               <label class="block font-semibold text-amber-700 mb-0.5 flex items-center gap-1">
                 <i class="fa-solid fa-user-plus text-amber-600"></i> Add Extra Person(s)
               </label>
               <input type="number" id="cust-extra-persons" min="0" value="0" placeholder="0" oninput="calculateModalBilling()" class="w-full bg-amber-50 border border-amber-300 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-amber-500 font-bold text-amber-900" />
+            </div>
+
+            <!-- NEW FIELD: EXTRA ROOM(S) FIELD (Beside Extra Person) -->
+            <div>
+              <label class="block font-semibold text-amber-700 mb-0.5 flex items-center gap-1">
+                <i class="fa-solid fa-door-open text-amber-600"></i> Add Extra Room(s)
+              </label>
+              <input type="text" id="cust-extra-rooms" disabled placeholder="Active when extra person > 0" class="w-full bg-slate-100 border border-slate-200 rounded-xl px-2.5 py-1.5 focus:outline-none font-bold text-amber-900 disabled:opacity-50 disabled:cursor-not-allowed" />
             </div>
 
             <!-- ADDITIONAL PERSON CUSTOM CHECK-IN & CHECK-OUT WINDOW -->

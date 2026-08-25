@@ -434,7 +434,7 @@
     <section id="tab-dashboard" class="tab-content space-y-4">
       <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl p-5 text-white shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
-          <h2 class="text-base font-bold tracking-tight">Hi Aniruddha, Welcome to dashboard 🏠</h2>
+          <h2 class="text-base font-bold tracking-tight">Hi, Welcome to dashboard 🏠</h2>
           <p class="text-blue-100 text-[10px] mt-0.5">Quickly view, schedule, and manage room allocations and orders.</p>
         </div>
         <div class="flex items-center bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-2xl border border-white/20 space-x-2">
@@ -552,10 +552,10 @@
           </div>
         </div>
 
-        <!-- BOX 6: TODAY'S LIVE BOOKING DETAILS (YELLOW/AMBER THEME) -->
+        <!-- BOX 6: ALL LIVE BOOKING DETAILS (YELLOW/AMBER THEME) -->
         <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200/60 flex flex-col justify-between space-y-2">
           <div class="flex justify-between items-center border-b border-slate-100 pb-2">
-            <p class="text-[10px] uppercase font-bold text-slate-400 tracking-wider break-words">Today's Live Bookings Details</p>
+            <p class="text-[10px] uppercase font-bold text-slate-400 tracking-wider break-words">All Live Bookings Details</p>
             <span class="px-2 py-0.5 text-[9px] font-bold bg-amber-50 text-amber-600 rounded-full border border-amber-200 flex items-center gap-1">
               <span class="w-1.5 h-1.5 bg-amber-500 rounded-full animate-ping"></span> Live Today
             </span>
@@ -903,28 +903,12 @@
               </div>
             </div>
 
-          <!-- EXTRA PERSON(S) COUNT FIELD -->
+            <!-- EXTRA PERSON(S) COUNT FIELD -->
             <div>
               <label class="block font-semibold text-amber-700 mb-0.5 flex items-center gap-1">
                 <i class="fa-solid fa-user-plus text-amber-600"></i> Add Extra Person(s)
               </label>
-              <input type="number" id="cust-extra-persons" min="0" value="0" placeholder="0" oninput="toggleExtraRoomDropdown(); calculateModalBilling();" class="w-full bg-amber-50 border border-amber-300 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-amber-500 font-bold text-amber-900" />
-            </div>
-
-            <!-- ADD EXTRA ROOM(S) DROPDOWN (ACTIVE IF EXTRA PERSON > 0) -->
-            <div>
-              <label class="block font-semibold text-amber-700 mb-0.5 flex items-center gap-1">
-                <i class="fa-solid fa-door-open text-amber-600"></i> Add Extra Room(s)
-              </label>
-              <div class="relative" id="extra-room-dropdown-container">
-                <button type="button" id="extra-room-dropdown-btn" onclick="toggleExtraRoomDropdownMenu()" disabled class="w-full bg-slate-100 border border-slate-200 opacity-60 cursor-not-allowed rounded-xl px-2.5 focus:outline-none focus:border-amber-500 font-bold text-amber-900 text-left flex justify-between items-center" style="height: 34px;">
-                  <span id="extra-room-dropdown-text" class="truncate pr-2">Select Extra Rooms...</span>
-                  <i class="fa-solid fa-chevron-down text-slate-400"></i>
-                </button>
-                <div id="extra-room-checkboxes" class="hidden absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl max-h-48 overflow-y-auto p-2 space-y-1">
-                  <!-- Dynamically Generated Checkboxes -->
-                </div>
-              </div>
+              <input type="number" id="cust-extra-persons" min="0" value="0" placeholder="0" oninput="calculateModalBilling()" class="w-full bg-amber-50 border border-amber-300 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-amber-500 font-bold text-amber-900" />
             </div>
 
             <!-- ADDITIONAL PERSON CUSTOM CHECK-IN & CHECK-OUT WINDOW -->
@@ -1036,12 +1020,8 @@
           
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2 pb-2 border-b border-blue-200">
              <div>
-                <label class="block font-semibold text-slate-600 mb-0.5">Extra Person Rate (₹)</label>
-                <input type="number" id="cust-extra-rate" value="1200" oninput="calculateModalBilling()" class="w-full bg-white font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 focus:outline-none focus:border-blue-500" />
-             </div>
-             <div>
-                <label class="block font-semibold text-slate-600 mb-0.5">Extra Person Total (₹)</label>
-                <input type="number" id="cust-extra-total" value="0" readonly class="w-full bg-slate-200/60 font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" />
+                <label class="block font-semibold text-slate-600 mb-0.5">Extra Person (₹)</label>
+                <input type="number" id="cust-extra-total" readonly="" class="w-full bg-slate-200/60 font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" />
              </div>
              <div>
                 <label class="block font-semibold text-slate-600 mb-0.5">Cab Fare (₹)</label>
@@ -1099,9 +1079,9 @@
 
       <div class="flex justify-between items-start border-b border-slate-200 pb-3">
         <div>
-          <h2 class="text-base sm:text-lg font-black text-blue-600 uppercase tracking-wide">Aniruddha Homestay</h2>
+          <h2 class="text-base sm:text-lg font-black text-blue-600 uppercase tracking-wide">Sanoum Pema Homestay-by Anaristays</h2>
           <p class="text-[10px] text-slate-500 mt-0.5">Sittong, Village in West Bengal</p>
-          <p class="text-[10px] text-slate-500">Phone: +91 9804396541 | Email: info@businessportal.com</p>
+          <p class="text-[10px] text-slate-500">Phone: +91 9804396541 | Email: demo@gmail.com</p>
         </div>
         <div class="text-right">
           <div id="e-invoice-section">
@@ -1383,7 +1363,7 @@ function checkBirthdayTrigger() {
       }
     }
 
-    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbz6rME_OuYHucGBPCfCrV7EYjuE5YF0eqSeuqBjm42-HPXUYJzUSBu0mov9jCdM7zx5Ng/exec"; 
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzvFdRB-rD_eZW-yl2gitJ3BZK0RjrPl1xmc79Q6ISE01k9lZNgp3itWRnuAviK1de74Q/exec"; 
     
     const ONE_HOUR_MS = 1 * 60 * 60 * 1000;
     let activeModalBooking = null;
@@ -2571,7 +2551,7 @@ function updatePieChart(elementId, liveVal = null, upcomingVal = null, closedVal
   )`;
 }
 
-// Helper to update Box 6: Today's Live Booking Details Table (Moved to Top-Level Scope)
+// Helper to update Box 6: All Live Booking Details Table (Moved to Top-Level Scope)
 function updateDashboardLiveBookings(liveBookings) {
   const container = document.getElementById('dash-today-live-container');
   if (!container) return;
@@ -2781,7 +2761,7 @@ function updateDashboardCards() {
       const effectiveOut = (isTrue(b.hasExtendedCheckout) && b.extendedCheckOut) ? b.extendedCheckOut : b.checkOut;
       const roomsDisplay = getBookingRooms(b).join(', ');
 
-      const messageText = `*Aniruddha Homestay - Booking Receipt*\n\n` +
+      const messageText = `*Sanoum Pema Homestay-by Anaristays - Booking Receipt*\n\n` +
         `Dear *${b.name}*,\n` +
         `Thank you for booking with us! Here are your booking details:\n\n` +
         `*Reservation Details:*\n` +
@@ -3194,7 +3174,7 @@ function updateDashboardCards() {
 
           if (now > effectiveOutTime) {
             isClosedBooking = true;
-            if (now > effectiveOutTime + (3 * 24 * 60 * 60 * 1000)) {
+            if (now > effectiveOutTime + (730 * 24 * 60 * 60 * 1000)) {
                isPast730Days = true;
             }
           } else if (now >= checkInTime && now <= effectiveOutTime) {

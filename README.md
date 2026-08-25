@@ -3703,7 +3703,7 @@ function updateDashboardCards() {
       document.getElementById('cust-total').value = total;
       document.getElementById('cust-due').value = due;
       
-      const extraTotalInput = parseFloat(document.getElementById('cust-extra-rate')?.value) || 0;
+      const extraTotalInput =document.getElementById('cust-extra-rate');
       if (extraTotalInput) extraTotalInput.value = extraPersonTotal;
       
       const cabTotalInput = document.getElementById('cust-cab-total');

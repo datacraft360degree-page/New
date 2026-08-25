@@ -552,10 +552,10 @@
           </div>
         </div>
 
-        <!-- BOX 6: All LIVE BOOKING DETAILS (YELLOW/AMBER THEME) -->
+        <!-- BOX 6: TODAY'S LIVE BOOKING DETAILS (YELLOW/AMBER THEME) -->
         <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200/60 flex flex-col justify-between space-y-2">
           <div class="flex justify-between items-center border-b border-slate-100 pb-2">
-            <p class="text-[10px] uppercase font-bold text-slate-400 tracking-wider break-words">All Live Bookings Details</p>
+            <p class="text-[10px] uppercase font-bold text-slate-400 tracking-wider break-words">Today's Live Bookings Details</p>
             <span class="px-2 py-0.5 text-[9px] font-bold bg-amber-50 text-amber-600 rounded-full border border-amber-200 flex items-center gap-1">
               <span class="w-1.5 h-1.5 bg-amber-500 rounded-full animate-ping"></span> Live Today
             </span>
@@ -1021,7 +1021,7 @@
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2 pb-2 border-b border-blue-200">
              <div>
                 <label class="block font-semibold text-slate-600 mb-0.5">Extra Person (₹)</label>
-               <input type="number" id="cust-extra-total" value="1200" oninput="calculateModalBilling()" class="w-full bg-white font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 focus:outline-none focus:border-blue-500" />
+                <input type="number" id="cust-extra-total" readonly="" class="w-full bg-slate-200/60 font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" />
              </div>
              <div>
                 <label class="block font-semibold text-slate-600 mb-0.5">Cab Fare (₹)</label>
@@ -2551,7 +2551,7 @@ function updatePieChart(elementId, liveVal = null, upcomingVal = null, closedVal
   )`;
 }
 
-// Helper to update Box 6: All Live Booking Details Table (Moved to Top-Level Scope)
+// Helper to update Box 6: Today's Live Booking Details Table (Moved to Top-Level Scope)
 function updateDashboardLiveBookings(liveBookings) {
   const container = document.getElementById('dash-today-live-container');
   if (!container) return;
@@ -3639,7 +3639,7 @@ function updateDashboardCards() {
       const price = parseFloat(document.getElementById('cust-price').value) || 0;
       const capacity = parseFloat(document.getElementById('cust-capacity').value) || 1;
 
-      const extraPersons = parseFloat(document.getElementById('cust-extra-persons')?.value) || 0;
+      const extraPersons = parseInt(document.getElementById('cust-extra-persons')?.value) || 0;
       let extraPersonDays = 0;
 
       if (extraPersons > 0 && latestMainCheckoutDt) {
@@ -3703,7 +3703,7 @@ function updateDashboardCards() {
       document.getElementById('cust-total').value = total;
       document.getElementById('cust-due').value = due;
       
-      const extraTotalInput =document.getElementById('cust-extra-rate');
+      const extraTotalInput = document.getElementById('cust-extra-total');
       if (extraTotalInput) extraTotalInput.value = extraPersonTotal;
       
       const cabTotalInput = document.getElementById('cust-cab-total');
@@ -3777,7 +3777,7 @@ function updateDashboardCards() {
 
       const includeMeals = document.getElementById('cust-include-meals')?.checked ?? true;
 
-      const extraPersons = parseFloat(document.getElementById('cust-extra-persons')?.value) || 0;
+      const extraPersons = parseInt(document.getElementById('cust-extra-persons')?.value) || 0;
       
       const epDateCheck = document.getElementById('cust-extra-person-date')?.value;
       const epOutDateCheck = document.getElementById('cust-extra-person-out-date')?.value;

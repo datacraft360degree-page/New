@@ -3639,7 +3639,7 @@ function updateDashboardCards() {
       const price = parseFloat(document.getElementById('cust-price').value) || 0;
       const capacity = parseFloat(document.getElementById('cust-capacity').value) || 1;
 
-      const extraPersons = parseInt(document.getElementById('cust-extra-persons')?.value) || 0;
+      const extraPersons = parseFloat(document.getElementById('cust-extra-persons')?.value) || 0;
       let extraPersonDays = 0;
 
       if (extraPersons > 0 && latestMainCheckoutDt) {

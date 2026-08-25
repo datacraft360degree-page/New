@@ -3611,105 +3611,141 @@ function updateDashboardCards() {
       document.getElementById('cust-due').value = due;
     }
 
-    function calculateModalBilling() {
-      const inDate = document.getElementById('cust-checkin-date').value;
-      const inTime = document.getElementById('cust-checkin-time').value || '00:00';
-      
-      const hasExtCheckout = document.getElementById('cust-has-extended-checkout')?.checked;
-      let outDate = document.getElementById('cust-checkout-date').value;
-      let outTime = document.getElementById('cust-checkout-time').value || '00:00';
+   // ==========================================
+// UPDATED BILLING SUMMARY & CALCULATION CODE
+// ==========================================
 
-      if (hasExtCheckout) {
-        const extDate = document.getElementById('cust-ext-checkout-date')?.value;
-        const extTime = document.getElementById('cust-ext-checkout-time')?.value;
-        if (extDate) outDate = extDate;
-        if (extTime) outTime = extTime;
+/**
+ * Calculates all billing totals inside the booking modal dynamically.
+ * Reads Room Count, Extra Persons Count & Rate, Days, Cab Fares, and Advance Payments.
+ */
+function calculateModalBilling() {
+  // 1. Calculate Stay Duration in Days (24-hour cycle logic with 2-hour grace period)
+  const inDate = document.getElementById('cust-checkin-date')?.value;
+  const inTime = document.getElementById('cust-checkin-time')?.value || '12:00';
+  const hasExtCheckout = document.getElementById('cust-has-extended-checkout')?.checked;
+  
+  let outDate = document.getElementById('cust-checkout-date')?.value;
+  let outTime = document.getElementById('cust-checkout-time')?.value || '11:00';
+
+  if (hasExtCheckout) {
+    const extDate = document.getElementById('cust-ext-checkout-date')?.value;
+    const extTime = document.getElementById('cust-ext-checkout-time')?.value;
+    if (extDate) outDate = extDate;
+    if (extTime) outTime = extTime;
+  }
+
+  let numDays = 1; // Default minimum 1 day
+  if (inDate && outDate) {
+    const checkInDt = new Date(`${inDate}T${inTime}:00+05:30`);
+    const checkOutDt = new Date(`${outDate}T${outTime}:00+05:30`);
+
+    if (!isNaN(checkInDt.getTime()) && !isNaN(checkOutDt.getTime())) {
+      const diffMs = checkOutDt.getTime() - checkInDt.getTime();
+      if (diffMs > 0) {
+        const diffHours = diffMs / (1000 * 60 * 60);
+        // Calculate days using 24-hour cycles with a 2-hour grace buffer
+        numDays = Math.ceil((diffHours - 2) / 24);
+        if (numDays < 1) numDays = 1;
       }
-
-      let days = 0;
-      let latestMainCheckoutDt = null;
-
-      if (inDate && outDate) {
-        latestMainCheckoutDt = new Date(`${outDate}T${outTime}:00+05:30`);
-        const inDateOnly = new Date(inDate);
-        const outDateOnly = new Date(outDate);
-        days = Math.max(1, Math.round((outDateOnly - inDateOnly) / (1000 * 60 * 60 * 24)));
-      }
-
-      const price = parseFloat(document.getElementById('cust-price').value) || 0;
-      const capacity = parseFloat(document.getElementById('cust-capacity').value) || 1;
-
-      const extraPersons = parseInt(document.getElementById('cust-extra-persons')?.value) || 0;
-      let extraPersonDays = 0;
-
-      if (extraPersons > 0 && latestMainCheckoutDt) {
-        const epInDate = document.getElementById('cust-extra-person-date')?.value;
-        const epInTime = document.getElementById('cust-extra-person-time')?.value;
-        let epOutDate = document.getElementById('cust-extra-person-out-date')?.value;
-        let epOutTime = document.getElementById('cust-extra-person-out-time')?.value;
-
-        if (epInDate && epOutDate && epInTime && epOutTime) {
-          const epInDt = new Date(`${epInDate}T${epInTime}:00+05:30`);
-          let epOutDt = new Date(`${epOutDate}T${epOutTime}:00+05:30`);
-
-          if (epOutDt > latestMainCheckoutDt) {
-            epOutDt = new Date(latestMainCheckoutDt.getTime());
-            epOutDate = toLocalISOString(epOutDt).split('T')[0];
-          }
-
-          if (epInDt < epOutDt) {
-            const epInOnly = new Date(epInDate);
-            const epOutOnly = new Date(epOutDate);
-            const diffDays = Math.round((epOutOnly - epInOnly) / (1000 * 60 * 60 * 24));
-            extraPersonDays = Math.max(1, diffDays);
-          } else {
-            extraPersonDays = 0;
-          }
-        } else {
-           extraPersonDays = 0; 
-        }
-      }
-
-      const roomTotal = days * price * capacity;
-      const extraPersonTotal = extraPersons * extraPersonDays * price;
-
-      let foodTotalCharge = 0;
-      document.querySelectorAll('.cust-food-charge').forEach(input => {
-        foodTotalCharge += parseFloat(input.value) || 0;
-      });
-      
-      let cabFare = 0;
-      document.querySelectorAll('.cust-cab-rate').forEach(input => {
-        cabFare += parseFloat(input.value) || 0;
-      });
-
-      const total = roomTotal + extraPersonTotal + foodTotalCharge + cabFare;
-
-      const advanceInput = document.getElementById('cust-advance');
-      let currentAdvVal = parseFloat(advanceInput.value) || 0;
-
-      if (currentAdvVal > total) {
-        alert(`⚠️ Advance payment (₹${currentAdvVal}) cannot exceed the total bill amount (₹${total})!`);
-        currentAdvVal = total;
-        advanceInput.value = total;
-      }
-
-      advanceInput.setAttribute('data-initial-adv', currentAdvVal);
-
-      const clearBillVal = parseFloat(document.getElementById('cust-clear-bill')?.value) || 0;
-      const due = Math.max(0, total - currentAdvVal - clearBillVal);
-
-      document.getElementById('cust-days').value = days;
-      document.getElementById('cust-total').value = total;
-      document.getElementById('cust-due').value = due;
-      
-      const extraTotalInput = document.getElementById('cust-extra-total');
-      if (extraTotalInput) extraTotalInput.value = extraPersonTotal;
-      
-      const cabTotalInput = document.getElementById('cust-cab-total');
-      if (cabTotalInput) cabTotalInput.value = cabFare;
     }
+  }
 
+  // Display calculated days
+  const daysInput = document.getElementById('cust-days');
+  if (daysInput) daysInput.value = numDays;
+
+  // 2. Fetch Base Price/Day & Selected Room Count
+  const pricePerDayInput = document.getElementById('cust-price');
+  const pricePerDay = parseFloat(pricePerDayInput?.value) || 0;
+
+  const selectedRooms = Array.from(
+    document.querySelectorAll('#room-checkboxes input[type="checkbox"]:checked')
+  ).map(cb => cb.value);
+  const roomCount = selectedRooms.length > 0 ? selectedRooms.length : 1;
+
+  // Base Room Tariff = Room Count * Price/Day * Days
+  const baseRoomTariff = roomCount * pricePerDay * numDays;
+
+  // 3. Fetch Extra Person Count & Editable Extra Person Rate
+  const extraPersonsCount = parseFloat(document.getElementById('cust-extra-persons')?.value) || 0;
+  const extraRateInput = document.getElementById('cust-extra-total');
+  
+  // Set default to 1200 if empty or uninitialized
+  let extraPersonRate = parseFloat(extraRateInput?.value);
+  if (isNaN(extraPersonRate)) {
+    extraPersonRate = 1200;
+    if (extraRateInput) extraRateInput.value = 1200;
+  }
+
+  // Calculate total extra person charges
+  const extraPersonsCharge = extraPersonsCount * extraPersonRate * numDays;
+
+  // 4. Calculate Cab Fare Total
+  let cabTotal = 0;
+  document.querySelectorAll('.cab-fare-amount').forEach(input => {
+    cabTotal += parseFloat(input.value) || 0;
+  });
+  const cabTotalInput = document.getElementById('cust-cab-total');
+  if (cabTotalInput) cabTotalInput.value = cabTotal;
+
+  // 5. Calculate Grand Total
+  const grandTotal = baseRoomTariff + extraPersonsCharge + cabTotal;
+  const totalInput = document.getElementById('cust-total');
+  if (totalInput) totalInput.value = Math.round(grandTotal);
+
+  // 6. Calculate Due Amount
+  const advanceAmount = parseFloat(document.getElementById('cust-advance')?.value) || 0;
+  const dueAmount = grandTotal - advanceAmount;
+
+  const dueInput = document.getElementById('cust-due');
+  if (dueInput) dueInput.value = Math.round(dueAmount > 0 ? dueAmount : 0);
+}
+
+/**
+ * Handles clearing due bills dynamically when paying an amount into the "Clear Bill" field.
+ * @param {string|number} val - Amount entered into the Clear Bill field.
+ */
+function handleClearBillPayment(val) {
+  const clearAmt = parseFloat(val) || 0;
+  const advanceInput = document.getElementById('cust-advance');
+  const totalInput = document.getElementById('cust-total');
+  const dueInput = document.getElementById('cust-due');
+
+  if (!advanceInput || !totalInput || !dueInput) return;
+
+  // Get current values
+  const currentTotal = parseFloat(totalInput.value) || 0;
+  const currentAdvance = parseFloat(advanceInput.getAttribute('data-initial-advance') || advanceInput.value) || 0;
+
+  // Save base advance state for recalculations
+  if (!advanceInput.hasAttribute('data-initial-advance')) {
+    advanceInput.setAttribute('data-initial-advance', currentAdvance);
+  }
+
+  const newAdvance = currentAdvance + clearAmt;
+  advanceInput.value = newAdvance;
+
+  const newDue = currentTotal - newAdvance;
+  dueInput.value = Math.round(newDue > 0 ? newDue : 0);
+}
+
+/**
+ * Ensures Extra Person rate defaults to 1200 when opening the booking modal.
+ */
+function resetBillingSummaryFields() {
+  const extraRateInput = document.getElementById('cust-extra-total');
+  const priceInput = document.getElementById('cust-price');
+  
+  if (extraRateInput && (!extraRateInput.value || parseFloat(extraRateInput.value) === 0)) {
+    extraRateInput.value = 1200;
+  }
+  if (priceInput && (!priceInput.value || parseFloat(priceInput.value) === 0)) {
+    priceInput.value = 1200;
+  }
+  
+  calculateModalBilling();
+}
     function handleSaveBooking(e) {
       e.preventDefault();
 

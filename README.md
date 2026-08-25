@@ -3777,7 +3777,7 @@ function updateDashboardCards() {
 
       const includeMeals = document.getElementById('cust-include-meals')?.checked ?? true;
 
-      const extraPersons = parseInt(document.getElementById('cust-extra-persons')?.value) || 0;
+      const extraPersons = parseFloat(document.getElementById('cust-extra-persons')?.value) || 0;
       
       const epDateCheck = document.getElementById('cust-extra-person-date')?.value;
       const epOutDateCheck = document.getElementById('cust-extra-person-out-date')?.value;

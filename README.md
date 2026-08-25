@@ -908,15 +908,23 @@
               <label class="block font-semibold text-amber-700 mb-0.5 flex items-center gap-1">
                 <i class="fa-solid fa-user-plus text-amber-600"></i> Add Extra Person(s)
               </label>
-              <input type="number" id="cust-extra-persons" min="0" value="0" placeholder="0" oninput="calculateModalBilling()" class="w-full bg-amber-50 border border-amber-300 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-amber-500 font-bold text-amber-900" />
+              <input type="number" id="cust-extra-persons" min="0" value="0" placeholder="0" oninput="toggleExtraRoomDropdown(); calculateModalBilling();" class="w-full bg-amber-50 border border-amber-300 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-amber-500 font-bold text-amber-900" />
             </div>
 
-            <!-- NEW FIELD: EXTRA ROOM(S) FIELD (Beside Extra Person) -->
+            <!-- ADD EXTRA ROOM(S) DROPDOWN (ACTIVE IF EXTRA PERSON > 0) -->
             <div>
               <label class="block font-semibold text-amber-700 mb-0.5 flex items-center gap-1">
                 <i class="fa-solid fa-door-open text-amber-600"></i> Add Extra Room(s)
               </label>
-              <input type="text" id="cust-extra-rooms" disabled placeholder="Active when extra person > 0" class="w-full bg-slate-100 border border-slate-200 rounded-xl px-2.5 py-1.5 focus:outline-none font-bold text-amber-900 disabled:opacity-50 disabled:cursor-not-allowed" />
+              <div class="relative" id="extra-room-dropdown-container">
+                <button type="button" id="extra-room-dropdown-btn" onclick="toggleExtraRoomDropdownMenu()" disabled class="w-full bg-slate-100 border border-slate-200 opacity-60 cursor-not-allowed rounded-xl px-2.5 focus:outline-none focus:border-amber-500 font-bold text-amber-900 text-left flex justify-between items-center" style="height: 34px;">
+                  <span id="extra-room-dropdown-text" class="truncate pr-2">Select Extra Rooms...</span>
+                  <i class="fa-solid fa-chevron-down text-slate-400"></i>
+                </button>
+                <div id="extra-room-checkboxes" class="hidden absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl max-h-48 overflow-y-auto p-2 space-y-1">
+                  <!-- Dynamically Generated Checkboxes -->
+                </div>
+              </div>
             </div>
 
             <!-- ADDITIONAL PERSON CUSTOM CHECK-IN & CHECK-OUT WINDOW -->

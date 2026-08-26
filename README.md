@@ -3679,104 +3679,105 @@ function updateDashboardCards() {
       document.getElementById('cust-due').value = due;
     }
 
-    function calculateModalBilling() {
-      const inDate = document.getElementById('cust-checkin-date').value;
-      const inTime = document.getElementById('cust-checkin-time').value || '00:00';
-      
-      const hasExtCheckout = document.getElementById('cust-has-extended-checkout')?.checked;
-      let outDate = document.getElementById('cust-checkout-date').value;
-      let outTime = document.getElementById('cust-checkout-time').value || '00:00';
+  function calculateModalBilling() {
+  const inDate = document.getElementById('cust-checkin-date').value;
+  const inTime = document.getElementById('cust-checkin-time').value || '00:00';
+  
+  const hasExtCheckout = document.getElementById('cust-has-extended-checkout')?.checked;
+  let outDate = document.getElementById('cust-checkout-date').value;
+  let outTime = document.getElementById('cust-checkout-time').value || '00:00';
 
-      if (hasExtCheckout) {
-        const extDate = document.getElementById('cust-ext-checkout-date')?.value;
-        const extTime = document.getElementById('cust-ext-checkout-time')?.value;
-        if (extDate) outDate = extDate;
-        if (extTime) outTime = extTime;
+  if (hasExtCheckout) {
+    const extDate = document.getElementById('cust-ext-checkout-date')?.value;
+    const extTime = document.getElementById('cust-ext-checkout-time')?.value;
+    if (extDate) outDate = extDate;
+    if (extTime) outTime = extTime;
+  }
+
+  let days = 0;
+  let latestMainCheckoutDt = null;
+
+  if (inDate && outDate) {
+    latestMainCheckoutDt = new Date(`${outDate}T${outTime}:00+05:30`);
+    const inDateOnly = new Date(inDate);
+    const outDateOnly = new Date(outDate);
+    days = Math.max(1, Math.round((outDateOnly - inDateOnly) / (1000 * 60 * 60 * 24)));
+  }
+
+  const price = parseFloat(document.getElementById('cust-price').value) || 0;
+  const capacity = parseFloat(document.getElementById('cust-capacity').value) || 1;
+
+  const extraPersons = parseInt(document.getElementById('cust-extra-persons')?.value) || 0;
+  const extraPersonRate = parseFloat(document.getElementById('cust-extra-rate')?.value) || 1200;
+  let extraPersonDays = 0;
+
+  if (extraPersons > 0 && latestMainCheckoutDt) {
+    const epInDate = document.getElementById('cust-extra-person-date')?.value;
+    const epInTime = document.getElementById('cust-extra-person-time')?.value;
+    let epOutDate = document.getElementById('cust-extra-person-out-date')?.value;
+    let epOutTime = document.getElementById('cust-extra-person-out-time')?.value;
+
+    if (epInDate && epOutDate && epInTime && epOutTime) {
+      const epInDt = new Date(`${epInDate}T${epInTime}:00+05:30`);
+      let epOutDt = new Date(`${epOutDate}T${epOutTime}:00+05:30`);
+
+      if (epOutDt > latestMainCheckoutDt) {
+        epOutDt = new Date(latestMainCheckoutDt.getTime());
+        epOutDate = toLocalISOString(epOutDt).split('T')[0];
       }
 
-      let days = 0;
-      let latestMainCheckoutDt = null;
-
-      if (inDate && outDate) {
-        latestMainCheckoutDt = new Date(`${outDate}T${outTime}:00+05:30`);
-        const inDateOnly = new Date(inDate);
-        const outDateOnly = new Date(outDate);
-        days = Math.max(1, Math.round((outDateOnly - inDateOnly) / (1000 * 60 * 60 * 24)));
+      if (epInDt < epOutDt) {
+        const epInOnly = new Date(epInDate);
+        const epOutOnly = new Date(epOutDate);
+        const diffDays = Math.round((epOutOnly - epInOnly) / (1000 * 60 * 60 * 24));
+        extraPersonDays = Math.max(1, diffDays);
+      } else {
+        extraPersonDays = 0;
       }
-
-      const price = parseFloat(document.getElementById('cust-price').value) || 0;
-      const capacity = parseFloat(document.getElementById('cust-capacity').value) || 1;
-
-      const extraPersons = parseInt(document.getElementById('cust-extra-persons')?.value) || 0;
-      let extraPersonDays = 0;
-
-      if (extraPersons > 0 && latestMainCheckoutDt) {
-        const epInDate = document.getElementById('cust-extra-person-date')?.value;
-        const epInTime = document.getElementById('cust-extra-person-time')?.value;
-        let epOutDate = document.getElementById('cust-extra-person-out-date')?.value;
-        let epOutTime = document.getElementById('cust-extra-person-out-time')?.value;
-
-        if (epInDate && epOutDate && epInTime && epOutTime) {
-          const epInDt = new Date(`${epInDate}T${epInTime}:00+05:30`);
-          let epOutDt = new Date(`${epOutDate}T${epOutTime}:00+05:30`);
-
-          if (epOutDt > latestMainCheckoutDt) {
-            epOutDt = new Date(latestMainCheckoutDt.getTime());
-            epOutDate = toLocalISOString(epOutDt).split('T')[0];
-          }
-
-          if (epInDt < epOutDt) {
-            const epInOnly = new Date(epInDate);
-            const epOutOnly = new Date(epOutDate);
-            const diffDays = Math.round((epOutOnly - epInOnly) / (1000 * 60 * 60 * 24));
-            extraPersonDays = Math.max(1, diffDays);
-          } else {
-            extraPersonDays = 0;
-          }
-        } else {
-           extraPersonDays = 0; 
-        }
-      }
-
-      const roomTotal = days * price * capacity;
-      const extraPersonTotal = extraPersons * extraPersonDays * price;
-
-      let foodTotalCharge = 0;
-      document.querySelectorAll('.cust-food-charge').forEach(input => {
-        foodTotalCharge += parseFloat(input.value) || 0;
-      });
-      
-      let cabFare = 0;
-      document.querySelectorAll('.cust-cab-rate').forEach(input => {
-        cabFare += parseFloat(input.value) || 0;
-      });
-
-      const total = roomTotal + extraPersonTotal + foodTotalCharge + cabFare;
-
-      const advanceInput = document.getElementById('cust-advance');
-      let currentAdvVal = parseFloat(advanceInput.value) || 0;
-
-      if (currentAdvVal > total) {
-        alert(`⚠️ Advance payment (₹${currentAdvVal}) cannot exceed the total bill amount (₹${total})!`);
-        currentAdvVal = total;
-        advanceInput.value = total;
-      }
-
-      advanceInput.setAttribute('data-initial-adv', currentAdvVal);
-
-      const clearBillVal = parseFloat(document.getElementById('cust-clear-bill')?.value) || 0;
-      const due = Math.max(0, total - currentAdvVal - clearBillVal);
-
-      document.getElementById('cust-days').value = days;
-      document.getElementById('cust-total').value = total;
-      document.getElementById('cust-due').value = due;
-      
-      const extraTotalInput = document.getElementById('cust-extra-total');
-      if (extraTotalInput) extraTotalInput.value = extraPersonTotal;
-      
-      const cabTotalInput = document.getElementById('cust-cab-total');
-      if (cabTotalInput) cabTotalInput.value = cabFare;
+    } else {
+       extraPersonDays = 0; 
     }
+  }
+
+  const roomTotal = days * price * capacity;
+  const extraPersonTotal = extraPersons * extraPersonDays * extraPersonRate;
+
+  let foodTotalCharge = 0;
+  document.querySelectorAll('.cust-food-charge').forEach(input => {
+    foodTotalCharge += parseFloat(input.value) || 0;
+  });
+  
+  let cabFare = 0;
+  document.querySelectorAll('.cust-cab-rate').forEach(input => {
+    cabFare += parseFloat(input.value) || 0;
+  });
+
+  const total = roomTotal + extraPersonTotal + foodTotalCharge + cabFare;
+
+  const advanceInput = document.getElementById('cust-advance');
+  let currentAdvVal = parseFloat(advanceInput.value) || 0;
+
+  if (currentAdvVal > total) {
+    alert(`⚠️ Advance payment (₹${currentAdvVal}) cannot exceed the total bill amount (₹${total})!`);
+    currentAdvVal = total;
+    advanceInput.value = total;
+  }
+
+  advanceInput.setAttribute('data-initial-adv', currentAdvVal);
+
+  const clearBillVal = parseFloat(document.getElementById('cust-clear-bill')?.value) || 0;
+  const due = Math.max(0, total - currentAdvVal - clearBillVal);
+
+  document.getElementById('cust-days').value = days;
+  document.getElementById('cust-total').value = total;
+  document.getElementById('cust-due').value = due;
+  
+  const extraTotalInput = document.getElementById('cust-extra-total');
+  if (extraTotalInput) extraTotalInput.value = extraPersonTotal;
+  
+  const cabTotalInput = document.getElementById('cust-cab-total');
+  if (cabTotalInput) cabTotalInput.value = cabFare;
+}
 
     function handleSaveBooking(e) {
       e.preventDefault();

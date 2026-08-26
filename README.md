@@ -3150,7 +3150,7 @@ function updateDashboardCards() {
     function openBookingModal(bookingId = null) {
       const now = new Date().getTime();
       let isLiveBooking = false;
-      let isClosedBooking = true;
+      let isClosedBooking = false;
       let isUpcomingBooking = false;
       let ispast1825days = false;
 

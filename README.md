@@ -815,12 +815,6 @@
       <form id="booking-form" onsubmit="handleSaveBooking(event)" class="space-y-3 text-[11px]">
         <input type="hidden" id="modal-booking-id" />
 
-<!-- PLACE THIS AT THE TOP OF <form id="booking-form"> INSIDE #booking-modal -->
-<div id="closed-booking-warning-banner" class="hidden bg-amber-50 border border-amber-200 text-amber-800 p-2.5 rounded-2xl text-[11px] font-bold flex items-center gap-2">
-  <i class="fa-solid fa-triangle-exclamation text-amber-600 text-sm"></i>
-  <span>You are about to edit the closed booking details so please be careful with data</span>
-</div>
-
         <!-- GUEST DETAILS -->
         <div id="sec-guest-info" class="bg-slate-50 p-3 rounded-2xl border border-slate-200/60 space-y-2.5 transition-all">
           <h4 class="text-[9px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
@@ -3153,128 +3147,22 @@ function updateDashboardCards() {
       }
     }
 
-/**
- * Helper function to set field disabled state and styling
- */
-function setElementDisabled(elemId, disable) {
-  const el = document.getElementById(elemId);
-  if (!el) return;
-  el.disabled = disable;
-  if (disable) {
-    el.classList.add('bg-slate-200/60', 'cursor-not-allowed');
-    el.classList.remove('bg-white');
-  } else {
-    el.classList.remove('bg-slate-200/60', 'cursor-not-allowed');
-    if (!el.classList.contains('bg-amber-50') && !el.classList.contains('bg-emerald-50')) {
-      el.classList.add('bg-white');
-    }
-  }
-}
+    function openBookingModal(bookingId = null) {
+      const now = new Date().getTime();
+      let isLiveBooking = false;
+      let isClosedBooking = false;
+      let isUpcomingBooking = false;
+      let isPast730Days = false;
 
-/**
- * Apply dynamic edit restrictions based on booking status
- */
-function applyBookingEditRestrictions(status) {
-  const isClosed = (status === 'CLOSED');
-  const isLive = (status === 'LIVE');
-
-  // Reset all locks first
-  const lockableIds = [
-    'cust-name',
-    'cust-checkin-date',
-    'cust-checkin-time',
-    'cust-checkout-date',
-    'cust-checkout-time',
-    'cust-agent',
-    'cust-ext-checkout-date',
-    'cust-ext-checkout-time',
-    'cust-has-extended-checkout'
-  ];
-  
-  lockableIds.forEach(id => setElementDisabled(id, false));
-  
-  const roomBtn = document.getElementById('room-dropdown-btn');
-  if (roomBtn) {
-    roomBtn.disabled = false;
-    roomBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-  }
-
-  // 1. IF BOOKING IS CLOSED
-  if (isClosed) {
-    // Lock: Main check-in & check-out date/time, extended check-out, Room no, Agent info, Guest name
-    setElementDisabled('cust-name', true);
-    setElementDisabled('cust-checkin-date', true);
-    setElementDisabled('cust-checkin-time', true);
-    setElementDisabled('cust-checkout-date', true);
-    setElementDisabled('cust-checkout-time', true);
-    setElementDisabled('cust-agent', true);
-    setElementDisabled('cust-ext-checkout-date', true);
-    setElementDisabled('cust-ext-checkout-time', true);
-    setElementDisabled('cust-has-extended-checkout', true);
-    
-    if (roomBtn) {
-      roomBtn.disabled = true;
-      roomBtn.classList.add('opacity-50', 'cursor-not-allowed');
-    }
-  }
-  // 2. IF BOOKING IS LIVE
-  else if (isLive) {
-    // Lock: Guest name, Room no, Agent info, Main check-in & check-out date/time
-    setElementDisabled('cust-name', true);
-    setElementDisabled('cust-checkin-date', true);
-    setElementDisabled('cust-checkin-time', true);
-    setElementDisabled('cust-checkout-date', true);
-    setElementDisabled('cust-checkout-time', true);
-    setElementDisabled('cust-agent', true);
-    
-    if (roomBtn) {
-      roomBtn.disabled = true;
-      roomBtn.classList.add('opacity-50', 'cursor-not-allowed');
-    }
-  }
-}
-
-/**
- * Updated openBookingModal function with status detection & alerts
- */
-function openBookingModal(bookingId = null) {
-  const modal = document.getElementById('booking-modal');
-  const warningBanner = document.getElementById('closed-booking-warning-banner');
-  if (!modal) return;
-
-  const b = state.bookings.find(item => String(item.id) === String(bookingId));
-  activeModalBooking = b || null;
-
-  // Determine booking status
-  let status = 'UPCOMING';
-  if (b) {
-    const now = Date.now();
-    const checkInMs = parseDateMs(b.checkIn);
-    const checkOutMs = getEffectiveCheckoutTime(b);
-
-    if (now >= checkInMs && now <= checkOutMs) {
-      status = 'LIVE';
-    } else if (now > checkOutMs) {
-      status = 'CLOSED';
-    }
-  }
-
-  // 3. Popup message when booking is closed and edit window is opened
-  if (status === 'CLOSED') {
-    alert("You are about to edit the closed booking details so please be careful with data");
-    if (warningBanner) warningBanner.classList.remove('hidden');
-  } else {
-    if (warningBanner) warningBanner.classList.add('hidden');
-  }
-
-  // Fill modal fields with booking data (Standard existing logic)
-  populateBookingFormFields(b);
-
-  // Apply conditional field lock rules
-  applyBookingEditRestrictions(status);
-
-  modal.classList.remove('hidden');
-}
+      let b = null;
+      if (bookingId) {
+        b = state.bookings.find(item => String(item.id) === String(bookingId));
+        if (b) {
+          if (isInactiveBooking(b)) {
+            // "just receipt view will be enabled."
+            printInvoice(bookingId);
+            return;
+          }
 
           if (!isRoomInMaster(b.roomNo)) {
             alert("This booking details were deleted from Master Data and cannot be opened or edited.");

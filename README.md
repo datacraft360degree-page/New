@@ -3780,6 +3780,22 @@ function updateDashboardCards() {
 }
 
     function handleSaveBooking(e) {
+
+  const extraPersons = parseInt(document.getElementById('cust-extra-persons')?.value) || 0;
+  const extraRoomVal = document.getElementById('cust-extra-room')?.value || "Same room with extra bed";
+  
+  const epDateCheck = document.getElementById('cust-extra-person-date')?.value;
+  const epOutDateCheck = document.getElementById('cust-extra-person-out-date')?.value;
+
+  // Validation Rule: If any extra person field/count/dates/room is filled, all must be filled
+  const hasAnyExtraFieldFilled = (extraPersons > 0) || (extraRoomVal !== "Same room with extra bed") || Boolean(epDateCheck) || Boolean(epOutDateCheck);
+
+  if (hasAnyExtraFieldFilled) {
+    if (extraPersons <= 0 || !epDateCheck || !epOutDateCheck) {
+      alert("⚠️ Error: Please fill in all required Extra Person details (Extra Person Count, Extra Room Selection, and Extra Person Check-In/Check-Out Dates) completely before saving the booking.");
+      return;
+    }
+  }
       e.preventDefault();
 
       const guestName = formatTitleCase(document.getElementById('cust-name').value.trim());

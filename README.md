@@ -872,44 +872,52 @@
           </div>
         </div>
 
-        <!-- Room & Stay Schedule Box -->
-        <div id="sec-room-dates" class="bg-slate-50 p-3 rounded-2xl border border-slate-200/60 space-y-2.5 transition-all">
-          <h4 class="text-[9px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-            <i class="fa-solid fa-bed text-blue-600"></i> Room Selection &amp; Stay Dates
-          </h4>
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-            <div>
-              <label class="block font-semibold text-slate-600 mb-0.5">Room No(s)</label>
-              <div class="relative" id="room-dropdown-container">
-                <button type="button" onclick="toggleRoomDropdown()" id="room-dropdown-btn" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 focus:outline-none focus:border-blue-500 font-bold text-blue-600 text-left flex justify-between items-center" style="height: 34px;">
-                  <span id="room-dropdown-text" class="truncate pr-2">Select Rooms...</span>
-                  <i class="fa-solid fa-chevron-down text-slate-400"></i>
-                </button>
-                <div id="room-checkboxes" class="hidden absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl max-h-48 overflow-y-auto p-2 space-y-1">
-                  <!-- Generated Checkboxes Go Here -->
-                </div>
-              </div>
-            </div>
-            
-            <div class="flex flex-col gap-2">
-              <div>
-                <label class="block font-semibold text-slate-600 mb-0.5">Agent Info</label>
-                <select id="cust-agent" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-blue-500 font-bold text-slate-700"></select>
-              </div>
+       <!-- Replace the inner block of #sec-room-dates with the following: -->
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+  <div>
+    <label class="block font-semibold text-slate-600 mb-0.5">Room No(s)</label>
+    <div class="relative" id="room-dropdown-container">
+      <button type="button" onclick="toggleRoomDropdown()" id="room-dropdown-btn" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 font-bold text-blue-600 text-left flex justify-between items-center" style="height: 34px;">
+        <span id="room-dropdown-text" class="truncate pr-2">Select Rooms...</span>
+        <i class="fa-solid fa-chevron-down text-slate-400"></i>
+      </button>
+      <div id="room-checkboxes" class="hidden absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl max-h-48 overflow-y-auto p-2 space-y-1">
+        <!-- Generated Checkboxes Go Here -->
+      </div>
+    </div>
+  </div>
+  
+  <div class="flex flex-col gap-2">
+    <div>
+      <label class="block font-semibold text-slate-600 mb-0.5">Agent Info</label>
+      <select id="cust-agent" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-blue-500 font-bold text-slate-700"></select>
+    </div>
 
-              <div>
-                <label class="block font-semibold text-slate-600 mb-0.5">Total Capacity</label>
-                <input type="number" id="cust-capacity" min="1" value="1" oninput="calculateModalBilling()" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-blue-500 font-bold text-slate-700" />
-              </div>
-            </div>
+    <div>
+      <label class="block font-semibold text-slate-600 mb-0.5">Total Capacity</label>
+      <input type="number" id="cust-capacity" min="1" value="1" oninput="calculateModalBilling()" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-blue-500 font-bold text-slate-700" />
+    </div>
+  </div>
 
-            <!-- EXTRA PERSON(S) COUNT FIELD -->
-            <div>
-              <label class="block font-semibold text-amber-700 mb-0.5 flex items-center gap-1">
-                <i class="fa-solid fa-user-plus text-amber-600"></i> Add Extra Person(s)
-              </label>
-              <input type="number" id="cust-extra-persons" min="0" value="0" placeholder="0" oninput="calculateModalBilling()" class="w-full bg-amber-50 border border-amber-300 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-amber-500 font-bold text-amber-900" />
-            </div>
+  <!-- EXTRA PERSON(S) COUNT FIELD -->
+  <div>
+    <label class="block font-semibold text-amber-700 mb-0.5 flex items-center gap-1">
+      <i class="fa-solid fa-user-plus text-amber-600"></i> Add Extra Person(s)
+    </label>
+    <input type="number" id="cust-extra-persons" min="0" value="0" placeholder="0" oninput="handleExtraPersonCountChange()" class="w-full bg-amber-50 border border-amber-300 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-amber-500 font-bold text-amber-900" />
+  </div>
+
+  <!-- ADD EXTRA ROOM(S) FIELD -->
+  <div>
+    <label class="block font-semibold text-amber-700 mb-0.5 flex items-center gap-1">
+      <i class="fa-solid fa-door-open text-amber-600"></i> Add Extra Room(s)
+    </label>
+    <select id="cust-extra-room" disabled onchange="calculateModalBilling()" class="w-full bg-slate-100 border border-slate-200 rounded-xl px-2 py-1.5 focus:outline-none font-bold text-amber-900 disabled:opacity-50 disabled:cursor-not-allowed">
+      <option value="">-- Select Extra Room --</option>
+      <option value="Same room no with extra bed">Same room no with extra bed</option>
+    </select>
+  </div>
+</div>
 
             <!-- ADDITIONAL PERSON CUSTOM CHECK-IN & CHECK-OUT WINDOW -->
             <div id="sec-extra-person-time-wrapper" class="sm:col-span-4 hidden bg-amber-50/70 p-2.5 rounded-2xl border border-amber-200/80 space-y-2">
@@ -1019,10 +1027,15 @@
           </h4>
           
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2 pb-2 border-b border-blue-200">
-             <div>
-                <label class="block font-semibold text-slate-600 mb-0.5">Extra Person (₹)</label>
-                <input type="number" id="cust-extra-total" readonly="" class="w-full bg-slate-200/60 font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" />
-             </div>
+             <!-- Replace Extra Person input in Billing Summary with: -->
+<div>
+  <label class="block font-semibold text-slate-600 mb-0.5">Extra Person Rate (₹)</label>
+  <input type="number" id="cust-extra-rate" value="1200" oninput="calculateModalBilling()" class="w-full bg-white font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 focus:outline-none focus:border-blue-500" />
+</div>
+<div>
+  <label class="block font-semibold text-slate-600 mb-0.5">Extra Person Total (₹)</label>
+  <input type="number" id="cust-extra-total" readonly class="w-full bg-slate-200/60 font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" />
+</div>
              <div>
                 <label class="block font-semibold text-slate-600 mb-0.5">Cab Fare (₹)</label>
                 <input type="number" id="cust-cab-total" readonly="" class="w-full bg-slate-200/60 font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" />

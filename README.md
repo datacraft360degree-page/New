@@ -3150,9 +3150,9 @@ function updateDashboardCards() {
     function openBookingModal(bookingId = null) {
       const now = new Date().getTime();
       let isLiveBooking = false;
-      let isClosedBooking = true;
+      let isClosedBooking = false;
       let isUpcomingBooking = false;
-      let ispast1825days = false;
+      let isPast730Days = false;
 
       let b = null;
       if (bookingId) {
@@ -3174,8 +3174,8 @@ function updateDashboardCards() {
 
           if (now > effectiveOutTime) {
             isClosedBooking = true;
-            if (now > effectiveOutTime + (1825 * 24 * 60 * 60 * 1000)) {
-               ispast1825days = true;
+            if (now > effectiveOutTime + (730 * 24 * 60 * 60 * 1000)) {
+               isPast730Days = true;
             }
           } else if (now >= checkInTime && now <= effectiveOutTime) {
             isLiveBooking = true;
@@ -3201,7 +3201,7 @@ function updateDashboardCards() {
       document.getElementById('cab-trips-container').innerHTML = '';
       populateAgentDropdown();
 
-      setSectionEditability('sec-guest-info', !ispast1825days);
+      setSectionEditability('sec-guest-info', !isClosedBooking);
       setSectionEditability('sec-room-dates', !isClosedBooking);
 
       const extChkBox = document.getElementById('cust-has-extended-checkout');
@@ -3237,13 +3237,13 @@ function updateDashboardCards() {
 
       const mealsChkBox = document.getElementById('cust-include-meals');
       if (mealsChkBox) {
-        mealsChkBox.disabled = isPast1825Days;
+        mealsChkBox.disabled = isClosedBooking;
       }
 
       const addFoodBtn = document.getElementById('btn-add-food-order');
       if (addFoodBtn) {
-        addFoodBtn.disabled = isPast1825Days;
-        if (isPast1825Days) {
+        addFoodBtn.disabled = isClosedBooking;
+        if (isClosedBooking) {
           addFoodBtn.classList.add('opacity-50', 'cursor-not-allowed');
         } else {
           addFoodBtn.classList.remove('opacity-50', 'cursor-not-allowed');
@@ -3252,20 +3252,20 @@ function updateDashboardCards() {
       
       const addCabBtn = document.getElementById('btn-add-cab-trip');
       if (addCabBtn) {
-        addCabBtn.disabled = isPast1825Days;
-        if (isPast1825Days) {
+        addCabBtn.disabled = isClosedBooking;
+        if (isClosedBooking) {
           addCabBtn.classList.add('opacity-50', 'cursor-not-allowed');
         } else {
           addCabBtn.classList.remove('opacity-50', 'cursor-not-allowed');
         }
       }
 
-      setSectionEditability('sec-cab-fare', !isPast1825Days);
-      setSectionEditability('sec-billing-summary', !ispast1825days);
+      setSectionEditability('sec-cab-fare', !isClosedBooking);
+      setSectionEditability('sec-billing-summary', !isPast730Days);
 
       const btnSave = document.getElementById('btn-save-booking');
       if (btnSave) {
-         if (ispast1825days) {
+         if (isPast730Days) {
             btnSave.disabled = true;
             btnSave.classList.add('opacity-50', 'cursor-not-allowed', 'bg-slate-400');
             btnSave.classList.remove('bg-blue-600', 'hover:bg-blue-700');
@@ -3301,7 +3301,7 @@ function updateDashboardCards() {
       }
 
       if (b) {
-        document.getElementById('modal-title').innerText = ispast1825days ? 'Closed Booking (Read-Only)' : (isClosedBooking ? 'Closed Booking (Billing Active)' : 'Edit Booking Details');
+        document.getElementById('modal-title').innerText = isPast730Days ? 'Closed Booking (Read-Only)' : (isClosedBooking ? 'Closed Booking (Billing Active)' : 'Edit Booking Details');
         
         // ** ONLY ALLOW EDITING OF MAIN CHECK-IN AND CHECK-OUT DATES IF BOOKING IS UPCOMING **
         setInputEnabled(document.getElementById('cust-checkin-date'), isUpcomingBooking);
@@ -3398,7 +3398,7 @@ function updateDashboardCards() {
                cDate = trip.dateStr || '';
                cTime = trip.timeStr || '';
             }
-            addCabTripRow(trip.rate || 0, cDate, cTime, trip.remark || '', isPast1825Days);
+            addCabTripRow(trip.rate || 0, cDate, cTime, trip.remark || '', isClosedBooking);
           });
         }
 

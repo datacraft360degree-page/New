@@ -815,6 +815,12 @@
       <form id="booking-form" onsubmit="handleSaveBooking(event)" class="space-y-3 text-[11px]">
         <input type="hidden" id="modal-booking-id" />
 
+<!-- PLACE THIS AT THE TOP OF <form id="booking-form"> INSIDE #booking-modal -->
+<div id="closed-booking-warning-banner" class="hidden bg-amber-50 border border-amber-200 text-amber-800 p-2.5 rounded-2xl text-[11px] font-bold flex items-center gap-2">
+  <i class="fa-solid fa-triangle-exclamation text-amber-600 text-sm"></i>
+  <span>You are about to edit the closed booking details so please be careful with data</span>
+</div>
+
         <!-- GUEST DETAILS -->
         <div id="sec-guest-info" class="bg-slate-50 p-3 rounded-2xl border border-slate-200/60 space-y-2.5 transition-all">
           <h4 class="text-[9px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">

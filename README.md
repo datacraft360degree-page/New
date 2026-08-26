@@ -910,6 +910,20 @@
               </label>
               <input type="number" id="cust-extra-persons" min="0" value="0" placeholder="0" oninput="calculateModalBilling()" class="w-full bg-amber-50 border border-amber-300 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-amber-500 font-bold text-amber-900" />
             </div>
+  <div id="sec-extra-persons-room-wrapper" class="sm:col-span-4 hidden bg-amber-50/70 p-2.5 rounded-2xl border border-amber-200/80 space-y-2">
+              <label class="block font-bold text-amber-900 mb-1 flex items-center gap-1">
+                <i class="fa-solid fa-door-open text-amber-600"></i> Extra Persons Room No(s)
+              </label>
+              <div class="relative" id="extra-room-dropdown-container">
+                <button type="button" onclick="toggleExtraRoomDropdown()" id="extra-room-dropdown-btn" class="w-full bg-white border border-amber-200 rounded-xl px-2.5 focus:outline-none focus:border-amber-500 font-bold text-amber-900 text-left flex justify-between items-center" style="height: 34px;">
+                  <span id="extra-room-dropdown-text" class="truncate pr-2">Select Rooms for Extra Persons...</span>
+                  <i class="fa-solid fa-chevron-down text-slate-400"></i>
+                </button>
+                <div id="extra-room-checkboxes" class="hidden absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl max-h-48 overflow-y-auto p-2 space-y-1">
+                  <!-- Dynamically populated from state.roomsCapacity -->
+                </div>
+              </div>
+            </div>
 
             <!-- ADDITIONAL PERSON CUSTOM CHECK-IN & CHECK-OUT WINDOW -->
             <div id="sec-extra-person-time-wrapper" class="sm:col-span-4 hidden bg-amber-50/70 p-2.5 rounded-2xl border border-amber-200/80 space-y-2">

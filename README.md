@@ -1031,9 +1031,9 @@
           
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2 pb-2 border-b border-blue-200">
              <div>
-                <label class="block font-semibold text-slate-600 mb-0.5">Extra Person (₹)</label>
-                <input type="number" id="cust-extra-total" readonly="" class="w-full bg-slate-200/60 font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" />
-             </div>
+   <label class="block font-semibold text-slate-600 mb-0.5">Extra Rate/Person (₹)</label>
+   <input type="number" id="cust-extra-rate" value="1200" oninput="calculateModalBilling()" class="w-full bg-white font-bold text-amber-700 border border-amber-300 rounded-xl px-2 py-1.5 focus:outline-none focus:border-amber-500" />
+</div>
              <div>
                 <label class="block font-semibold text-slate-600 mb-0.5">Cab Fare (₹)</label>
                 <input type="number" id="cust-cab-total" readonly="" class="w-full bg-slate-200/60 font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" />

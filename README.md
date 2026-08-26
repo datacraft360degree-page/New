@@ -3150,7 +3150,7 @@ function updateDashboardCards() {
     function openBookingModal(bookingId = null) {
       const now = new Date().getTime();
       let isLiveBooking = false;
-      let isClosedBooking = false;
+      let isClosedBooking = true;
       let isUpcomingBooking = false;
       let ispast1825days = false;
 
@@ -3201,7 +3201,7 @@ function updateDashboardCards() {
       document.getElementById('cab-trips-container').innerHTML = '';
       populateAgentDropdown();
 
-      setSectionEditability('sec-guest-info', !isClosedBooking);
+      setSectionEditability('sec-guest-info', !ispast1825days);
       setSectionEditability('sec-room-dates', !isClosedBooking);
 
       const extChkBox = document.getElementById('cust-has-extended-checkout');
@@ -3237,13 +3237,13 @@ function updateDashboardCards() {
 
       const mealsChkBox = document.getElementById('cust-include-meals');
       if (mealsChkBox) {
-        mealsChkBox.disabled = isClosedBooking;
+        mealsChkBox.disabled = isPast1825Days;
       }
 
       const addFoodBtn = document.getElementById('btn-add-food-order');
       if (addFoodBtn) {
-        addFoodBtn.disabled = isClosedBooking;
-        if (isClosedBooking) {
+        addFoodBtn.disabled = isPast1825Days;
+        if (isPast1825Days) {
           addFoodBtn.classList.add('opacity-50', 'cursor-not-allowed');
         } else {
           addFoodBtn.classList.remove('opacity-50', 'cursor-not-allowed');
@@ -3252,15 +3252,15 @@ function updateDashboardCards() {
       
       const addCabBtn = document.getElementById('btn-add-cab-trip');
       if (addCabBtn) {
-        addCabBtn.disabled = isClosedBooking;
-        if (isClosedBooking) {
+        addCabBtn.disabled = isPast1825Days;
+        if (isPast1825Days) {
           addCabBtn.classList.add('opacity-50', 'cursor-not-allowed');
         } else {
           addCabBtn.classList.remove('opacity-50', 'cursor-not-allowed');
         }
       }
 
-      setSectionEditability('sec-cab-fare', !isClosedBooking);
+      setSectionEditability('sec-cab-fare', !isPast1825Days);
       setSectionEditability('sec-billing-summary', !ispast1825days);
 
       const btnSave = document.getElementById('btn-save-booking');
@@ -3398,7 +3398,7 @@ function updateDashboardCards() {
                cDate = trip.dateStr || '';
                cTime = trip.timeStr || '';
             }
-            addCabTripRow(trip.rate || 0, cDate, cTime, trip.remark || '', isClosedBooking);
+            addCabTripRow(trip.rate || 0, cDate, cTime, trip.remark || '', isPast1825Days);
           });
         }
 

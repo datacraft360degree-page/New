@@ -621,6 +621,10 @@
             <button onclick="openBookingModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-1.5 rounded-full text-[11px] font-semibold flex items-center gap-1.5 transition shadow-sm whitespace-nowrap">
               <i class="fa-solid fa-plus text-[10px]"></i> Add Booking
             </button>
+  <!-- ADD CLOSED BOOKING BUTTON -->
+<button onclick="openEditClosedBookingModal()" class="bg-amber-600 hover:bg-amber-700 text-white px-3.5 py-1.5 rounded-full text-[11px] font-semibold flex items-center gap-1.5 transition shadow-sm whitespace-nowrap">
+ <i class="fa-solid fa-unlock-keyhole text-[10px]"></i> Edit Closed Booking
+</button>
           </div>
         </div>
 

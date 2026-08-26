@@ -1408,6 +1408,71 @@ function checkBirthdayTrigger() {
     }
 
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbz6rME_OuYHucGBPCfCrV7EYjuE5YF0eqSeuqBjm42-HPXUYJzUSBu0mov9jCdM7zx5Ng/exec"; 
+
+// --- EDIT CLOSED BOOKING MODULE ---
+
+function openEditClosedBookingModal() {
+ document.getElementById('closed-bkg-id-input').value = '';
+ document.getElementById('closed-bkg-date-input').value = '';
+ document.getElementById('closed-bkg-pass-input').value = '';
+ document.getElementById('closed-bkg-error').classList.add('hidden');
+ document.getElementById('edit-closed-booking-modal').classList.remove('hidden');
+}
+
+function closeEditClosedBookingModal() {
+ document.getElementById('edit-closed-booking-modal').classList.add('hidden');
+}
+
+function handleEditClosedBookingAuth(e) {
+ e.preventDefault();
+ const inputId = document.getElementById('closed-bkg-id-input').value.trim().toUpperCase();
+ const inputDate = document.getElementById('closed-bkg-date-input').value;
+ const inputPass = document.getElementById('closed-bkg-pass-input').value.trim();
+ const errorElem = document.getElementById('closed-bkg-error');
+
+ if (inputPass !== "Aadmin123") {
+   errorElem.innerText = "Incorrect Password!";
+   errorElem.classList.remove('hidden');
+   return;
+ }
+
+ // Find the booking by ID and check-in date match
+ const foundBooking = state.bookings.find(b => {
+   if (!b.bookingCode || !b.checkIn) return false;
+   const bCodeMatch = String(b.bookingCode).trim().toUpperCase() === inputId;
+   const bDateMatch = String(b.checkIn).split('T')[0] === inputDate;
+   return bCodeMatch && bDateMatch;
+ });
+
+ if (!foundBooking) {
+   errorElem.innerText = "No booking found matching that Booking ID and Check-In date!";
+   errorElem.classList.remove('hidden');
+   return;
+ }
+
+ // Set 1-hour temporary unlock authorization in localStorage for this booking ID
+ const unlockExpiry = new Date().getTime() + (60 * 60 * 1000);
+ localStorage.setItem(`unlocked_closed_bkg_${foundBooking.id}`, unlockExpiry);
+
+ closeEditClosedBookingModal();
+ 
+ // Open standard booking edit window with the unlocked booking ID
+ openBookingModal(foundBooking.id);
+ 
+ // Refresh table/dashboard to reflect unlocked state capability
+ renderBookingsTable();
+}
+
+// Helper to check if a closed booking is currently within its 1-hour unlocked window
+function isClosedBookingUnlocked(bookingId) {
+ const expiry = localStorage.getItem(`unlocked_closed_bkg_${bookingId}`);
+ if (!expiry) return false;
+ if (new Date().getTime() > parseInt(expiry, 10)) {
+   localStorage.removeItem(`unlocked_closed_bkg_${bookingId}`);
+   return false;
+ }
+ return true;
+}
     
     const ONE_HOUR_MS = 1 * 60 * 60 * 1000;
     let activeModalBooking = null;

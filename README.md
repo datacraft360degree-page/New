@@ -1375,7 +1375,43 @@ function checkBirthdayTrigger() {
     }
 
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbz6rME_OuYHucGBPCfCrV7EYjuE5YF0eqSeuqBjm42-HPXUYJzUSBu0mov9jCdM7zx5Ng/exec"; 
-    
+
+function populateExtraRoomDropdown() {
+  const select = document.getElementById('cust-extra-room');
+  if (!select) return;
+  const currentVal = select.value;
+  select.innerHTML = '<option value="">-- Select Extra Room --</option><option value="Same room no with extra bed">Same room no with extra bed</option>';
+  
+  if (state && state.roomsCapacity) {
+    state.roomsCapacity.forEach(r => {
+      const opt = document.createElement('option');
+      opt.value = `Room ${r.roomNo}`;
+      opt.textContent = `Room ${r.roomNo}`;
+      select.appendChild(opt);
+    });
+  }
+  select.value = currentVal;
+}
+
+function handleExtraPersonCountChange() {
+  const count = parseInt(document.getElementById('cust-extra-persons').value) || 0;
+  const extraRoomSelect = document.getElementById('cust-extra-room');
+  const extraTimeWrapper = document.getElementById('sec-extra-person-time-wrapper');
+
+  if (count > 0) {
+    extraRoomSelect.disabled = false;
+    extraRoomSelect.classList.remove('bg-slate-100', 'disabled:opacity-50', 'disabled:cursor-not-allowed');
+    extraRoomSelect.classList.add('bg-white');
+    if (extraTimeWrapper) extraTimeWrapper.classList.remove('hidden');
+  } else {
+    extraRoomSelect.disabled = true;
+    extraRoomSelect.classList.add('bg-slate-100', 'disabled:opacity-50', 'disabled:cursor-not-allowed');
+    extraRoomSelect.classList.remove('bg-white');
+    extraRoomSelect.value = '';
+    if (extraTimeWrapper) extraTimeWrapper.classList.add('hidden');
+  }
+  calculateModalBilling();
+}
     const ONE_HOUR_MS = 1 * 60 * 60 * 1000;
     let activeModalBooking = null;
 

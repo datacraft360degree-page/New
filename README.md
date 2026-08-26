@@ -3281,11 +3281,18 @@ function updateDashboardCards() {
           const effectiveOutTime = getEffectiveCheckoutTime(b);
           const checkInTime = parseDateMs(b.checkIn);
 
-          if (now > effectiveOutTime) {
-            isClosedBooking = true;
-            if (now > effectiveOutTime + (730 * 24 * 60 * 60 * 1000)) {
-               isPast730Days = true;
-            }
+         if (now > effectiveOutTime) {
+           isClosedBooking = true;
+           // Check if user unlocked this closed booking via the "Edit Closed Booking" button within the last 1 hour
+           if (isClosedBookingUnlocked(b.id)) {
+             isClosedBooking = false; // Temporarily treat as editable for 1 hour
+           }
+
+           if (now > effectiveOutTime + (730 * 24 * 60 * 60 * 1000)) {
+              isPast730Days = true;
+           }
+         }
+      
           } else if (now >= checkInTime && now <= effectiveOutTime) {
             isLiveBooking = true;
           } else {

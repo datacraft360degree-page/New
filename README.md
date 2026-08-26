@@ -621,10 +621,6 @@
             <button onclick="openBookingModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-1.5 rounded-full text-[11px] font-semibold flex items-center gap-1.5 transition shadow-sm whitespace-nowrap">
               <i class="fa-solid fa-plus text-[10px]"></i> Add Booking
             </button>
-  <!-- ADD CLOSED BOOKING BUTTON -->
-<button onclick="openEditClosedBookingModal()" class="bg-amber-600 hover:bg-amber-700 text-white px-3.5 py-1.5 rounded-full text-[11px] font-semibold flex items-center gap-1.5 transition shadow-sm whitespace-nowrap">
- <i class="fa-solid fa-unlock-keyhole text-[10px]"></i> Edit Closed Booking
-</button>
           </div>
         </div>
 
@@ -779,46 +775,6 @@
         <div id="calendar-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3"></div>
       </div>
     </section>
-
-<!-- EDIT CLOSED BOOKING AUTH & SEARCH MODAL -->
-<div id="edit-closed-booking-modal" class="hidden fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-4 no-print">
- <div class="bg-white rounded-3xl shadow-2xl border border-slate-100 max-w-sm w-full p-5 space-y-4 text-left">
-   <div class="flex justify-between items-center pb-2 border-b border-slate-100">
-     <h3 class="text-xs font-bold text-slate-900 flex items-center gap-1.5">
-       <i class="fa-solid fa-lock-open text-amber-600"></i> Edit Closed Booking Unlock
-     </h3>
-     <button onclick="closeEditClosedBookingModal()" class="text-slate-400 hover:text-slate-600 p-0.5 text-base"><i class="fa-solid fa-xmark"></i></button>
-   </div>
-
-   <form onsubmit="handleEditClosedBookingAuth(event)" class="space-y-3 text-[11px]">
-     <div>
-       <label class="block font-semibold text-slate-600 mb-0.5">Booking ID <span class="text-rose-500">*</span></label>
-       <input type="text" id="closed-bkg-id-input" required placeholder="e.g. BKG-2026-0000001" class="w-full bg-slate-100 border border-transparent focus:border-amber-500 rounded-xl px-2.5 py-1.5 focus:outline-none focus:bg-white uppercase font-mono font-bold text-blue-600" />
-     </div>
-
-     <div>
-       <label class="block font-semibold text-slate-600 mb-0.5">Check-In Date <span class="text-rose-500">*</span></label>
-       <input type="date" id="closed-bkg-date-input" required class="w-full bg-slate-100 border border-transparent focus:border-amber-500 rounded-xl px-2.5 py-1.5 focus:outline-none focus:bg-white font-semibold" />
-     </div>
-
-     <div>
-       <label class="block font-semibold text-slate-600 mb-0.5">Password <span class="text-rose-500">*</span></label>
-       <input type="password" id="closed-bkg-pass-input" required placeholder="Enter Password" class="w-full bg-slate-100 border border-transparent focus:border-amber-500 rounded-xl px-2.5 py-1.5 focus:outline-none focus:bg-white" />
-     </div>
-
-     <div id="closed-bkg-error" class="hidden bg-rose-50 border border-rose-100 text-rose-600 text-[10px] p-2 rounded-xl text-center font-medium">
-       Invalid credentials or matching closed booking not found!
-     </div>
-
-     <div class="flex space-x-2 pt-2 border-t border-slate-100">
-       <button type="button" onclick="closeEditClosedBookingModal()" class="w-1/2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2 rounded-xl text-[11px] transition">Cancel</button>
-       <button type="submit" class="w-1/2 bg-amber-600 hover:bg-amber-700 text-white font-bold py-2 rounded-xl shadow-sm transition text-[11px] flex items-center justify-center gap-1">
-         <i class="fa-solid fa-unlock text-[10px]"></i> Unlock Booking
-       </button>
-     </div>
-   </form>
- </div>
-</div>
 
   </main>
 
@@ -1408,71 +1364,6 @@ function checkBirthdayTrigger() {
     }
 
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbz6rME_OuYHucGBPCfCrV7EYjuE5YF0eqSeuqBjm42-HPXUYJzUSBu0mov9jCdM7zx5Ng/exec"; 
-
-// --- EDIT CLOSED BOOKING MODULE ---
-
-function openEditClosedBookingModal() {
- document.getElementById('closed-bkg-id-input').value = '';
- document.getElementById('closed-bkg-date-input').value = '';
- document.getElementById('closed-bkg-pass-input').value = '';
- document.getElementById('closed-bkg-error').classList.add('hidden');
- document.getElementById('edit-closed-booking-modal').classList.remove('hidden');
-}
-
-function closeEditClosedBookingModal() {
- document.getElementById('edit-closed-booking-modal').classList.add('hidden');
-}
-
-function handleEditClosedBookingAuth(e) {
- e.preventDefault();
- const inputId = document.getElementById('closed-bkg-id-input').value.trim().toUpperCase();
- const inputDate = document.getElementById('closed-bkg-date-input').value;
- const inputPass = document.getElementById('closed-bkg-pass-input').value.trim();
- const errorElem = document.getElementById('closed-bkg-error');
-
- if (inputPass !== "Aadmin123") {
-   errorElem.innerText = "Incorrect Password!";
-   errorElem.classList.remove('hidden');
-   return;
- }
-
- // Find the booking by ID and check-in date match
- const foundBooking = state.bookings.find(b => {
-   if (!b.bookingCode || !b.checkIn) return false;
-   const bCodeMatch = String(b.bookingCode).trim().toUpperCase() === inputId;
-   const bDateMatch = String(b.checkIn).split('T')[0] === inputDate;
-   return bCodeMatch && bDateMatch;
- });
-
- if (!foundBooking) {
-   errorElem.innerText = "No booking found matching that Booking ID and Check-In date!";
-   errorElem.classList.remove('hidden');
-   return;
- }
-
- // Set 1-hour temporary unlock authorization in localStorage for this booking ID
- const unlockExpiry = new Date().getTime() + (60 * 60 * 1000);
- localStorage.setItem(`unlocked_closed_bkg_${foundBooking.id}`, unlockExpiry);
-
- closeEditClosedBookingModal();
- 
- // Open standard booking edit window with the unlocked booking ID
- openBookingModal(foundBooking.id);
- 
- // Refresh table/dashboard to reflect unlocked state capability
- renderBookingsTable();
-}
-
-// Helper to check if a closed booking is currently within its 1-hour unlocked window
-function isClosedBookingUnlocked(bookingId) {
- const expiry = localStorage.getItem(`unlocked_closed_bkg_${bookingId}`);
- if (!expiry) return false;
- if (new Date().getTime() > parseInt(expiry, 10)) {
-   localStorage.removeItem(`unlocked_closed_bkg_${bookingId}`);
-   return false;
- }
- return true;
-}
     
     const ONE_HOUR_MS = 1 * 60 * 60 * 1000;
     let activeModalBooking = null;
@@ -3281,13 +3172,11 @@ function updateDashboardCards() {
           const effectiveOutTime = getEffectiveCheckoutTime(b);
           const checkInTime = parseDateMs(b.checkIn);
 
-         if (now > effectiveOutTime) {
-           isClosedBooking = true;
-           if (now > effectiveOutTime + (730 * 24 * 60 * 60 * 1000)) {
-              isPast730Days = true;
-           }
-         }
-      
+          if (now > effectiveOutTime) {
+            isClosedBooking = true;
+            if (now > effectiveOutTime + (730 * 24 * 60 * 60 * 1000)) {
+               isPast730Days = true;
+            }
           } else if (now >= checkInTime && now <= effectiveOutTime) {
             isLiveBooking = true;
           } else {

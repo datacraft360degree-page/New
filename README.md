@@ -1376,6 +1376,72 @@ function checkBirthdayTrigger() {
         btn.disabled = false;
       }
     }
+  // Toggle Extra Room Dropdown Visibility
+function toggleExtraRoomDropdown() {
+  const container = document.getElementById('extra-room-checkboxes');
+  if (container) {
+    container.classList.toggle('hidden');
+  }
+}
+
+// Populate Extra Persons Room Dropdown with all rooms available in Master
+function renderExtraRoomDropdown() {
+  const container = document.getElementById('extra-room-checkboxes');
+  if (!container) return;
+
+  container.innerHTML = '';
+
+  const rooms = state.roomsCapacity || [];
+  if (rooms.length === 0) {
+    container.innerHTML = '<p class="text-[10px] text-slate-400 p-1">No rooms available in Master</p>';
+    return;
+  }
+
+  rooms.forEach(r => {
+    const roomNoStr = String(r.roomNo);
+    const label = document.createElement('label');
+    label.className = 'flex items-center space-x-2 p-1 hover:bg-slate-50 rounded cursor-pointer text-[11px] font-semibold text-slate-700';
+    label.innerHTML = `
+      <input type="checkbox" value="${roomNoStr}" class="extra-room-checkbox w-3.5 h-3.5 text-amber-600 rounded border-slate-300 focus:ring-amber-500" onchange="updateSelectedExtraRoomsText()" />
+      <span>Room ${roomNoStr} (Cap: ${r.capacity})</span>
+    `;
+    container.appendChild(label);
+  });
+}
+
+// Update Extra Persons Room Dropdown Button Label
+function updateSelectedExtraRoomsText() {
+  const checkboxes = document.querySelectorAll('.extra-room-checkbox:checked');
+  const selectedRooms = Array.from(checkboxes).map(cb => cb.value);
+  const btnText = document.getElementById('extra-room-dropdown-text');
+
+  if (btnText) {
+    if (selectedRooms.length === 0) {
+      btnText.innerText = 'Select Rooms for Extra Persons...';
+    } else {
+      btnText.innerText = 'Room ' + selectedRooms.join(', ');
+    }
+  }
+}
+
+// Get selected Extra Persons Room values as array
+function getSelectedExtraRooms() {
+  const checkboxes = document.querySelectorAll('.extra-room-checkbox:checked');
+  return Array.from(checkboxes).map(cb => cb.value);
+}
+
+// Helper to set selected Extra Persons Rooms during Edit Booking
+function setSelectedExtraRooms(roomsArray) {
+  const targetRooms = Array.isArray(roomsArray) 
+    ? roomsArray.map(r => String(r).trim()) 
+    : String(roomsArray || '').split(/[,|]/).map(s => s.trim());
+
+  const checkboxes = document.querySelectorAll('.extra-room-checkbox');
+  checkboxes.forEach(cb => {
+    cb.checked = targetRooms.includes(cb.value);
+  });
+  updateSelectedExtraRoomsText();
+}
 
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbz6rME_OuYHucGBPCfCrV7EYjuE5YF0eqSeuqBjm42-HPXUYJzUSBu0mov9jCdM7zx5Ng/exec"; 
     

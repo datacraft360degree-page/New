@@ -2345,7 +2345,9 @@ function checkBirthdayTrigger() {
       }
     }
 
-    function toggleRoomDropdown() {
+   function toggleRoomDropdown() {
+      const btn = document.getElementById('room-dropdown-btn');
+      if (btn && btn.disabled) return; // Prevents dropdown from opening if locked
       document.getElementById('room-checkboxes').classList.toggle('hidden');
     }
 
@@ -3203,6 +3205,22 @@ function updateDashboardCards() {
 
       setSectionEditability('sec-guest-info', !isClosedBooking);
       setSectionEditability('sec-room-dates', !isClosedBooking);
+
+   // --- ADD THIS TO LOCK ROOM SELECTION FOR LIVE BOOKINGS ---
+      const roomDropdownBtn = document.getElementById('room-dropdown-btn');
+      if (roomDropdownBtn) {
+        // Lock if it's Live, Closed, or heavily past due
+        if (isLiveBooking || isClosedBooking || isPast730Days) {
+          roomDropdownBtn.disabled = true;
+          roomDropdownBtn.classList.add('bg-slate-100', 'cursor-not-allowed');
+          roomDropdownBtn.classList.remove('bg-white');
+        } else {
+          roomDropdownBtn.disabled = false;
+          roomDropdownBtn.classList.remove('bg-slate-100', 'cursor-not-allowed');
+          roomDropdownBtn.classList.add('bg-white');
+        }
+      }
+      // -----------
 
       const extChkBox = document.getElementById('cust-has-extended-checkout');
       const extDateInput = document.getElementById('cust-ext-checkout-date');

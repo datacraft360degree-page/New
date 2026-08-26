@@ -2345,9 +2345,7 @@ function checkBirthdayTrigger() {
       }
     }
 
-   function toggleRoomDropdown() {
-      const btn = document.getElementById('room-dropdown-btn');
-      if (btn && btn.disabled) return; // Prevents dropdown from opening if locked
+    function toggleRoomDropdown() {
       document.getElementById('room-checkboxes').classList.toggle('hidden');
     }
 
@@ -3205,31 +3203,6 @@ function updateDashboardCards() {
 
       setSectionEditability('sec-guest-info', !isClosedBooking);
       setSectionEditability('sec-room-dates', !isClosedBooking);
-
-  // --- ADD THIS TO LOCK ROOM, GUEST NAME & AGENT FOR LIVE BOOKINGS ---
-      const isLockedForLive = isLiveBooking || isClosedBooking || isPast730Days;
-      
-      // 1. Lock Room Selection Dropdown
-      const roomDropdownBtn = document.getElementById('room-dropdown-btn');
-      if (roomDropdownBtn) {
-        if (isLockedForLive) {
-          roomDropdownBtn.disabled = true;
-          roomDropdownBtn.classList.add('bg-slate-100', 'cursor-not-allowed');
-          roomDropdownBtn.classList.remove('bg-white');
-        } else {
-          roomDropdownBtn.disabled = false;
-          roomDropdownBtn.classList.remove('bg-slate-100', 'cursor-not-allowed');
-          roomDropdownBtn.classList.add('bg-white');
-        }
-      }
-
-      // 2. Lock Guest Name & Agent Info
-      const custNameInput = document.getElementById('cust-name');
-      const agentInfoSelect = document.getElementById('cust-agent');
-      
-      if (custNameInput) setInputEnabled(custNameInput, !isLockedForLive);
-      if (agentInfoSelect) setInputEnabled(agentInfoSelect, !isLockedForLive);
-      // -------------------------------------------------------------------
 
       const extChkBox = document.getElementById('cust-has-extended-checkout');
       const extDateInput = document.getElementById('cust-ext-checkout-date');

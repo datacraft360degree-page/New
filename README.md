@@ -3147,7 +3147,9 @@ function updateDashboardCards() {
       }
     }
 
-    function openBookingModal(bookingId = null) {
+   
+
+function openBookingModal(bookingId = null) {
       const now = new Date().getTime();
       let isLiveBooking = false;
       let isClosedBooking = false;
@@ -3201,8 +3203,9 @@ function updateDashboardCards() {
       document.getElementById('cab-trips-container').innerHTML = '';
       populateAgentDropdown();
 
-      setSectionEditability('sec-guest-info', !isClosedBooking);
-      setSectionEditability('sec-room-dates', !isClosedBooking);
+      // UPDATED: Allow editing for almost all sections unless it is past 730 days
+      setSectionEditability('sec-guest-info', !isPast730Days);
+      setSectionEditability('sec-room-dates', !isPast730Days);
 
       const extChkBox = document.getElementById('cust-has-extended-checkout');
       const extDateInput = document.getElementById('cust-ext-checkout-date');
@@ -3237,13 +3240,13 @@ function updateDashboardCards() {
 
       const mealsChkBox = document.getElementById('cust-include-meals');
       if (mealsChkBox) {
-        mealsChkBox.disabled = isClosedBooking;
+        mealsChkBox.disabled = isPast730Days;
       }
 
       const addFoodBtn = document.getElementById('btn-add-food-order');
       if (addFoodBtn) {
-        addFoodBtn.disabled = isClosedBooking;
-        if (isClosedBooking) {
+        addFoodBtn.disabled = isPast730Days;
+        if (isPast730Days) {
           addFoodBtn.classList.add('opacity-50', 'cursor-not-allowed');
         } else {
           addFoodBtn.classList.remove('opacity-50', 'cursor-not-allowed');
@@ -3252,15 +3255,15 @@ function updateDashboardCards() {
       
       const addCabBtn = document.getElementById('btn-add-cab-trip');
       if (addCabBtn) {
-        addCabBtn.disabled = isClosedBooking;
-        if (isClosedBooking) {
+        addCabBtn.disabled = isPast730Days;
+        if (isPast730Days) {
           addCabBtn.classList.add('opacity-50', 'cursor-not-allowed');
         } else {
           addCabBtn.classList.remove('opacity-50', 'cursor-not-allowed');
         }
       }
 
-      setSectionEditability('sec-cab-fare', !isClosedBooking);
+      setSectionEditability('sec-cab-fare', !isPast730Days);
       setSectionEditability('sec-billing-summary', !isPast730Days);
 
       const btnSave = document.getElementById('btn-save-booking');
@@ -3283,7 +3286,7 @@ function updateDashboardCards() {
       const extraPersonOutDateInput = document.getElementById('cust-extra-person-out-date');
       const extraPersonOutTimeInput = document.getElementById('cust-extra-person-out-time');
 
-      const canEditExtras = !isClosedBooking;
+      const canEditExtras = !isPast730Days;
       if (extraPersonsInput) setInputEnabled(extraPersonsInput, canEditExtras);
       if (extraPersonDateInput) setInputEnabled(extraPersonDateInput, canEditExtras);
       if (extraPersonTimeInput) setInputEnabled(extraPersonTimeInput, canEditExtras);
@@ -3301,7 +3304,7 @@ function updateDashboardCards() {
       }
 
       if (b) {
-        document.getElementById('modal-title').innerText = isPast730Days ? 'Closed Booking (Read-Only)' : (isClosedBooking ? 'Closed Booking (Billing Active)' : 'Edit Booking Details');
+        document.getElementById('modal-title').innerText = isPast730Days ? 'Closed Booking (Read-Only)' : 'Edit Booking Details';
         
         // ** ONLY ALLOW EDITING OF MAIN CHECK-IN AND CHECK-OUT DATES IF BOOKING IS UPCOMING **
         setInputEnabled(document.getElementById('cust-checkin-date'), isUpcomingBooking);
@@ -3383,7 +3386,7 @@ function updateDashboardCards() {
             fDate = parts.date || '';
             fTime = parts.time || '';
           }
-          addFoodOrderItem(fo.foodDesc || '', fo.plates || 1, fo.itemPrice || 0, fo.foodCharge || 0, fDate, fTime, isClosedBooking);
+          addFoodOrderItem(fo.foodDesc || '', fo.plates || 1, fo.itemPrice || 0, fo.foodCharge || 0, fDate, fTime, isPast730Days);
         });
         
         const tripsList = parseJSONField(b.cabTrips);
@@ -3398,7 +3401,7 @@ function updateDashboardCards() {
                cDate = trip.dateStr || '';
                cTime = trip.timeStr || '';
             }
-            addCabTripRow(trip.rate || 0, cDate, cTime, trip.remark || '', isClosedBooking);
+            addCabTripRow(trip.rate || 0, cDate, cTime, trip.remark || '', isPast730Days);
           });
         }
 
@@ -3414,9 +3417,99 @@ function updateDashboardCards() {
         }
 
         calculateModalBilling();
+
+        // NEW: Lock specific restricted fields if it's a closed booking
+        if (isClosedBooking && !isPast730Days) {
+          setInputEnabled(document.getElementById('room-dropdown-btn'), false);
+          document.querySelectorAll('.room-chk').forEach(chk => {
+             chk.disabled = true;
+          });
+          
+          setInputEnabled(extDateInput, false);
+          setInputEnabled(extTimeInput, false);
+        }
+
       } else {
         document.getElementById('modal-title').innerText = 'Add New Booking';
         document.getElementById('modal-booking-id').value = '';
+        
+        // DO NOT lock the fields if adding a new booking
+        setInputEnabled(document.getElementById('cust-checkin-date'), true);
+        setInputEnabled(document.getElementById('cust-checkin-time'), true);
+        setInputEnabled(document.getElementById('cust-checkout-date'), true);
+        setInputEnabled(document.getElementById('cust-checkout-time'), true);
+
+        // Calculate and set today's date as min for new bookings strictly using IST standard
+        const todayDt = new Date();
+        const utcMs = todayDt.getTime();
+        const istDate = new Date(utcMs + (330 * 60000));
+        
+        const yyyy = istDate.getUTCFullYear();
+        const mm = String(istDate.getUTCMonth() + 1).padStart(2, '0');
+        const dd = String(istDate.getUTCDate()).padStart(2, '0');
+        const todayStr = `${yyyy}-${mm}-${dd}`;
+
+        const tomorrowDt = new Date(todayDt);
+        tomorrowDt.setDate(tomorrowDt.getDate() + 1);
+        const t_utcMs = tomorrowDt.getTime();
+        const t_istDate = new Date(t_utcMs + (330 * 60000));
+        const t_yyyy = t_istDate.getUTCFullYear();
+        const t_mm = String(t_istDate.getUTCMonth() + 1).padStart(2, '0');
+        const t_dd = String(t_istDate.getUTCDate()).padStart(2, '0');
+        const tomorrowStr = `${t_yyyy}-${t_mm}-${t_dd}`;
+
+        const checkInElem = document.getElementById('cust-checkin-date');
+        checkInElem.min = todayStr;
+        checkInElem.value = todayStr;
+
+        const checkOutElem = document.getElementById('cust-checkout-date');
+        checkOutElem.min = todayStr;
+        checkOutElem.value = tomorrowStr;
+
+        populateRoomDropdown(state.roomsCapacity.length > 0 ? [state.roomsCapacity[0].roomNo] : []);
+
+        document.getElementById('cust-country-code').value = "+91";
+
+        // SET DEFAULT CHECK-IN AND CHECK-OUT TIME TO 11:00 AM FOR NEW BOOKING
+        document.getElementById('cust-checkin-time').value = "11:00";
+        document.getElementById('cust-checkout-time').value = "11:00";
+
+        if (extraPersonsInput) extraPersonsInput.value = 0;
+        
+        if (extraPersonDateInput) extraPersonDateInput.value = "";
+        
+        // SET EXTRA PERSON DEFAULT TIMES TO 11:00 AM FOR NEW BOOKING
+        if (extraPersonTimeInput) extraPersonTimeInput.value = "11:00";
+        if (extraPersonOutDateInput) extraPersonOutDateInput.value = "";
+        if (extraPersonOutTimeInput) extraPersonOutTimeInput.value = "11:00";
+
+        extChkBox.checked = false;
+        extChkBox.disabled = true;
+        
+        if (timerNotice) {
+          timerNotice.innerText = "(Selectable only for Live Booking)";
+          timerNotice.classList.remove('hidden');
+          timerNotice.classList.add('text-rose-600');
+        }
+
+        toggleExtendedCheckoutFields(false);
+
+        if (mealsChkBox) {
+          mealsChkBox.checked = true;
+          mealsChkBox.disabled = false;
+        }
+
+        document.getElementById('cust-price').value = 1200;
+        
+        const advanceElem = document.getElementById('cust-advance');
+        advanceElem.value = 0;
+        advanceElem.setAttribute('data-initial-adv', 0);
+
+        calculateModalBilling();
+      }
+
+      document.getElementById('booking-modal').classList.remove('hidden');
+    }
         
         // DO NOT lock the fields if adding a new booking
         setInputEnabled(document.getElementById('cust-checkin-date'), true);

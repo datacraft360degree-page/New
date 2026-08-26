@@ -1057,14 +1057,10 @@
           </div>
         </div>
 
-      <!-- AFTER -->
-<div class="flex justify-end space-x-2 pt-1">
-  <button type="button" id="btn-edit-closed-booking" onclick="handleEditClosedBookingUnlock()" class="hidden px-4 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-semibold transition shadow-sm flex items-center gap-1">
-    <i class="fa-solid fa-lock-open text-[10px]"></i> Edit Closed Booking
-  </button>
-  <button type="button" onclick="closeBookingModal()" class="px-4 py-1.5 bg-slate-100 text-slate-700 rounded-xl font-semibold transition hover:bg-slate-200">Cancel</button>
-  <button type="submit" id="btn-save-booking" class="px-5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold shadow-sm transition">Save Booking</button>
-</div>
+        <div class="flex justify-end space-x-2 pt-1">
+          <button type="button" onclick="closeBookingModal()" class="px-4 py-1.5 bg-slate-100 text-slate-700 rounded-xl font-semibold transition hover:bg-slate-200">Cancel</button>
+          <button type="submit" id="btn-save-booking" class="px-5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold shadow-sm transition">Save Booking</button>
+        </div>
       </form>
     </div>
   </div>
@@ -1371,8 +1367,6 @@ function checkBirthdayTrigger() {
     
     const ONE_HOUR_MS = 1 * 60 * 60 * 1000;
     let activeModalBooking = null;
-    // Closed Booking Unlock Timer Tracker
-let closedBookingUnlockTimers = {}; // Stores { bookingId: unlockTimestamp }
 
     window.addEventListener('beforeunload', function (e) {
       if (isLoggedIn) {

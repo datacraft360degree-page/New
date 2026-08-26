@@ -910,20 +910,6 @@
               </label>
               <input type="number" id="cust-extra-persons" min="0" value="0" placeholder="0" oninput="calculateModalBilling()" class="w-full bg-amber-50 border border-amber-300 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-amber-500 font-bold text-amber-900" />
             </div>
-  <div id="sec-extra-persons-room-wrapper" class="sm:col-span-4 hidden bg-amber-50/70 p-2.5 rounded-2xl border border-amber-200/80 space-y-2">
-              <label class="block font-bold text-amber-900 mb-1 flex items-center gap-1">
-                <i class="fa-solid fa-door-open text-amber-600"></i> Extra Persons Room No(s)
-              </label>
-              <div class="relative" id="extra-room-dropdown-container">
-                <button type="button" onclick="toggleExtraRoomDropdown()" id="extra-room-dropdown-btn" class="w-full bg-white border border-amber-200 rounded-xl px-2.5 focus:outline-none focus:border-amber-500 font-bold text-amber-900 text-left flex justify-between items-center" style="height: 34px;">
-                  <span id="extra-room-dropdown-text" class="truncate pr-2">Select Rooms for Extra Persons...</span>
-                  <i class="fa-solid fa-chevron-down text-slate-400"></i>
-                </button>
-                <div id="extra-room-checkboxes" class="hidden absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl max-h-48 overflow-y-auto p-2 space-y-1">
-                  <!-- Dynamically populated from state.roomsCapacity -->
-                </div>
-              </div>
-            </div>
 
             <!-- ADDITIONAL PERSON CUSTOM CHECK-IN & CHECK-OUT WINDOW -->
             <div id="sec-extra-person-time-wrapper" class="sm:col-span-4 hidden bg-amber-50/70 p-2.5 rounded-2xl border border-amber-200/80 space-y-2">
@@ -1376,72 +1362,6 @@ function checkBirthdayTrigger() {
         btn.disabled = false;
       }
     }
-  // Toggle Extra Room Dropdown Visibility
-function toggleExtraRoomDropdown() {
-  const container = document.getElementById('extra-room-checkboxes');
-  if (container) {
-    container.classList.toggle('hidden');
-  }
-}
-
-// Populate Extra Persons Room Dropdown with all rooms available in Master
-function renderExtraRoomDropdown() {
-  const container = document.getElementById('extra-room-checkboxes');
-  if (!container) return;
-
-  container.innerHTML = '';
-
-  const rooms = state.roomsCapacity || [];
-  if (rooms.length === 0) {
-    container.innerHTML = '<p class="text-[10px] text-slate-400 p-1">No rooms available in Master</p>';
-    return;
-  }
-
-  rooms.forEach(r => {
-    const roomNoStr = String(r.roomNo);
-    const label = document.createElement('label');
-    label.className = 'flex items-center space-x-2 p-1 hover:bg-slate-50 rounded cursor-pointer text-[11px] font-semibold text-slate-700';
-    label.innerHTML = `
-      <input type="checkbox" value="${roomNoStr}" class="extra-room-checkbox w-3.5 h-3.5 text-amber-600 rounded border-slate-300 focus:ring-amber-500" onchange="updateSelectedExtraRoomsText()" />
-      <span>Room ${roomNoStr} (Cap: ${r.capacity})</span>
-    `;
-    container.appendChild(label);
-  });
-}
-
-// Update Extra Persons Room Dropdown Button Label
-function updateSelectedExtraRoomsText() {
-  const checkboxes = document.querySelectorAll('.extra-room-checkbox:checked');
-  const selectedRooms = Array.from(checkboxes).map(cb => cb.value);
-  const btnText = document.getElementById('extra-room-dropdown-text');
-
-  if (btnText) {
-    if (selectedRooms.length === 0) {
-      btnText.innerText = 'Select Rooms for Extra Persons...';
-    } else {
-      btnText.innerText = 'Room ' + selectedRooms.join(', ');
-    }
-  }
-}
-
-// Get selected Extra Persons Room values as array
-function getSelectedExtraRooms() {
-  const checkboxes = document.querySelectorAll('.extra-room-checkbox:checked');
-  return Array.from(checkboxes).map(cb => cb.value);
-}
-
-// Helper to set selected Extra Persons Rooms during Edit Booking
-function setSelectedExtraRooms(roomsArray) {
-  const targetRooms = Array.isArray(roomsArray) 
-    ? roomsArray.map(r => String(r).trim()) 
-    : String(roomsArray || '').split(/[,|]/).map(s => s.trim());
-
-  const checkboxes = document.querySelectorAll('.extra-room-checkbox');
-  checkboxes.forEach(cb => {
-    cb.checked = targetRooms.includes(cb.value);
-  });
-  updateSelectedExtraRoomsText();
-}
 
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbz6rME_OuYHucGBPCfCrV7EYjuE5YF0eqSeuqBjm42-HPXUYJzUSBu0mov9jCdM7zx5Ng/exec"; 
     

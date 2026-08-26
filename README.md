@@ -3147,276 +3147,158 @@ function updateDashboardCards() {
       }
     }
 
-    function openBookingModal(bookingId = null) {
-      const now = new Date().getTime();
-      let isLiveBooking = false;
-      let isClosedBooking = false;
-      let isUpcomingBooking = false;
-      let isPast730Days = false;
+   // OPEN ADD / EDIT BOOKING MODAL
+function openBookingModal(bookingId = null) {
+  const modal = document.getElementById('booking-modal');
+  const form = document.getElementById('booking-form');
+  const title = document.getElementById('modal-title');
+  const saveBtn = document.getElementById('btn-save-booking');
+  
+  // Clear previous food orders and cab trips
+  document.getElementById('food-orders-container').innerHTML = '';
+  document.getElementById('cab-trips-container').innerHTML = '';
+  
+  if (bookingId) {
+    // EDIT MODE
+    const booking = state.bookings.find(b => String(b.id) === String(bookingId));
+    if (!booking) return;
+    
+    activeModalBooking = booking;
+    title.innerHTML = `<i class="fa-solid fa-pen-to-square text-blue-600"></i> Edit Booking Details (${booking.bookingCode})`;
+    
+    // Populate Form Fields
+    document.getElementById('modal-booking-id').value = booking.id;
+    document.getElementById('cust-name').value = booking.guestName || '';
+    document.getElementById('cust-address').value = booking.address || '';
+    document.getElementById('cust-city').value = booking.city || '';
+    document.getElementById('cust-state').value = booking.state || '';
+    document.getElementById('cust-country').value = booking.country || '';
+    document.getElementById('cust-zip').value = booking.zipCode || '';
+    document.getElementById('cust-id').value = booking.idNumber || '';
+    document.getElementById('cust-country-code').value = booking.countryCode || '+91';
+    document.getElementById('cust-contact').value = booking.contactNo || '';
+    
+    // ID Proof attachment restore
+    document.getElementById('cust-id-file-base64').value = booking.attachedIdBase64 || '';
+    document.getElementById('cust-id-file-name').value = booking.attachedIdName || '';
+    const statusText = document.getElementById('cust-id-file-status');
+    const removeBtn = document.getElementById('cust-id-file-remove');
+    if (booking.attachedIdBase64) {
+      statusText.innerHTML = `<span class="text-emerald-600 font-semibold"><i class="fa-solid fa-circle-check"></i> Attached: ${booking.attachedIdName || 'Document.pdf'}</span>`;
+      removeBtn.classList.remove('hidden');
+    } else {
+      statusText.innerText = 'No PDF document attached.';
+      removeBtn.classList.add('hidden');
+    }
 
-      let b = null;
-      if (bookingId) {
-        b = state.bookings.find(item => String(item.id) === String(bookingId));
-        if (b) {
-          if (isInactiveBooking(b)) {
-            // "just receipt view will be enabled."
-            printInvoice(bookingId);
-            return;
-          }
+    // Room & Agent Info
+    renderRoomDropdownCheckboxes(booking.roomNo);
+    renderAgentSelectDropdown(booking.agentInfo);
+    document.getElementById('cust-capacity').value = booking.capacity || 1;
+    document.getElementById('cust-extra-persons').value = booking.extraPersons || 0;
 
-          if (!isRoomInMaster(b.roomNo)) {
-            alert("This booking details were deleted from Master Data and cannot be opened or edited.");
-            return;
-          }
+    // Check-In / Check-Out dates
+    const inParts = extractISTDateParts(booking.checkIn);
+    document.getElementById('cust-checkin-date').value = inParts.date;
+    document.getElementById('cust-checkin-time').value = inParts.time || '12:00';
 
-          const effectiveOutTime = getEffectiveCheckoutTime(b);
-          const checkInTime = parseDateMs(b.checkIn);
+    const outParts = extractISTDateParts(booking.checkOut);
+    document.getElementById('cust-checkout-date').value = outParts.date;
+    document.getElementById('cust-checkout-time').value = outParts.time || '11:00';
 
-          if (now > effectiveOutTime) {
-            isClosedBooking = true;
-            if (now > effectiveOutTime + (730 * 24 * 60 * 60 * 1000)) {
-               isPast730Days = true;
-            }
-          } else if (now >= checkInTime && now <= effectiveOutTime) {
-            isLiveBooking = true;
-          } else {
-            isUpcomingBooking = true;
-          }
-        }
-      } else {
-        isUpcomingBooking = true;
-      }
+    // Extended Checkout Date logic
+    const hasExt = isTrue(booking.hasExtendedCheckout);
+    document.getElementById('cust-has-extended-checkout').checked = hasExt;
+    toggleExtendedCheckoutFields(hasExt);
 
-      document.getElementById('modal-booking-id').value = bookingId || '';
-      setMinBookingDates();
-      
-      const form = document.getElementById('booking-form');
-      form.reset();
-      removeAttachedIdProof();
-      
-      const clearBillInput = document.getElementById('cust-clear-bill');
-      if (clearBillInput) clearBillInput.value = 0;
+    if (hasExt && booking.extendedCheckOut) {
+      const extParts = extractISTDateParts(booking.extendedCheckOut);
+      document.getElementById('cust-ext-checkout-date').value = extParts.date;
+      document.getElementById('cust-ext-checkout-time').value = extParts.time || '11:00';
+    }
 
-      document.getElementById('food-orders-container').innerHTML = '';
-      document.getElementById('cab-trips-container').innerHTML = '';
-      populateAgentDropdown();
+    // Custom Extra Person Stay Window dates
+    if (booking.extraPersonCheckIn) {
+      const epIn = extractISTDateParts(booking.extraPersonCheckIn);
+      document.getElementById('cust-extra-person-date').value = epIn.date;
+      document.getElementById('cust-extra-person-time').value = epIn.time;
+    }
+    if (booking.extraPersonCheckOut) {
+      const epOut = extractISTDateParts(booking.extraPersonCheckOut);
+      document.getElementById('cust-extra-person-out-date').value = epOut.date;
+      document.getElementById('cust-extra-person-out-time').value = epOut.time;
+    }
 
-      setSectionEditability('sec-guest-info', !isClosedBooking);
-      setSectionEditability('sec-room-dates', !isClosedBooking);
+    document.getElementById('cust-include-meals').checked = booking.includeMeals !== false;
 
-      const extChkBox = document.getElementById('cust-has-extended-checkout');
-      const extDateInput = document.getElementById('cust-ext-checkout-date');
-      const extTimeInput = document.getElementById('cust-ext-checkout-time');
-      const timerNotice = document.getElementById('ext-checkout-timer-notice');
+    // Populate Food Orders & Cab Trips
+    const foodItems = parseJSONField(booking.extraFoodOrders);
+    foodItems.forEach(item => addFoodOrderItem(item));
 
-      let canToggleExtendedCheckout = false;
-      if (b) {
-        const initialCheckOutTime = parseDateMs(b.checkOut);
-        const isWithin1HrPastCheckout = now > initialCheckOutTime && now <= (initialCheckOutTime + ONE_HOUR_MS);
+    const cabTrips = parseJSONField(booking.cabTrips);
+    cabTrips.forEach(trip => addCabTripRow(trip));
 
-        if (isLiveBooking || isWithin1HrPastCheckout) {
-          canToggleExtendedCheckout = true;
-        }
-      }
+    // Rates & Financials
+    document.getElementById('cust-price').value = booking.pricePerDay || 1200;
+    document.getElementById('cust-advance').value = booking.advanceReceived || 0;
+    document.getElementById('cust-clear-bill').value = 0;
 
-      if (extChkBox) {
-        extChkBox.disabled = !canToggleExtendedCheckout;
-        if (canToggleExtendedCheckout) {
-          if (timerNotice) {
-            timerNotice.innerText = isLiveBooking ? "(Active for Live Booking)" : "(Active up to 1hr post check-out)";
-            timerNotice.classList.remove('hidden', 'text-rose-600');
-          }
-        } else {
-          if (timerNotice) {
-            timerNotice.innerText = isClosedBooking ? "(Closed Booking - Inactive)" : "(Selectable only for Live Booking)";
-            timerNotice.classList.remove('hidden');
-            timerNotice.classList.add('text-rose-600');
-          }
-        }
-      }
+    // Determine status of booking
+    const effCheckoutMs = getEffectiveCheckoutTime(booking);
+    const nowMs = new Date().getTime();
+    const isClosed = nowMs >= effCheckoutMs;
 
-      const mealsChkBox = document.getElementById('cust-include-meals');
-      if (mealsChkBox) {
-        mealsChkBox.disabled = isClosedBooking;
-      }
+    // -------------------------------------------------------------
+    // CLOSED BOOKING FIELD LOCKING RULES:
+    // All fields enabled EXCEPT: Room Selection, Check In Date/Time,
+    // Check Out Date/Time & Extended Check Out Date/Time (if any).
+    // -------------------------------------------------------------
+    
+    // Enable all form elements by default
+    const allInputs = form.querySelectorAll('input, select, button, textarea');
+    allInputs.forEach(el => el.disabled = false);
 
-      const addFoodBtn = document.getElementById('btn-add-food-order');
-      if (addFoodBtn) {
-        addFoodBtn.disabled = isClosedBooking;
-        if (isClosedBooking) {
-          addFoodBtn.classList.add('opacity-50', 'cursor-not-allowed');
-        } else {
-          addFoodBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-        }
-      }
-      
-      const addCabBtn = document.getElementById('btn-add-cab-trip');
-      if (addCabBtn) {
-        addCabBtn.disabled = isClosedBooking;
-        if (isClosedBooking) {
-          addCabBtn.classList.add('opacity-50', 'cursor-not-allowed');
-        } else {
-          addCabBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-        }
-      }
+    if (isClosed) {
+      // 1. Lock Room Selection Dropdown Button & Checkboxes
+      const roomBtn = document.getElementById('room-dropdown-btn');
+      if (roomBtn) roomBtn.disabled = true;
+      const roomCheckboxes = document.querySelectorAll('#room-checkboxes input[type="checkbox"]');
+      roomCheckboxes.forEach(cb => cb.disabled = true);
 
-      setSectionEditability('sec-cab-fare', !isClosedBooking);
-      setSectionEditability('sec-billing-summary', !isPast730Days);
+      // 2. Lock Main Check-In Date & Time
+      document.getElementById('cust-checkin-date').disabled = true;
+      document.getElementById('cust-checkin-time').disabled = true;
 
-      const btnSave = document.getElementById('btn-save-booking');
-      if (btnSave) {
-         if (isPast730Days) {
-            btnSave.disabled = true;
-            btnSave.classList.add('opacity-50', 'cursor-not-allowed', 'bg-slate-400');
-            btnSave.classList.remove('bg-blue-600', 'hover:bg-blue-700');
-         } else {
-            btnSave.disabled = false;
-            btnSave.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-slate-400');
-            btnSave.classList.add('bg-blue-600', 'hover:bg-blue-700');
-         }
-      }
+      // 3. Lock Main Check-Out Date & Time
+      document.getElementById('cust-checkout-date').disabled = true;
+      document.getElementById('cust-checkout-time').disabled = true;
 
-      const extraPersonsInput = document.getElementById('cust-extra-persons');
-      const extraPersonTimeWrapper = document.getElementById('sec-extra-person-time-wrapper');
-      const extraPersonDateInput = document.getElementById('cust-extra-person-date');
-      const extraPersonTimeInput = document.getElementById('cust-extra-person-time');
-      const extraPersonOutDateInput = document.getElementById('cust-extra-person-out-date');
-      const extraPersonOutTimeInput = document.getElementById('cust-extra-person-out-time');
+      // 4. Lock Extended Check-Out Date & Time (and toggle checkbox)
+      document.getElementById('cust-has-extended-checkout').disabled = true;
+      document.getElementById('cust-ext-checkout-date').disabled = true;
+      document.getElementById('cust-ext-checkout-time').disabled = true;
+    }
 
-      const canEditExtras = !isClosedBooking;
-      if (extraPersonsInput) setInputEnabled(extraPersonsInput, canEditExtras);
-      if (extraPersonDateInput) setInputEnabled(extraPersonDateInput, canEditExtras);
-      if (extraPersonTimeInput) setInputEnabled(extraPersonTimeInput, canEditExtras);
-      if (extraPersonOutDateInput) setInputEnabled(extraPersonOutDateInput, canEditExtras);
-      if (extraPersonOutTimeInput) setInputEnabled(extraPersonOutTimeInput, canEditExtras);
+  } else {
+    // NEW BOOKING CREATION MODE (RESET ALL LOCKS)
+    activeModalBooking = null;
+    title.innerHTML = `<i class="fa-solid fa-calendar-plus text-blue-600"></i> Add New Booking`;
+    form.reset();
+    document.getElementById('modal-booking-id').value = '';
+    
+    // Enable all inputs completely
+    const allInputs = form.querySelectorAll('input, select, button, textarea');
+    allInputs.forEach(el => el.disabled = false);
 
-      if (canEditExtras) {
-        if (extraPersonTimeWrapper) extraPersonTimeWrapper.classList.remove('hidden');
-      } else {
-        if (extraPersonTimeWrapper && (!b || !b.extraPersons || b.extraPersons <= 0)) {
-          extraPersonTimeWrapper.classList.add('hidden');
-        } else if (extraPersonTimeWrapper) {
-          extraPersonTimeWrapper.classList.remove('hidden');
-        }
-      }
+    removeAttachedIdProof();
+    renderRoomDropdownCheckboxes();
+    renderAgentSelectDropdown();
+    toggleExtendedCheckoutFields(false);
+  }
 
-      if (b) {
-        document.getElementById('modal-title').innerText = isPast730Days ? 'Closed Booking (Read-Only)' : (isClosedBooking ? 'Closed Booking (Billing Active)' : 'Edit Booking Details');
-        
-        // ** ONLY ALLOW EDITING OF MAIN CHECK-IN AND CHECK-OUT DATES IF BOOKING IS UPCOMING **
-        setInputEnabled(document.getElementById('cust-checkin-date'), isUpcomingBooking);
-        setInputEnabled(document.getElementById('cust-checkin-time'), isUpcomingBooking);
-        setInputEnabled(document.getElementById('cust-checkout-date'), isUpcomingBooking);
-        setInputEnabled(document.getElementById('cust-checkout-time'), isUpcomingBooking);
-        
-        document.getElementById('modal-booking-id').value = b.id;
-        document.getElementById('cust-name').value = formatTitleCase(b.name);
-        document.getElementById('cust-address').value = formatTitleCase(b.address || '');
-        document.getElementById('cust-city').value = formatTitleCase(b.city || '');
-        document.getElementById('cust-state').value = formatTitleCase(b.state || '');
-        document.getElementById('cust-country').value = formatTitleCase(b.country || '');
-        document.getElementById('cust-zip').value = b.zipCode || '';
-        document.getElementById('cust-id').value = b.idNo || '';
-        document.getElementById('cust-country-code').value = b.countryCode || '+91';
-        document.getElementById('cust-contact').value = b.contactNo || '';
-
-        if (b.idProofBase64) {
-          document.getElementById('cust-id-file-base64').value = b.idProofBase64;
-          document.getElementById('cust-id-file-name').value = b.idProofFileName || 'Attached_ID_Proof.pdf';
-          document.getElementById('cust-id-file-status').innerHTML = `<span class="text-emerald-600 font-semibold"><i class="fa-solid fa-circle-check"></i> Attached: ${b.idProofFileName || 'Attached_ID_Proof.pdf'}</span>`;
-          document.getElementById('cust-id-file-remove').classList.remove('hidden');
-        }
-        
-        populateRoomDropdown(b.roomNo);
-        populateAgentDropdown(b.agentInfo);
-        document.getElementById('cust-capacity').value = b.capacity || 1;
-
-        if (extraPersonsInput) extraPersonsInput.value = b.extraPersons || 0;
-        
-        if (b.extraPersonJoined) {
-          const parts = extractISTDateParts(b.extraPersonJoined);
-          if (extraPersonDateInput) extraPersonDateInput.value = parts.date || '';
-          if (extraPersonTimeInput) extraPersonTimeInput.value = parts.time || '';
-        } else {
-          if (extraPersonDateInput) extraPersonDateInput.value = '';
-          if (extraPersonTimeInput) extraPersonTimeInput.value = '';
-        }
-
-        if (b.extraPersonOut) {
-          const parts = extractISTDateParts(b.extraPersonOut);
-          if (extraPersonOutDateInput) extraPersonOutDateInput.value = parts.date || '';
-          if (extraPersonOutTimeInput) extraPersonOutTimeInput.value = parts.time || '';
-        } else {
-          if (extraPersonOutDateInput) extraPersonOutDateInput.value = '';
-          if (extraPersonOutTimeInput) extraPersonOutTimeInput.value = '';
-        }
-
-        if (b.checkIn) {
-          const parts = extractISTDateParts(b.checkIn);
-          document.getElementById('cust-checkin-date').value = parts.date || '';
-          document.getElementById('cust-checkin-time').value = parts.time || '';
-        }
-        if (b.checkOut) {
-          const parts = extractISTDateParts(b.checkOut);
-          document.getElementById('cust-checkout-date').value = parts.date || '';
-          document.getElementById('cust-checkout-time').value = parts.time || '';
-          if (extDateInput) extDateInput.min = parts.date || '';
-        }
-
-        extChkBox.checked = isTrue(b.hasExtendedCheckout);
-        toggleExtendedCheckoutFields(extChkBox.checked);
-        if (isTrue(b.hasExtendedCheckout) && b.extendedCheckOut) {
-          const parts = extractISTDateParts(b.extendedCheckOut);
-          extDateInput.value = parts.date || '';
-          extTimeInput.value = parts.time || '';
-        }
-
-        if (mealsChkBox) {
-          mealsChkBox.checked = b.includeMeals !== undefined ? (b.includeMeals !== false && b.includeMeals !== 'false') : true;
-        }
-
-        const foList = parseJSONField(b.foodOrders);
-        foList.forEach(fo => {
-          let fDate = '', fTime = '';
-          if (fo.foodDateTime) {
-            const parts = extractISTDateParts(fo.foodDateTime);
-            fDate = parts.date || '';
-            fTime = parts.time || '';
-          }
-          addFoodOrderItem(fo.foodDesc || '', fo.plates || 1, fo.itemPrice || 0, fo.foodCharge || 0, fDate, fTime, isClosedBooking);
-        });
-        
-        const tripsList = parseJSONField(b.cabTrips);
-        if (tripsList.length > 0) {
-          tripsList.forEach(trip => {
-            let cDate = '', cTime = '';
-            if (trip.dateTime) {
-               const parts = extractISTDateParts(trip.dateTime);
-               cDate = parts.date;
-               cTime = parts.time;
-            } else {
-               cDate = trip.dateStr || '';
-               cTime = trip.timeStr || '';
-            }
-            addCabTripRow(trip.rate || 0, cDate, cTime, trip.remark || '', isClosedBooking);
-          });
-        }
-
-        document.getElementById('cust-price').value = b.perDayPrice;
-        
-        const advanceElem = document.getElementById('cust-advance');
-        const baseAdv = b.initialAdv || 0;
-        advanceElem.value = baseAdv;
-        advanceElem.setAttribute('data-initial-adv', baseAdv);
-
-        if (b.clearedDue) {
-          document.getElementById('cust-clear-bill').value = b.clearedDue;
-        }
-
-        calculateModalBilling();
-      } else {
-        document.getElementById('modal-title').innerText = 'Add New Booking';
-        document.getElementById('modal-booking-id').value = '';
+  calculateModalBilling();
+  modal.classList.remove('hidden');
+}
         
         // DO NOT lock the fields if adding a new booking
         setInputEnabled(document.getElementById('cust-checkin-date'), true);

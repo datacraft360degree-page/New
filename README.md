@@ -904,12 +904,23 @@
             </div>
 
             <!-- EXTRA PERSON(S) COUNT FIELD -->
-            <div>
-              <label class="block font-semibold text-amber-700 mb-0.5 flex items-center gap-1">
-                <i class="fa-solid fa-user-plus text-amber-600"></i> Add Extra Person(s)
-              </label>
-              <input type="number" id="cust-extra-persons" min="0" value="0" placeholder="0" oninput="calculateModalBilling()" class="w-full bg-amber-50 border border-amber-300 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-amber-500 font-bold text-amber-900" />
-            </div>
+           <div>
+  <label class="block font-semibold text-amber-700 mb-0.5 flex items-center gap-1">
+    <i class="fa-solid fa-user-plus text-amber-600"></i> Add Extra Person(s)
+  </label>
+  <input type="number" id="cust-extra-persons" min="0" value="0" placeholder="0" oninput="handleExtraPersonCountChange()" class="w-full bg-amber-50 border border-amber-300 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-amber-500 font-bold text-amber-900" />
+</div>
+
+<!-- ADD THIS NEW DROPDOWN DIRECTLY BESIDE IT: -->
+<div>
+  <label class="block font-semibold text-amber-700 mb-0.5 flex items-center gap-1">
+    <i class="fa-solid fa-door-open text-amber-600"></i> Add Extra Room(s)
+  </label>
+  <select id="cust-extra-room" disabled onchange="calculateModalBilling()" class="w-full bg-amber-50 border border-amber-300 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-amber-500 font-bold text-amber-900 disabled:opacity-50 disabled:cursor-not-allowed">
+    <option value="">Select Extra Room...</option>
+    <option value="Same room no with extra bed">Same room no with extra bed</option>
+  </select>
+</div>
 
             <!-- ADDITIONAL PERSON CUSTOM CHECK-IN & CHECK-OUT WINDOW -->
             <div id="sec-extra-person-time-wrapper" class="sm:col-span-4 hidden bg-amber-50/70 p-2.5 rounded-2xl border border-amber-200/80 space-y-2">

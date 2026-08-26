@@ -1556,67 +1556,6 @@ function checkBirthdayTrigger() {
     let pendingMasterDeleteType = null; 
     let pendingMasterDeleteTarget = null; 
 
-// NEW FUNCTION: Applies field restrictions and warnings based on booking status
-function applyBookingEditRules(booking) {
-  // 1. First, reset all specific fields to be editable (important for when opening a 'New' booking)
-  const allRestrictedFields = [
-    'cust-name', 'room-dropdown-btn', 'cust-agent', 
-    'cust-checkin-date', 'cust-checkin-time', 
-    'cust-checkout-date', 'cust-checkout-time',
-    'cust-ext-checkout-date', 'cust-ext-checkout-time', 'cust-has-extended-checkout'
-  ];
-  
-  allRestrictedFields.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) {
-      el.disabled = false;
-      if (el.tagName === 'BUTTON') el.classList.remove('opacity-50', 'cursor-not-allowed');
-    }
-  });
-
-  if (!booking) return; // If it's a new booking, leave everything unlocked
-
-  // 2. Apply rules based on booking status
-  const status = booking.status || booking.bookingStatus; // Adjust property name based on your data structure
-
-  if (status === 'Closed') {
-    // Show warning popup for closed bookings
-    alert("You are about to edit the closed booking details so please be careful with data");
-    
-    // Lock specific fields for Closed bookings
-    const closedDisabled = [
-      'cust-name', 'room-dropdown-btn', 'cust-agent', 
-      'cust-checkin-date', 'cust-checkin-time', 
-      'cust-checkout-date', 'cust-checkout-time',
-      'cust-ext-checkout-date', 'cust-ext-checkout-time', 'cust-has-extended-checkout'
-    ];
-    
-    closedDisabled.forEach(id => {
-      const el = document.getElementById(id);
-      if (el) {
-        el.disabled = true;
-        if (el.tagName === 'BUTTON') el.classList.add('opacity-50', 'cursor-not-allowed');
-      }
-    });
-
-  } else if (status === 'Live') {
-    // Lock specific fields for Live bookings (Extended checkout remains editable)
-    const liveDisabled = [
-      'cust-name', 'room-dropdown-btn', 'cust-agent', 
-      'cust-checkin-date', 'cust-checkin-time', 
-      'cust-checkout-date', 'cust-checkout-time'
-    ];
-    
-    liveDisabled.forEach(id => {
-      const el = document.getElementById(id);
-      if (el) {
-        el.disabled = true;
-        if (el.tagName === 'BUTTON') el.classList.add('opacity-50', 'cursor-not-allowed');
-      }
-    });
-  }
-}
-
     function openMasterDeleteModal(type, target) {
       pendingMasterDeleteType = type;
       pendingMasterDeleteTarget = target;
@@ -3556,25 +3495,6 @@ function updateDashboardCards() {
 
       document.getElementById('booking-modal').classList.remove('hidden');
     }
-
-    // Find your existing edit function and add the new line at the bottom:
-function editBooking(bookingId) {
-    // ... your existing code that fetches the booking and populates the form ...
-    const booking = state.bookings.find(b => b.id === bookingId);
-    
-    // [ADD THIS LINE AT THE END]
-    applyBookingEditRules(booking);
-}
-
-// Locate your existing openBookingModal function for NEW bookings
-function openBookingModal() {
-    // ... your existing code to clear the form ...
-    
-    // [ADD THIS LINE]
-    applyBookingEditRules(null); 
-    
-    document.getElementById('booking-modal').classList.remove('hidden');
-}
 
     function setSectionEditability(sectionId, isEditable) {
       const container = document.getElementById(sectionId);

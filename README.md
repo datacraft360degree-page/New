@@ -780,6 +780,46 @@
       </div>
     </section>
 
+<!-- EDIT CLOSED BOOKING AUTH & SEARCH MODAL -->
+<div id="edit-closed-booking-modal" class="hidden fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-4 no-print">
+ <div class="bg-white rounded-3xl shadow-2xl border border-slate-100 max-w-sm w-full p-5 space-y-4 text-left">
+   <div class="flex justify-between items-center pb-2 border-b border-slate-100">
+     <h3 class="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+       <i class="fa-solid fa-lock-open text-amber-600"></i> Edit Closed Booking Unlock
+     </h3>
+     <button onclick="closeEditClosedBookingModal()" class="text-slate-400 hover:text-slate-600 p-0.5 text-base"><i class="fa-solid fa-xmark"></i></button>
+   </div>
+
+   <form onsubmit="handleEditClosedBookingAuth(event)" class="space-y-3 text-[11px]">
+     <div>
+       <label class="block font-semibold text-slate-600 mb-0.5">Booking ID <span class="text-rose-500">*</span></label>
+       <input type="text" id="closed-bkg-id-input" required placeholder="e.g. BKG-2026-0000001" class="w-full bg-slate-100 border border-transparent focus:border-amber-500 rounded-xl px-2.5 py-1.5 focus:outline-none focus:bg-white uppercase font-mono font-bold text-blue-600" />
+     </div>
+
+     <div>
+       <label class="block font-semibold text-slate-600 mb-0.5">Check-In Date <span class="text-rose-500">*</span></label>
+       <input type="date" id="closed-bkg-date-input" required class="w-full bg-slate-100 border border-transparent focus:border-amber-500 rounded-xl px-2.5 py-1.5 focus:outline-none focus:bg-white font-semibold" />
+     </div>
+
+     <div>
+       <label class="block font-semibold text-slate-600 mb-0.5">Password <span class="text-rose-500">*</span></label>
+       <input type="password" id="closed-bkg-pass-input" required placeholder="Enter Password" class="w-full bg-slate-100 border border-transparent focus:border-amber-500 rounded-xl px-2.5 py-1.5 focus:outline-none focus:bg-white" />
+     </div>
+
+     <div id="closed-bkg-error" class="hidden bg-rose-50 border border-rose-100 text-rose-600 text-[10px] p-2 rounded-xl text-center font-medium">
+       Invalid credentials or matching closed booking not found!
+     </div>
+
+     <div class="flex space-x-2 pt-2 border-t border-slate-100">
+       <button type="button" onclick="closeEditClosedBookingModal()" class="w-1/2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2 rounded-xl text-[11px] transition">Cancel</button>
+       <button type="submit" class="w-1/2 bg-amber-600 hover:bg-amber-700 text-white font-bold py-2 rounded-xl shadow-sm transition text-[11px] flex items-center justify-center gap-1">
+         <i class="fa-solid fa-unlock text-[10px]"></i> Unlock Booking
+       </button>
+     </div>
+   </form>
+ </div>
+</div>
+
   </main>
 
   <!-- POPUP MODAL: CHECK-OUT ALERT LIST -->

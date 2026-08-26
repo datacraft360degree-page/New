@@ -1171,72 +1171,6 @@
 
   <script>
 
-// NEW FUNCTION: Call this when opening the booking modal for editing
-function applyBookingEditRules(bookingStatus) {
-    // List of field IDs based on your HTML structure
-    const guestName = document.getElementById('cust-name');
-    const agentInfo = document.getElementById('cust-agent');
-    const roomBtn = document.getElementById('room-dropdown-btn');
-    const checkInDate = document.getElementById('cust-checkin-date');
-    const checkInTime = document.getElementById('cust-checkin-time');
-    const checkOutDate = document.getElementById('cust-checkout-date');
-    const checkOutTime = document.getElementById('cust-checkout-time');
-    const extCheckOutBox = document.getElementById('cust-has-extended-checkout');
-    const extCheckOutDate = document.getElementById('cust-ext-checkout-date');
-    const extCheckOutTime = document.getElementById('cust-ext-checkout-time');
-
-    // 1. Reset all fields to be fully editable by default (for New Bookings or Upcoming)
-    const allFields = [guestName, agentInfo, roomBtn, checkInDate, checkInTime, checkOutDate, checkOutTime, extCheckOutBox, extCheckOutDate, extCheckOutTime];
-    allFields.forEach(el => {
-        if (el) {
-            el.disabled = false;
-            el.classList.remove('bg-slate-200/60', 'cursor-not-allowed', 'opacity-60');
-        }
-    });
-
-    // 2. Apply Rules for LIVE or CLOSED Bookings
-    if (bookingStatus === 'Live' || bookingStatus === 'Closed') {
-        // Common fields locked for BOTH Live and Closed
-        const commonLockedFields = [guestName, agentInfo, roomBtn, checkInDate, checkInTime, checkOutDate, checkOutTime];
-        
-        commonLockedFields.forEach(el => {
-            if (el) {
-                el.disabled = true;
-                el.classList.add('bg-slate-200/60', 'cursor-not-allowed', 'opacity-60');
-            }
-        });
-    }
-
-    // 3. Apply Extra Rules & Popup for CLOSED Bookings
-    if (bookingStatus === 'Closed') {
-        // Extended checkout fields locked ONLY for Closed
-        const closedLockedFields = [extCheckOutBox, extCheckOutDate, extCheckOutTime];
-        
-        closedLockedFields.forEach(el => {
-            if (el) {
-                el.disabled = true;
-                el.classList.add('bg-slate-200/60', 'cursor-not-allowed', 'opacity-60');
-            }
-        });
-
-        // Trigger the mandatory warning popup
-        alert("You are about to edit the closed booking details so please be careful with data");
-    }
-}
-
-// Locate your existing edit function, for example:
-function editBooking(bookingId) {
-    // ... your existing code that fetches the booking data ...
-    // ... your existing code that populates the modal inputs ...
-
-    // ADD THIS LINE HERE:
-    // Determine the status of the booking (e.g., 'Live', 'Closed', or 'Upcoming')
-    // Replace 'currentBooking.status' with the actual variable you use for the status.
-    applyBookingEditRules(currentBooking.status); 
-    
-    // ... your existing code that shows the modal ...
-}
-
 // Function to check and display the birthday animation on August 20th
 function checkBirthdayTrigger() {
       const now = new Date();
@@ -3214,15 +3148,6 @@ function updateDashboardCards() {
     }
 
     function openBookingModal(bookingId = null) {
-
-  function openBookingModal() {
-    // ... your existing reset logic ...
-    
-    // ADD THIS LINE: Pass a status like 'New' so no locks are applied
-    applyBookingEditRules('New'); 
-
-    // ... existing code ...
-}
       const now = new Date().getTime();
       let isLiveBooking = false;
       let isClosedBooking = false;

@@ -3566,6 +3566,16 @@ function editBooking(bookingId) {
     applyBookingEditRules(booking);
 }
 
+// Locate your existing openBookingModal function for NEW bookings
+function openBookingModal() {
+    // ... your existing code to clear the form ...
+    
+    // [ADD THIS LINE]
+    applyBookingEditRules(null); 
+    
+    document.getElementById('booking-modal').classList.remove('hidden');
+}
+
     function setSectionEditability(sectionId, isEditable) {
       const container = document.getElementById(sectionId);
       if (!container) return;

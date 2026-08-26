@@ -1371,6 +1371,8 @@ function checkBirthdayTrigger() {
     
     const ONE_HOUR_MS = 1 * 60 * 60 * 1000;
     let activeModalBooking = null;
+    // Closed Booking Unlock Timer Tracker
+let closedBookingUnlockTimers = {}; // Stores { bookingId: unlockTimestamp }
 
     window.addEventListener('beforeunload', function (e) {
       if (isLoggedIn) {

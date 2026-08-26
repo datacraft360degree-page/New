@@ -1377,6 +1377,59 @@ function checkBirthdayTrigger() {
         btn.disabled = false;
       }
     }
+// Enable/Disable Extra Room and Stay Date fields based on Extra Person count
+function handleExtraPersonCountChange() {
+  const extraPersons = parseInt(document.getElementById('cust-extra-persons')?.value) || 0;
+  const extraRoomSelect = document.getElementById('cust-extra-room');
+  const extraPersonTimeWrapper = document.getElementById('sec-extra-person-time-wrapper');
+  
+  if (extraPersons > 0) {
+    if (extraRoomSelect) {
+      extraRoomSelect.disabled = false;
+      extraRoomSelect.classList.remove('bg-slate-100', 'cursor-not-allowed');
+      extraRoomSelect.classList.add('bg-white');
+    }
+    if (extraPersonTimeWrapper) {
+      extraPersonTimeWrapper.classList.remove('hidden');
+    }
+  } else {
+    if (extraRoomSelect) {
+      extraRoomSelect.value = "Same room with extra bed";
+      extraRoomSelect.disabled = true;
+      extraRoomSelect.classList.add('bg-slate-100', 'cursor-not-allowed');
+      extraRoomSelect.classList.remove('bg-white');
+    }
+    if (extraPersonTimeWrapper) {
+      extraPersonTimeWrapper.classList.add('hidden');
+    }
+    // Clear extra dates if count is 0
+    const epDate = document.getElementById('cust-extra-person-date');
+    const epOutDate = document.getElementById('cust-extra-person-out-date');
+    if (epDate) epDate.value = "";
+    if (epOutDate) epOutDate.value = "";
+  }
+  calculateModalBilling();
+}
+
+// Populate Extra Room dropdown dynamically from master rooms list
+function populateExtraRoomDropdown(selectedRoom = "Same room with extra bed") {
+  const extraRoomSelect = document.getElementById('cust-extra-room');
+  if (!extraRoomSelect) return;
+  
+  extraRoomSelect.innerHTML = `<option value="Same room with extra bed">Same room with extra bed</option>`;
+  
+  if (state && state.roomsCapacity) {
+    state.roomsCapacity.forEach(r => {
+      const opt = document.createElement('option');
+      opt.value = `Room ${r.roomNo}`;
+      opt.text = `Room ${r.roomNo} (Extra Room)`;
+      if (selectedRoom === opt.value) {
+        opt.selected = true;
+      }
+      extraRoomSelect.appendChild(opt);
+    });
+  }
+}
 
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbz6rME_OuYHucGBPCfCrV7EYjuE5YF0eqSeuqBjm42-HPXUYJzUSBu0mov9jCdM7zx5Ng/exec"; 
     

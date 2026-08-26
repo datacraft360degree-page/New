@@ -3257,6 +3257,18 @@ function handleSaveBooking(e) {
 
   // ... Proceed with normal booking save logic ...
 }
+// Include new fields in booking object structure:
+const bookingData = {
+  // ... existing fields ...
+  extraPersons: parseInt(document.getElementById('cust-extra-persons').value) || 0,
+  extraRoom: document.getElementById('cust-extra-room').value,
+  extraRate: parseFloat(document.getElementById('cust-extra-rate').value) || 1200,
+  extraCheckIn: document.getElementById('cust-extra-person-date').value + ' ' + document.getElementById('cust-extra-person-time').value,
+  extraCheckOut: document.getElementById('cust-extra-person-out-date').value + ' ' + document.getElementById('cust-extra-person-out-time').value,
+};
+
+// Excel Export mapping update:
+// Add "Extra Room" and "Extra Person Rate (INR)" into the SheetJS columns export object array.
     
     function openBookingModal(bookingId = null) {
       const now = new Date().getTime();

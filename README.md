@@ -1376,6 +1376,7 @@ function checkBirthdayTrigger() {
 
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbz6rME_OuYHucGBPCfCrV7EYjuE5YF0eqSeuqBjm42-HPXUYJzUSBu0mov9jCdM7zx5Ng/exec"; 
 
+<!-- New Added-->
 function populateExtraRoomDropdown() {
   const select = document.getElementById('cust-extra-room');
   if (!select) return;

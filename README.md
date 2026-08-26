@@ -3152,7 +3152,7 @@ function updateDashboardCards() {
       let isLiveBooking = false;
       let isClosedBooking = false;
       let isUpcomingBooking = false;
-      let isPast730Days = false;
+      let ispast1825days = false;
 
       let b = null;
       if (bookingId) {
@@ -3174,8 +3174,8 @@ function updateDashboardCards() {
 
           if (now > effectiveOutTime) {
             isClosedBooking = true;
-            if (now > effectiveOutTime + (730 * 24 * 60 * 60 * 1000)) {
-               isPast730Days = true;
+            if (now > effectiveOutTime + (1825 * 24 * 60 * 60 * 1000)) {
+               ispast1825days = true;
             }
           } else if (now >= checkInTime && now <= effectiveOutTime) {
             isLiveBooking = true;
@@ -3261,11 +3261,11 @@ function updateDashboardCards() {
       }
 
       setSectionEditability('sec-cab-fare', !isClosedBooking);
-      setSectionEditability('sec-billing-summary', !isPast730Days);
+      setSectionEditability('sec-billing-summary', !ispast1825days);
 
       const btnSave = document.getElementById('btn-save-booking');
       if (btnSave) {
-         if (isPast730Days) {
+         if (ispast1825days) {
             btnSave.disabled = true;
             btnSave.classList.add('opacity-50', 'cursor-not-allowed', 'bg-slate-400');
             btnSave.classList.remove('bg-blue-600', 'hover:bg-blue-700');
@@ -3301,7 +3301,7 @@ function updateDashboardCards() {
       }
 
       if (b) {
-        document.getElementById('modal-title').innerText = isPast730Days ? 'Closed Booking (Read-Only)' : (isClosedBooking ? 'Closed Booking (Billing Active)' : 'Edit Booking Details');
+        document.getElementById('modal-title').innerText = ispast1825days ? 'Closed Booking (Read-Only)' : (isClosedBooking ? 'Closed Booking (Billing Active)' : 'Edit Booking Details');
         
         // ** ONLY ALLOW EDITING OF MAIN CHECK-IN AND CHECK-OUT DATES IF BOOKING IS UPCOMING **
         setInputEnabled(document.getElementById('cust-checkin-date'), isUpcomingBooking);

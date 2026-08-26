@@ -3276,23 +3276,6 @@ function openBookingModal(bookingId = null) {
   modal.classList.remove('hidden');
 }
 
-    function openBookingModal(bookingId = null) {
-      const now = new Date().getTime();
-      let isLiveBooking = false;
-      let isClosedBooking = false;
-      let isUpcomingBooking = false;
-      let isPast730Days = false;
-
-      let b = null;
-      if (bookingId) {
-        b = state.bookings.find(item => String(item.id) === String(bookingId));
-        if (b) {
-          if (isInactiveBooking(b)) {
-            // "just receipt view will be enabled."
-            printInvoice(bookingId);
-            return;
-          }
-
           if (!isRoomInMaster(b.roomNo)) {
             alert("This booking details were deleted from Master Data and cannot be opened or edited.");
             return;

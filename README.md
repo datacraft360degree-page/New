@@ -3387,25 +3387,112 @@ function updateDashboardCards() {
       calculateModalBilling();
     }
 
-    function calculateFoodRowTotal(inputElem) {
-      const row = inputElem.closest('.food-order-row');
-      if (!row) return;
+// Calculate total food orders sum and reflect into Extra Food/Drink (₹)
+function calculateFoodTotal() {
+  const foodRows = document.querySelectorAll('#food-orders-container .food-order-row');
+  let foodTotal = 0;
 
-      const price = parseFloat(row.querySelector('.cust-food-price').value) || 0;
-      const plates = parseInt(row.querySelector('.cust-food-plates').value) || 0;
-      const totalCharge = price * plates;
+  foodRows.forEach(row => {
+    const rateInput = row.querySelector('.food-rate-input');
+    const qtyInput = row.querySelector('.food-qty-input');
 
-      row.querySelector('.cust-food-charge').value = totalCharge;
-      calculateModalBilling();
-    }
+    const rate = rateInput ? parseFloat(rateInput.value) || 0 : 0;
+    const qty = qtyInput ? parseFloat(qtyInput.value) || 1 : 1;
 
-    function removeFoodOrderItem(btn) {
-      const row = btn.closest('.food-order-row');
-      if (row) {
-        row.remove();
-        calculateModalBilling();
-      }
-    }
+    foodTotal += rate * qty;
+  });
+
+  const foodTotalElem = document.getElementById('cust-food-total');
+  if (foodTotalElem) {
+    foodTotalElem.value = foodTotal;
+  }
+  return foodTotal;
+}
+
+// Ensure food total is recalculated during overall modal billing math
+function calculateModalBilling() {
+  // Recalculate Extra Food Total sum first
+  const foodTotal = calculateFoodTotal();
+  
+  // Extra Person calculation
+  const extraPersonCheck = document.getElementById('cust-extra-person-check');
+  const extraPersonsInput = document.getElementById('cust-extra-persons');
+  const extraPersons = (extraPersonCheck && extraPersonCheck.checked) ? (parseFloat(extraPersonsInput?.value) || 0) : 0;
+  const extraPersonTotal = extraPersons * 300; // Adjust rate multiplier as configured
+  
+  const extraTotalElem = document.getElementById('cust-extra-total');
+  if (extraTotalElem) extraTotalElem.value = extraPersonTotal;
+
+  // Cab Fare calculation
+  let cabTotal = 0;
+  document.querySelectorAll('#cab-trips-container .cab-fare-input').forEach(input => {
+    cabTotal += parseFloat(input.value) || 0;
+  });
+  const cabTotalElem = document.getElementById('cust-cab-total');
+  if (cabTotalElem) cabTotalElem.value = cabTotal;
+
+  // Calculate Days & Total Tariff
+  const checkinVal = document.getElementById('cust-checkin-date')?.value;
+  const checkoutVal = document.getElementById('cust-checkout-date')?.value;
+  
+  let days = 1;
+  if (checkinVal && checkoutVal) {
+    const d1 = new Date(checkinVal);
+    const d2 = new Date(checkoutVal);
+    const diffTime = d2.getTime() - d1.getTime();
+    days = Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+  }
+
+  const daysElem = document.getElementById('cust-days');
+  if (daysElem) daysElem.value = days;
+
+  const pricePerDay = parseFloat(document.getElementById('cust-price')?.value) || 0;
+  const roomTariff = days * pricePerDay;
+
+  // Grand Total calculation
+  const grandTotal = roomTariff + extraPersonTotal + cabTotal + foodTotal;
+  const totalElem = document.getElementById('cust-total');
+  if (totalElem) totalElem.value = grandTotal;
+
+  // Due calculation
+  const advance = parseFloat(document.getElementById('cust-advance')?.value) || 0;
+  const clearBill = parseFloat(document.getElementById('cust-clear-bill')?.value) || 0;
+  const due = Math.max(0, grandTotal - advance - clearBill);
+  
+  const dueElem = document.getElementById('cust-due');
+  if (dueElem) dueElem.value = due;
+}
+
+// Add single dynamic food row helper with oninput listener
+function addFoodOrderItem(itemData = {}) {
+  const container = document.getElementById('food-orders-container');
+  if (!container) return;
+
+  const rowId = 'food-row-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
+  const div = document.createElement('div');
+  div.id = rowId;
+  div.className = 'food-order-row grid grid-cols-12 gap-1.5 items-center bg-white p-2 rounded-xl border border-amber-200';
+
+  div.innerHTML = `
+    <input type="text" placeholder="Item Name" value="${itemData.name || ''}" class="col-span-4 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-xs focus:outline-none focus:border-amber-500 font-medium" />
+    <input type="number" min="1" value="${itemData.qty || 1}" oninput="calculateModalBilling()" class="food-qty-input col-span-2 bg-slate-50 border border-slate-200 rounded-lg px-1.5 py-1 text-xs text-center font-bold focus:outline-none focus:border-amber-500" />
+    <input type="number" min="0" placeholder="Rate ₹" value="${itemData.rate || ''}" oninput="calculateModalBilling()" class="food-rate-input col-span-3 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-xs font-bold text-amber-900 focus:outline-none focus:border-amber-500" />
+    <button type="button" onclick="removeFoodOrderItem('${rowId}')" class="col-span-3 text-rose-500 hover:text-rose-700 text-[10px] font-bold flex items-center justify-center gap-1">
+      <i class="fa-solid fa-trash"></i> Remove
+    </button>
+  `;
+
+  container.appendChild(div);
+  calculateModalBilling();
+}
+
+function removeFoodOrderItem(rowId) {
+  const elem = document.getElementById(rowId);
+  if (elem) {
+    elem.remove();
+    calculateModalBilling();
+  }
+}
 
     function addCabTripRow(rate = 0, dateStr = '', timeStr = '', remark = '', disabled = false) {
       const container = document.getElementById('cab-trips-container');

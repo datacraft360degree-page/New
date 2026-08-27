@@ -1040,78 +1040,78 @@
         </div>
 
 <!-- Billing Calculation Box -->
-        <div id="sec-billing-summary" class="bg-blue-50/40 p-3 rounded-2xl border border-blue-100 space-y-3 transition-all">
-          <h4 class="text-[9px] font-bold uppercase tracking-wider text-blue-700 flex items-center gap-1.5">
-            <i class="fa-solid fa-calculator text-blue-600"></i> Billing Summary
-          </h4>
-          
-          <!-- Section 1: Extra Person Rates & Charges -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-amber-50/40 p-3 rounded-2xl border border-amber-200/80">
-            <div>
-              <label for="cust-extra-person-rate-per-day" class="block font-semibold text-amber-900 text-[10px] mb-0.5">
-                Extra Person Price/Day (₹)
-              </label>
-              <input type="number" 
-                     id="cust-extra-person-rate-per-day" 
-                     min="0" 
-                     value="1200" 
-                     placeholder="1200" 
-                     oninput="calculateModalBilling()" 
-                     class="w-full bg-white border border-amber-300 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-amber-500 font-bold text-amber-900 text-xs" />
-            </div>
+<div id="sec-billing-summary" class="bg-blue-50/40 p-3 rounded-2xl border border-blue-100 space-y-3 transition-all">
+  <h4 class="text-[9px] font-bold uppercase tracking-wider text-blue-700 flex items-center gap-1.5">
+    <i class="fa-solid fa-calculator text-blue-600"></i> Billing Summary
+  </h4>
+  
+  <!-- Section 1: Extra Person Rates & Charges -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-amber-50/40 p-3 rounded-2xl border border-amber-200/80">
+    <div>
+      <label for="cust-extra-person-rate-per-day" class="block font-semibold text-amber-900 text-[10px] mb-0.5">
+        Extra Person Price/Day (₹)
+      </label>
+      <input type="number" 
+             id="cust-extra-person-rate-per-day" 
+             min="0" 
+             value="1200" 
+             placeholder="1200" 
+             oninput="calculateModalBilling()" 
+             class="w-full bg-white border border-amber-300 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-amber-500 font-bold text-amber-900 text-xs" />
+    </div>
 
-            <div>
-              <label for="cust-extra-person-total-charge" class="block font-semibold text-amber-900 text-[10px] mb-0.5">
-                Extra Person (₹)
-              </label>
-              <input type="number" 
-                     id="cust-extra-person-total-charge" 
-                     value="0" 
-                     readonly 
-                     class="w-full bg-amber-100/70 border border-amber-300 rounded-xl px-2.5 py-1.5 font-extrabold text-amber-800 text-xs cursor-not-allowed" />
-            </div>
-          </div>
+    <div>
+      <label for="cust-extra-person-total-charge" class="block font-semibold text-amber-900 text-[10px] mb-0.5">
+        Extra Person (₹)
+      </label>
+      <input type="number" 
+             id="cust-extra-person-total-charge" 
+             value="0" 
+             readonly 
+             class="w-full bg-amber-100/70 border border-amber-300 rounded-xl px-2.5 py-1.5 font-extrabold text-amber-800 text-xs cursor-not-allowed" />
+    </div>
+  </div>
 
-          <!-- Section 2: Order & Service Breakdown -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-100/60 p-3 rounded-2xl border border-slate-200/60">
-            <div>
-              <label for="cust-food-total" class="block font-semibold text-slate-600 text-[10px] mb-0.5">Extra Food/Drink (₹)</label>
-              <input type="number" id="cust-food-total" value="0" readonly class="w-full bg-slate-200/80 text-blue-700 font-bold border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs cursor-not-allowed" />
-            </div>
-            <div>
-              <label for="cust-cab-total" class="block font-semibold text-slate-600 text-[10px] mb-0.5">Cab Fare (₹)</label>
-              <input type="number" id="cust-cab-total" value="0" readonly class="w-full bg-slate-200/80 text-blue-700 font-bold border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs cursor-not-allowed" />
-            </div>
-          </div>
+  <!-- Section 2: Order & Service Breakdown -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-100/60 p-3 rounded-2xl border border-slate-200/60">
+    <div>
+      <label for="cust-food-total" class="block font-semibold text-slate-600 text-[10px] mb-0.5">Extra Food/Drink (₹)</label>
+      <input type="number" id="cust-food-total" value="0" readonly class="w-full bg-slate-200/80 text-blue-700 font-bold border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs cursor-not-allowed" />
+    </div>
+    <div>
+      <label for="cust-cab-total" class="block font-semibold text-slate-600 text-[10px] mb-0.5">Cab Fare (₹)</label>
+      <input type="number" id="cust-cab-total" value="0" readonly class="w-full bg-slate-200/80 text-blue-700 font-bold border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs cursor-not-allowed" />
+    </div>
+  </div>
 
-          <!-- Section 3: Room Tariff, Advance & Due Calculations -->
-          <div class="grid grid-cols-2 sm:grid-cols-6 gap-2">
-            <div>
-              <label for="cust-days" class="block font-semibold text-slate-600 text-[10px] mb-0.5">Days</label>
-              <input type="number" id="cust-days" readonly class="w-full bg-slate-200/60 font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 text-xs cursor-not-allowed" />
-            </div>
-            <div>
-              <label for="cust-price" class="block font-semibold text-slate-600 text-[10px] mb-0.5">Price/Day (₹)</label>
-              <input type="number" id="cust-price" value="1200" oninput="calculateModalBilling()" class="w-full bg-white font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 text-xs focus:outline-none focus:border-blue-500" />
-            </div>
-            <div>
-              <label for="cust-total" class="block font-semibold text-slate-600 text-[10px] mb-0.5">Total (₹)</label>
-              <input type="number" id="cust-total" readonly class="w-full bg-slate-200/60 text-blue-700 font-extrabold border border-slate-200 rounded-xl px-2 py-1.5 text-xs cursor-not-allowed" />
-            </div>
-            <div>
-              <label for="cust-advance" class="block font-semibold text-slate-600 text-[10px] mb-0.5">Advance (₹)</label>
-              <input type="number" id="cust-advance" value="0" oninput="calculateModalBilling()" class="w-full bg-white border border-slate-200 rounded-xl px-2 py-1.5 text-xs focus:outline-none focus:border-blue-500 font-semibold text-emerald-600" />
-            </div>
-            <div>
-              <label for="cust-due" class="block font-semibold text-slate-600 text-[10px] mb-0.5">Due (₹)</label>
-              <input type="number" id="cust-due" readonly class="w-full bg-slate-200/60 text-rose-700 font-extrabold border border-slate-200 rounded-xl px-2 py-1.5 text-xs cursor-not-allowed" />
-            </div>
-            <div>
-              <label for="cust-clear-bill" class="block font-semibold text-[10px] text-emerald-700 mb-0.5">Clear Bill (₹)</label>
-              <input type="number" id="cust-clear-bill" value="0" placeholder="0" oninput="handleClearBillPayment(this.value)" class="w-full bg-emerald-50 border border-emerald-300 font-bold text-emerald-800 rounded-xl px-2 py-1.5 text-xs focus:outline-none focus:border-emerald-500" title="Put payment amount to clear due bill" />
-            </div>
-          </div>
-        </div>
+  <!-- Section 3: Room Tariff, Advance & Due Calculations -->
+  <div class="grid grid-cols-2 sm:grid-cols-6 gap-2">
+    <div>
+      <label for="cust-days" class="block font-semibold text-slate-600 text-[10px] mb-0.5">Days</label>
+      <input type="number" id="cust-days" readonly class="w-full bg-slate-200/60 font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 text-xs cursor-not-allowed" />
+    </div>
+    <div>
+      <label for="cust-price" class="block font-semibold text-slate-600 text-[10px] mb-0.5">Price/Day (₹)</label>
+      <input type="number" id="cust-price" value="1200" oninput="calculateModalBilling()" class="w-full bg-white font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 text-xs focus:outline-none focus:border-blue-500" />
+    </div>
+    <div>
+      <label for="cust-total" class="block font-semibold text-slate-600 text-[10px] mb-0.5">Total (₹)</label>
+      <input type="number" id="cust-total" readonly class="w-full bg-slate-200/60 text-blue-700 font-extrabold border border-slate-200 rounded-xl px-2 py-1.5 text-xs cursor-not-allowed" />
+    </div>
+    <div>
+      <label for="cust-advance" class="block font-semibold text-slate-600 text-[10px] mb-0.5">Advance (₹)</label>
+      <input type="number" id="cust-advance" value="0" oninput="calculateModalBilling()" class="w-full bg-white border border-slate-200 rounded-xl px-2 py-1.5 text-xs focus:outline-none focus:border-blue-500 font-semibold text-emerald-600" />
+    </div>
+    <div>
+      <label for="cust-due" class="block font-semibold text-slate-600 text-[10px] mb-0.5">Due (₹)</label>
+      <input type="number" id="cust-due" readonly class="w-full bg-slate-200/60 text-rose-700 font-extrabold border border-slate-200 rounded-xl px-2 py-1.5 text-xs cursor-not-allowed" />
+    </div>
+    <div>
+      <label for="cust-clear-bill" class="block font-semibold text-[10px] text-emerald-700 mb-0.5">Clear Bill (₹)</label>
+      <input type="number" id="cust-clear-bill" value="0" placeholder="0" oninput="handleClearBillPayment(this.value)" class="w-full bg-emerald-50 border border-emerald-300 font-bold text-emerald-800 rounded-xl px-2 py-1.5 text-xs focus:outline-none focus:border-emerald-500" title="Put payment amount to clear due bill" />
+    </div>
+  </div>
+</div>
 
         <div class="flex justify-end space-x-2 pt-1">
           <button type="button" onclick="closeBookingModal()" class="px-4 py-1.5 bg-slate-100 text-slate-700 rounded-xl font-semibold transition hover:bg-slate-200">Cancel</button>

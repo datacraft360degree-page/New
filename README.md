@@ -1434,6 +1434,28 @@ function handleExtraRoomChange() {
   
   calculateModalBilling();
 }
+
+function toggleExtraPersonSection(isChecked) {
+  const roomWrapper = document.getElementById('wrapper-extra-room');
+  const capWrapper = document.getElementById('wrapper-extra-capacity');
+  const customTimeWrapper = document.getElementById('sec-extra-person-time-wrapper');
+  const extraCapInput = document.getElementById('cust-extra-persons');
+
+  if (isChecked) {
+    roomWrapper.classList.remove('hidden');
+    capWrapper.classList.remove('hidden');
+    if (customTimeWrapper) customTimeWrapper.classList.remove('hidden');
+
+    populateExtraRoomDropdown();
+  } else {
+    roomWrapper.classList.add('hidden');
+    capWrapper.classList.add('hidden');
+    if (customTimeWrapper) customTimeWrapper.classList.add('hidden');
+    
+    if (extraCapInput) extraCapInput.value = 0;
+    calculateModalBilling();
+  }
+}
     
 
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbz6rME_OuYHucGBPCfCrV7EYjuE5YF0eqSeuqBjm42-HPXUYJzUSBu0mov9jCdM7zx5Ng/exec"; 

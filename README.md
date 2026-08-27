@@ -915,13 +915,20 @@
     </label>
   </div>
 
-  <!-- 2. Extra Room Multi-Select Dropdown with "Select All" Option -->
-  <div id="wrapper-extra-room" class="hidden">
+  <!-- 2. Checkbox-style Extra Room Selection Dropdown -->
+  <div id="wrapper-extra-room" class="relative hidden">
     <label class="block font-semibold text-amber-800 text-[10px] mb-0.5">Add Extra Room(s)</label>
-    <select id="cust-extra-room" multiple onchange="handleExtraRoomChange(event)" class="w-full bg-white border border-amber-300 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-amber-500 font-bold text-amber-900 cursor-pointer min-h-[90px]">
-      <!-- Options dynamically populated by JS -->
-    </select>
-    <span class="text-[9px] text-amber-700 block mt-0.5">Hold Ctrl / Cmd to select multiple</span>
+    
+    <!-- Custom Dropdown Trigger Button -->
+    <button type="button" id="extra-room-dropdown-btn" onclick="toggleExtraRoomMenu()" class="w-full bg-white border border-amber-300 rounded-xl px-2.5 py-1.5 text-left font-bold text-amber-900 text-xs flex justify-between items-center focus:outline-none focus:border-amber-500">
+      <span id="extra-room-btn-text">Select Room(s)...</span>
+      <i class="fa-solid fa-chevron-down text-amber-600 text-[10px]"></i>
+    </button>
+
+    <!-- Scrollable Checkbox Popover Menu -->
+    <div id="extra-room-menu" class="hidden absolute z-50 left-0 right-0 mt-1 bg-white border border-amber-300 rounded-xl shadow-lg max-h-48 overflow-y-auto p-1.5 space-y-1">
+      <!-- Dynamically populated room checkboxes -->
+    </div>
   </div>
 
   <!-- 3. Editable Extra Person Capacity -->
@@ -930,7 +937,7 @@
     <input type="number" id="cust-extra-persons" min="0" value="0" placeholder="0" oninput="calculateModalBilling()" class="w-full bg-white border border-amber-300 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-amber-500 font-bold text-amber-900" />
   </div>
   
-</div>            
+</div>
             <!-- ADDITIONAL PERSON CUSTOM CHECK-IN & CHECK-OUT WINDOW -->
             <div id="sec-extra-person-time-wrapper" class="sm:col-span-4 hidden bg-amber-50/70 p-2.5 rounded-2xl border border-amber-200/80 space-y-2">
               <label class="block font-bold text-amber-900 mb-1 flex items-center gap-1">

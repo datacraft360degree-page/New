@@ -904,7 +904,7 @@
             </div>
 
             <!-- EXTRA PERSON(S) COUNT FIELD -->
-            <!-- UPDATED EXTRA PERSON & ROOM SELECTION FIELD -->
+<!-- UPDATED EXTRA PERSON & ROOM SELECTION FIELD -->
 <div class="sm:col-span-4 grid grid-cols-1 sm:grid-cols-3 gap-2 bg-amber-50/50 p-2.5 rounded-2xl border border-amber-200/60">
   
   <!-- 1. Checkbox for Extra Person -->
@@ -915,14 +915,14 @@
     </label>
   </div>
 
-  <!-- 2. Extra Room Multi-Select Dropdown -->
-<div id="wrapper-extra-room" class="hidden">
-  <label class="block font-semibold text-amber-800 text-[10px] mb-0.5">Add Extra Room(s)</label>
-  <select id="cust-extra-room" multiple onchange="handleExtraRoomChange()" class="w-full bg-white border border-amber-300 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-amber-500 font-bold text-amber-900 cursor-pointer min-h-[80px]">
-    <!-- Options dynamically populated by JS -->
-  </select>
-  <span class="text-[9px] text-amber-700 block mt-0.5">Hold Ctrl / Cmd to select multiple</span>
-</div>
+  <!-- 2. Extra Room Multi-Select Dropdown with "Select All" Option -->
+  <div id="wrapper-extra-room" class="hidden">
+    <label class="block font-semibold text-amber-800 text-[10px] mb-0.5">Add Extra Room(s)</label>
+    <select id="cust-extra-room" multiple onchange="handleExtraRoomChange(event)" class="w-full bg-white border border-amber-300 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-amber-500 font-bold text-amber-900 cursor-pointer min-h-[90px]">
+      <!-- Options dynamically populated by JS -->
+    </select>
+    <span class="text-[9px] text-amber-700 block mt-0.5">Hold Ctrl / Cmd to select multiple</span>
+  </div>
 
   <!-- 3. Editable Extra Person Capacity -->
   <div id="wrapper-extra-capacity" class="hidden">
@@ -930,8 +930,7 @@
     <input type="number" id="cust-extra-persons" min="0" value="0" placeholder="0" oninput="calculateModalBilling()" class="w-full bg-white border border-amber-300 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-amber-500 font-bold text-amber-900" />
   </div>
   
-</div>
-
+</div>            
             <!-- ADDITIONAL PERSON CUSTOM CHECK-IN & CHECK-OUT WINDOW -->
             <div id="sec-extra-person-time-wrapper" class="sm:col-span-4 hidden bg-amber-50/70 p-2.5 rounded-2xl border border-amber-200/80 space-y-2">
               <label class="block font-bold text-amber-900 mb-1 flex items-center gap-1">

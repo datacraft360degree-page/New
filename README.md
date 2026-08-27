@@ -4065,6 +4065,9 @@ function openBookingModal(existingBooking = null) {
       document.getElementById('cust-days').value = days;
       document.getElementById('cust-total').value = total;
       document.getElementById('cust-due').value = due;
+
+      const foodTotal = parseFloat(document.getElementById('cust-food-total').value) || 0;
+document.getElementById('cust-food-total').value = foodTotal;
       
       const extraTotalInput = document.getElementById('cust-extra-total');
       if (extraTotalInput) extraTotalInput.value = extraPersonTotal;

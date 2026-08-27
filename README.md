@@ -1383,22 +1383,30 @@ function checkBirthdayTrigger() {
       }
     }
 // 1. Function to populate extra room options dynamically
+// 1. Populate Dropdown Options including "Select all options"
 function populateExtraRoomDropdown() {
   const extraRoomSelect = document.getElementById('cust-extra-room');
   if (!extraRoomSelect) return;
 
-  // Store currently selected room values to preserve UI state during re-population
-  const currentSelections = Array.from(extraRoomSelect.selectedOptions).map(opt => opt.value);
+  // Track existing user selections to preserve UI state during dynamic re-renders
+  const selectedValues = Array.from(extraRoomSelect.selectedOptions).map(opt => opt.value);
   extraRoomSelect.innerHTML = '';
 
-  // Default option
+  // Option A: "Select all options"
+  const selectAllOpt = document.createElement('option');
+  selectAllOpt.value = "ALL";
+  selectAllOpt.textContent = "--- Select all options ---";
+  selectAllOpt.className = "font-extrabold text-amber-700 bg-amber-100/50 py-0.5";
+  extraRoomSelect.appendChild(selectAllOpt);
+
+  // Option B: Default "Same room with extra bed"
   const defaultOption = document.createElement('option');
   defaultOption.value = "Same room with extra bed";
   defaultOption.textContent = "Same room with extra bed";
-  defaultOption.dataset.capacity = 1;
+  defaultOption.dataset.capacity = 1; // Default fallback
   extraRoomSelect.appendChild(defaultOption);
 
-  // Populate options from Master tab room capacity configuration
+  // Option C+: Dynamic rooms populated from Master Tab configuration
   if (Array.isArray(state.roomsCapacity)) {
     state.roomsCapacity.forEach(room => {
       const opt = document.createElement('option');
@@ -1410,33 +1418,55 @@ function populateExtraRoomDropdown() {
     });
   }
 
-  // Restore selections if available
+  // Restore previous selections if matching options exist
   Array.from(extraRoomSelect.options).forEach(opt => {
-    if (currentSelections.includes(opt.value)) {
+    if (selectedValues.includes(opt.value)) {
       opt.selected = true;
     }
   });
 }
 
-// 2. Handle room dynamic selection and sum calculated capacities
-function handleExtraRoomChange() {
+// 2. Handle Multi-Selection Changes (with Select All toggle & capacity calculation)
+function handleExtraRoomChange(event) {
   const selectElem = document.getElementById('cust-extra-room');
   const capInput = document.getElementById('cust-extra-persons');
   if (!selectElem || !capInput) return;
 
-  // Sum up capacity across all selected rooms in the multi-select
+  const options = Array.from(selectElem.options);
+  const selectAllOption = options.find(opt => opt.value === "ALL");
+
+  // Check if "Select all options" was just clicked/toggled
+  if (selectAllOption && selectAllOption.selected) {
+    const areAllRoomsSelected = options
+      .filter(opt => opt.value !== "ALL")
+      .every(opt => opt.selected);
+
+    // Toggle all other options depending on current selection state
+    options.forEach(opt => {
+      if (opt.value !== "ALL") {
+        opt.selected = !areAllRoomsSelected;
+      }
+    });
+
+    // Deselect the "Select all options" line itself so it acts purely as an action button
+    selectAllOption.selected = false;
+  }
+
+  // Calculate sum of capacities of all currently selected room options
   let totalCalculatedCapacity = 0;
   Array.from(selectElem.selectedOptions).forEach(opt => {
-    totalCalculatedCapacity += parseInt(opt.dataset.capacity || 0, 10);
+    if (opt.value !== "ALL") {
+      totalCalculatedCapacity += parseInt(opt.dataset.capacity || 0, 10);
+    }
   });
 
-  // Dynamically reflect calculated capacity while leaving field fully editable
+  // Dynamically reflect calculated capacity into the input field (fully user-editable)
   capInput.value = totalCalculatedCapacity;
   
   calculateModalBilling();
 }
 
-// 3. Dynamic Section Toggle (Show/Hide wrappers)
+// 3. Dynamic Section Display Toggle
 function toggleExtraPersonSection(isChecked) {
   const roomWrapper = document.getElementById('wrapper-extra-room');
   const capWrapper = document.getElementById('wrapper-extra-capacity');
@@ -1459,7 +1489,7 @@ function toggleExtraPersonSection(isChecked) {
   }
 }
 
-// 4. Modal Opening & State Management (Fresh vs. Edit Booking)
+// 4. Booking Handler (Fresh Booking Reset vs. Edit Booking State Preservation)
 function openBookingModal(existingBooking = null) {
   const extraCheck = document.getElementById('cust-extra-person-check');
   const extraRoomSelect = document.getElementById('cust-extra-room');
@@ -1467,14 +1497,14 @@ function openBookingModal(existingBooking = null) {
 
   if (existingBooking && (existingBooking.hasExtraPerson || existingBooking.extraPersons > 0 || existingBooking.extraRooms)) {
     // ==========================================
-    // EDIT BOOKING MODE (PRESERVE PREVIOUS RECORD)
+    // EDIT BOOKING MODE: PRESERVE SAVED RECORD
     // ==========================================
     
-    // 1. Enable checkbox & show section
+    // 1. Check the box and render inputs
     if (extraCheck) extraCheck.checked = true;
     toggleExtraPersonSection(true);
 
-    // 2. Parse saved room selection(s) into array format
+    // 2. Parse saved extra rooms into array format
     let savedRooms = [];
     if (Array.isArray(existingBooking.extraRooms)) {
       savedRooms = existingBooking.extraRooms;
@@ -1484,31 +1514,31 @@ function openBookingModal(existingBooking = null) {
       savedRooms = ["Same room with extra bed"];
     }
 
-    // 3. Match and restore multi-select dropdown states
+    // 3. Highlight and select all matching saved options in the multi-select dropdown
     if (extraRoomSelect) {
       Array.from(extraRoomSelect.options).forEach(opt => {
         opt.selected = savedRooms.includes(opt.value);
       });
     }
 
-    // 4. Preserve saved custom extra person capacity
+    // 4. Retain and display saved extra person capacity value
     if (extraCapInput) {
       extraCapInput.value = existingBooking.extraPersons !== undefined ? existingBooking.extraPersons : 0;
     }
 
   } else {
     // ==========================================
-    // FRESH BOOKING MODE (RESET ALL FIELDS)
+    // FRESH BOOKING MODE: COMPLETE RESET
     // ==========================================
     
-    // 1. Uncheck checkbox & hide wrappers
+    // 1. Uncheck checkbox & hide wrapper elements
     if (extraCheck) extraCheck.checked = false;
     toggleExtraPersonSection(false);
 
-    // 2. Reset extra capacity input to 0
+    // 2. Clear extra capacity input value to 0
     if (extraCapInput) extraCapInput.value = 0;
 
-    // 3. Clear all dropdown room selections
+    // 3. Deselect all options in dropdown list
     if (extraRoomSelect) {
       Array.from(extraRoomSelect.options).forEach(opt => {
         opt.selected = false;
@@ -1516,32 +1546,9 @@ function openBookingModal(existingBooking = null) {
     }
   }
 
-  // Recalculate billing based on updated modal state
+  // Recalculate totals after setting initial modal state
   calculateModalBilling();
 }
-
-function toggleExtraPersonSection(isChecked) {
-  const roomWrapper = document.getElementById('wrapper-extra-room');
-  const capWrapper = document.getElementById('wrapper-extra-capacity');
-  const customTimeWrapper = document.getElementById('sec-extra-person-time-wrapper');
-  const extraCapInput = document.getElementById('cust-extra-persons');
-
-  if (isChecked) {
-    roomWrapper.classList.remove('hidden');
-    capWrapper.classList.remove('hidden');
-    if (customTimeWrapper) customTimeWrapper.classList.remove('hidden');
-
-    populateExtraRoomDropdown();
-  } else {
-    roomWrapper.classList.add('hidden');
-    capWrapper.classList.add('hidden');
-    if (customTimeWrapper) customTimeWrapper.classList.add('hidden');
-    
-    if (extraCapInput) extraCapInput.value = 0;
-    calculateModalBilling();
-  }
-}
-    
 
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbz6rME_OuYHucGBPCfCrV7EYjuE5YF0eqSeuqBjm42-HPXUYJzUSBu0mov9jCdM7zx5Ng/exec"; 
     

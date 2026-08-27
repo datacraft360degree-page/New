@@ -1044,7 +1044,39 @@
           <h4 class="text-[9px] font-bold uppercase tracking-wider text-blue-700 flex items-center gap-1.5">
             <i class="fa-solid fa-calculator text-blue-600"></i> Billing Summary
           </h4>
-          
+
+          <!-- BILLING SUMMARY SECTION -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 bg-slate-50 p-3 rounded-2xl border border-slate-200 mt-4">
+  
+  <!-- Existing Billing Inputs... -->
+
+  <!-- 12. Editable Extra Person Price Per Day Field -->
+  <div>
+    <label for="cust-extra-person-rate-per-day" class="block font-semibold text-slate-700 text-[10px] mb-0.5">
+      Extra Person Price/Day (₹)
+    </label>
+    <input type="number" 
+           id="cust-extra-person-rate-per-day" 
+           min="0" 
+           value="1200" 
+           placeholder="1200" 
+           oninput="calculateModalBilling()" 
+           class="w-full bg-white border border-slate-300 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-amber-500 font-bold text-slate-900 text-xs" />
+  </div>
+
+  <!-- 13. Auto-calculated Total Extra Person Charge Display -->
+  <div>
+    <label class="block font-semibold text-slate-700 text-[10px] mb-0.5">
+      Extra Person (₹)
+    </label>
+    <input type="number" 
+           id="cust-extra-person-total-charge" 
+           value="0" 
+           readonly 
+           class="w-full bg-slate-100 border border-slate-200 rounded-xl px-2.5 py-1.5 font-bold text-amber-700 text-xs cursor-not-allowed" />
+  </div>
+
+</div>
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2 pb-2 border-b border-blue-200">
              <div>
                 <label class="block font-semibold text-slate-600 mb-0.5">Extra Person (₹)</label>

@@ -1618,8 +1618,8 @@ function updateExtraRoomButtonText() {
   if (selectedRooms.length === 0) {
     btnText.textContent = "Select Room(s)...";
   } else {
-    // Joins option names with commas (e.g., "Room 01, Room 02")
-    btnText.textContent = selectedRooms.join(', ');
+    // Joins option names with commas (e.g., "Room 1, Room 2")
+    btnText.textContent = selectedRooms.join(' | ');
   }
 }
 

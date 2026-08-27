@@ -1073,39 +1073,14 @@
            readonly 
            class="w-full bg-amber-100/70 border border-amber-300 rounded-xl px-2.5 py-1.5 font-extrabold text-amber-800 text-xs cursor-not-allowed" />
 
-<!-- BILLING SUMMARY SECTION -->
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 bg-slate-50 p-3 rounded-2xl border border-slate-200 mt-4">
-
-  <!-- Existing fields... -->
-
-  <!-- 14. Auto-calculated Cab Food/Drink Field -->
-  <div>
-    <label for="cust-cab-food-drink" class="block font-semibold text-slate-700 text-[10px] mb-0.5">
-      Cab Food/Drink (₹)
-    </label>
-    <input type="number" 
-           id="cust-cab-food-drink" 
-           value="0" 
-           readonly 
-           class="w-full bg-slate-100 border border-slate-200 rounded-xl px-2.5 py-1.5 font-bold text-amber-800 text-xs cursor-not-allowed" />
-  </div>
-
-  <!-- Cab Fare Field -->
-  <div>
-    <label for="cust-cab-fare" class="block font-semibold text-slate-700 text-[10px] mb-0.5">
-      Cab Fare (₹)
-    </label>
-    <input type="number" 
-           id="cust-cab-fare" 
-           min="0" 
-           value="0" 
-           oninput="calculateModalBilling()" 
-           class="w-full bg-white border border-slate-300 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-amber-500 font-bold text-slate-900 text-xs" />
-  </div>
-
-  <!-- Remaining fields... -->
-
-</div>
+        <div>
+              <label class="block font-semibold text-slate-600 mb-0.5">Cab Food/Drink (₹)</label>
+              <input type="number" id="cust-total" readonly="" class="w-full bg-slate-200/60 text-blue-700 font-bold border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" />
+            </div>
+    <div>
+              <label class="block font-semibold text-slate-600 mb-0.5">Cab Fare (₹)</label>
+              <input type="number" id="cust-total" readonly="" class="w-full bg-slate-200/60 text-blue-700 font-bold border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" />
+            </div>
           <div class="grid grid-cols-2 sm:grid-cols-6 gap-2">
             <div>
               <label class="block font-semibold text-slate-600 mb-0.5">Days</label>

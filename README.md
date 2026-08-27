@@ -1044,15 +1044,13 @@
           <h4 class="text-[9px] font-bold uppercase tracking-wider text-blue-700 flex items-center gap-1.5">
             <i class="fa-solid fa-calculator text-blue-600"></i> Billing Summary
           </h4>
+          
+         <!-- EXTRA PERSON BILLING ROW (Side-by-Side) -->
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-amber-50/40 p-3 rounded-2xl border border-amber-200/80 mt-3">
 
-          <!-- BILLING SUMMARY SECTION -->
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 bg-slate-50 p-3 rounded-2xl border border-slate-200 mt-4">
-  
-  <!-- Existing Billing Inputs... -->
-
-  <!-- 12. Editable Extra Person Price Per Day Field -->
+  <!-- 12. Editable Per-Day Rate (Defaults to 1200) -->
   <div>
-    <label for="cust-extra-person-rate-per-day" class="block font-semibold text-slate-700 text-[10px] mb-0.5">
+    <label for="cust-extra-person-rate-per-day" class="block font-semibold text-amber-900 text-[10px] mb-0.5">
       Extra Person Price/Day (₹)
     </label>
     <input type="number" 
@@ -1061,28 +1059,22 @@
            value="1200" 
            placeholder="1200" 
            oninput="calculateModalBilling()" 
-           class="w-full bg-white border border-slate-300 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-amber-500 font-bold text-slate-900 text-xs" />
+           class="w-full bg-white border border-amber-300 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-amber-500 font-bold text-amber-900 text-xs" />
   </div>
 
-  <!-- 13. Auto-calculated Total Extra Person Charge Display -->
+  <!-- 13. Auto-calculated Total Extra Person Field -->
   <div>
-    <label class="block font-semibold text-slate-700 text-[10px] mb-0.5">
+    <label for="cust-extra-person-total-charge" class="block font-semibold text-amber-900 text-[10px] mb-0.5">
       Extra Person (₹)
     </label>
     <input type="number" 
            id="cust-extra-person-total-charge" 
            value="0" 
            readonly 
-           class="w-full bg-slate-100 border border-slate-200 rounded-xl px-2.5 py-1.5 font-bold text-amber-700 text-xs cursor-not-allowed" />
+           class="w-full bg-amber-100/70 border border-amber-300 rounded-xl px-2.5 py-1.5 font-extrabold text-amber-800 text-xs cursor-not-allowed" />
   </div>
 
 </div>
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2 pb-2 border-b border-blue-200">
-             <div>
-                <label class="block font-semibold text-slate-600 mb-0.5">Extra Person (₹)</label>
-                <input type="number" id="cust-extra-total" readonly="" class="w-full bg-slate-200/60 font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" />
-             </div>
-             <div>
                 <label class="block font-semibold text-slate-600 mb-0.5">Cab Fare (₹)</label>
                 <input type="number" id="cust-cab-total" readonly="" class="w-full bg-slate-200/60 font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" />
              </div>

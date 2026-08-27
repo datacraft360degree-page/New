@@ -3361,6 +3361,12 @@ function updateDashboardCards() {
             btnSave.classList.add('bg-blue-600', 'hover:bg-blue-700');
          }
       }
+  // Add this inside openBookingModal() when initializing values:
+const extraCheck = document.getElementById('cust-extra-person-check');
+if (extraCheck) {
+  extraCheck.checked = false;
+  toggleExtraPersonSection(false);
+}
 
       const extraPersonsInput = document.getElementById('cust-extra-persons');
       const extraPersonTimeWrapper = document.getElementById('sec-extra-person-time-wrapper');

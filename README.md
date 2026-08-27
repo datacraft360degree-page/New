@@ -2175,108 +2175,98 @@ function openBookingModal(existingBooking = null) {
       }
     }
 
-  // 1. UPDATE EXPORT TO EXCEL FUNCTION (processExport)
-function processExport() {
-  const startDateVal = document.getElementById('export-start-date').value;
-  const endDateVal = document.getElementById('export-end-date').value;
+    function processExport() {
+      const startDateStr = document.getElementById('export-start-date').value;
+      const endDateStr = document.getElementById('export-end-date').value;
 
-  if (!startDateVal || !endDateVal) {
-    alert("Please select both start and end dates.");
-    return;
-  }
+      if (!startDateStr || !endDateStr) {
+        alert("Please select both Start and End dates.");
+        return;
+      }
 
-  const startMs = new Date(startDateVal + "T00:00:00").getTime();
-  const endMs = new Date(endDateVal + "T23:59:59").getTime();
-
-  if (startMs > endMs) {
-    alert("Start Date cannot be after End Date.");
-    return;
-  }
-
-  // Filter non-inactive bookings within date range
-  const filteredBookings = state.bookings.filter(b => {
-    if (isInactiveBooking(b)) return false;
-    const checkinMs = parseDateMs(b.checkIn);
-    return checkinMs >= startMs && checkinMs <= endMs;
-  });
-
-  if (filteredBookings.length === 0) {
-    alert("No valid bookings found within the selected date range.");
-    return;
-  }
-
-  // Map booking data including the new column "Extra Person Room No(s)"
-  const excelRows = filteredBookings.map(b => {
-    // Parse JSON fields securely
-    const foodList = parseJSONField(b.foodOrders);
-    const cabList = parseJSONField(b.cabTrips);
-
-    // Format Extra Person Room No(s) as a clean string list
-    let extraRoomsStr = "";
-    if (Array.isArray(b.extraRooms)) {
-      extraRoomsStr = b.extraRooms.join(", ");
-    } else if (typeof b.extraRooms === 'string') {
-      extraRoomsStr = b.extraRooms;
+      exportToExcel(startDateStr, endDateStr);
     }
 
-    return {
-      "Booking ID (System)": b.systemId || b.id || "",
-      "Booking ID": b.id || "",
-      "Invoice ID": b.invoiceId || "",
-      "Booking Status": b.status || "Upcoming",
-      "Guest Name": b.guestName || "",
-      "Contact No": b.contactNo || "",
-      "Country Code": b.countryCode || "+91",
-      "ID Number": b.idNumber || "",
-      "Attached ID File Name": b.attachedIdFileName || "",
-      "Address": b.address || "",
-      "City": b.city || "",
-      "State": b.state || "",
-      "Country": b.country || "",
-      "Pin/Zip Code": b.zipCode || "",
-      "Room No(s)": Array.isArray(b.roomNo) ? b.roomNo.join(", ") : (b.roomNo || ""),
-      "Capacity": b.capacity || 0,
-      "Extra Persons": b.extraPersons || 0,
-      "Extra Person Joined": format24hDate(b.extraPersonCheckIn),
-      "Extra Person Check-Out": format24hDate(b.extraPersonCheckOut),
-      "Extra Person Days": b.extraPersonDays || 0,
-      "Extra Person Room No(s)": extraRoomsStr,
-      "Agent Info": b.agentInfo || "",
-      "Check-In": format24hDate(b.checkIn),
-      "Check-Out": format24hDate(b.checkOut),
-      "Has Extended Check-Out": isTrue(b.hasExtendedCheckout) ? "Yes" : "No",
-      "Extended Check-Out": format24hDate(b.extendedCheckout),
-      "Include Meals": isTrue(b.includeMeals) ? "Yes" : "No",
-      "Stay Days": b.stayDays || 0,
-      "Price / Day": b.pricePerDay || 0,
-      "Food Orders (JSON)": JSON.stringify(foodList),
-      "Cab trip details": JSON.stringify(cabList),
-      "Extra Person (₹)": b.extraPersonTotal || 0,
-      "Cab Fare (₹)": b.cabTotal || 0,
-      "Extra Food/Drink (₹)": b.foodTotal || 0,
-      "Total Amount": b.totalAmount || 0,
-      "Initial Advance": b.initialAdvance || 0,
-      "Cleared Due": b.clearedDue || 0,
-      "Balance Due": b.balanceDue || 0
-    };
-  });
+    function exportToExcel(startDateStr, endDateStr) {
+      if (!state.bookings || state.bookings.length === 0) {
+        alert("No booking records available to export!");
+        return;
+      }
 
-  // Generate sheet & workbook using SheetJS
-  const worksheet = XLSX.utils.json_to_sheet(excelRows);
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, "Bookings_Report");
+      const filteredBookings = state.bookings.filter(b => {
+        if(!b.checkIn) return false;
+        
+        const bIn = String(b.checkIn).replace(' ', 'T').split('T')[0];
+        return (bIn >= startDateStr) && (bIn <= endDateStr);
+      });
 
-  // Auto-fit Excel column widths nicely
-  const maxCols = Object.keys(excelRows[0]).map(key => ({
-    wch: Math.max(key.length, 14)
-  }));
-  worksheet['!cols'] = maxCols;
+      if (filteredBookings.length === 0) {
+        alert(`No booking records found with a Check-In date between ${formatDate(startDateStr)} and ${formatDate(endDateStr)}!`);
+        return;
+      }
 
-  // Trigger Excel file download
-  const fileName = `Booking_Report_${startDateVal}_to_${endDateVal}.xlsx`;
-  XLSX.writeFile(workbook, fileName);
-  closeExportModal();
-}
+      const now = new Date().getTime();
+
+      const exportData = filteredBookings.map(b => {
+        let bStatus = "Unknown";
+        if (isInactiveBooking(b)) {
+            bStatus = "Inactive";
+        } else {
+            const cIn = parseDateMs(b.checkIn);
+            const cOut = getEffectiveCheckoutTime(b);
+            if (now > cOut) bStatus = "Closed";
+            else if (now >= cIn && now <= cOut) bStatus = "Live";
+            else bStatus = "Upcoming";
+        }
+
+        const foodList = parseJSONField(b.foodOrders);
+        const cabList = parseJSONField(b.cabTrips);
+        
+        return {
+          "Booking ID (System)": b.id || "",
+          "Booking ID": b.bookingCode || "",
+          "Invoice ID": b.invoiceNo || "",
+          "Booking Status": bStatus,
+          "Guest Name": b.name || "",
+          "Contact No": b.contactNo || "",
+          "Country Code": b.countryCode || "",
+          "ID Number": b.idNo || "",
+          "Attached ID File Name": b.idProofFileName || "",
+          "Address": b.address || "",
+          "City": b.city || "",
+          "State": b.state || "",
+          "Country": b.country || "",
+          "Pin/Zip Code": b.zipCode || "",
+          "Room No(s)": getBookingRooms(b).join(" | "),
+          "Capacity": b.capacity || 1,
+          "Extra Persons": b.extraPersons || 0,
+          "Extra Person Joined": format24hDate(b.extraPersonJoined),
+          "Extra Person Check-Out": format24hDate(b.extraPersonOut),
+          "Extra Person Days": b.extraPersonDays || 0,
+          "Agent Info": b.agentInfo || "",
+          "Check-In": format24hDate(b.checkIn),
+          "Check-Out": format24hDate(b.checkOut),
+          "Has Extended Check-Out": isTrue(b.hasExtendedCheckout) ? "Yes" : "No",
+          "Extended Check-Out": format24hDate(b.extendedCheckOut),
+          "Include Meals": (b.includeMeals !== false && b.includeMeals !== 'false') ? "Yes" : "No",
+          "Stay Days": b.noOfDays || 0,
+          "Price / Day": b.perDayPrice || 0,
+          "Food Orders Details": foodList.map(f => `${f.foodDesc} (${format24hDate(f.foodDateTime)}): ${f.plates} pl @ ₹${f.itemPrice} = ₹${f.foodCharge}`).join('\n'),
+          "Cab Trips Details": cabList.map(c => `${c.tripName} (${format24hDate(c.dateTime)}): ₹${c.rate} ${c.remark ? `[${c.remark}]` : ''}`).join('\n'),
+          "Total Amount": b.totalAmount || 0,
+          "Initial Advance": b.initialAdv || 0,
+          "Cleared Due": b.clearedDue || 0,
+          "Balance Due": b.totalDue || 0
+        };
+      });
+
+      const worksheet = XLSX.utils.json_to_sheet(exportData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Bookings");
+
+      XLSX.writeFile(workbook, `Booking_Report_${startDateStr}_to_${endDateStr}.xlsx`);
+      closeExportModal();
+    }
 
     function searchBookingByDate() {
       const dateVal = document.getElementById('booking-date-search').value;

@@ -915,13 +915,14 @@
     </label>
   </div>
 
-  <!-- 2. Extra Room Dropdown Selection -->
-  <div id="wrapper-extra-room" class="hidden">
-    <label class="block font-semibold text-amber-800 text-[10px] mb-0.5">Add Extra Room(s)</label>
-    <select id="cust-extra-room" onchange="handleExtraRoomChange(this.value)" class="w-full bg-white border border-amber-300 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-amber-500 font-bold text-amber-900 cursor-pointer">
-      <!-- Options dynamically populated by JS -->
-    </select>
-  </div>
+  <!-- 2. Extra Room Multi-Select Dropdown -->
+<div id="wrapper-extra-room" class="hidden">
+  <label class="block font-semibold text-amber-800 text-[10px] mb-0.5">Add Extra Room(s)</label>
+  <select id="cust-extra-room" multiple onchange="handleExtraRoomChange()" class="w-full bg-white border border-amber-300 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-amber-500 font-bold text-amber-900 cursor-pointer min-h-[80px]">
+    <!-- Options dynamically populated by JS -->
+  </select>
+  <span class="text-[9px] text-amber-700 block mt-0.5">Hold Ctrl / Cmd to select multiple</span>
+</div>
 
   <!-- 3. Editable Extra Person Capacity -->
   <div id="wrapper-extra-capacity" class="hidden">

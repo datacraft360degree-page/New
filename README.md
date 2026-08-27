@@ -1387,64 +1387,50 @@ function populateExtraRoomDropdown() {
   const extraRoomSelect = document.getElementById('cust-extra-room');
   if (!extraRoomSelect) return;
 
-  // Clear existing options
+  // Preserve existing selections before clearing options
+  const selectedValues = Array.from(extraRoomSelect.selectedOptions).map(opt => opt.value);
   extraRoomSelect.innerHTML = '';
 
-  // Option 1: Default extra bed in same room
+  // 1. Default Option: Same room with extra bed
   const defaultOption = document.createElement('option');
   defaultOption.value = "Same room with extra bed";
   defaultOption.textContent = "Same room with extra bed";
-  defaultOption.dataset.capacity = 1; // Default fallback capacity
+  defaultOption.dataset.capacity = 1;
   extraRoomSelect.appendChild(defaultOption);
 
-  // Options 2+: Populated from Master tab state (state.roomsCapacity)
+  // 2. Add options from Master Tab configuration
   if (Array.isArray(state.roomsCapacity)) {
     state.roomsCapacity.forEach(room => {
       const opt = document.createElement('option');
-      opt.value = `Room ${String(room.roomNo).padStart(2, '0')}`;
-      opt.textContent = `Room ${String(room.roomNo).padStart(2, '0')}`;
+      const roomLabel = `Room ${String(room.roomNo).padStart(2, '0')}`;
+      opt.value = roomLabel;
+      opt.textContent = `${roomLabel} (Cap: ${room.capacity || 1})`;
       opt.dataset.capacity = room.capacity || 1;
       extraRoomSelect.appendChild(opt);
     });
   }
-}
-function toggleExtraPersonSection(isChecked) {
-  const roomWrapper = document.getElementById('wrapper-extra-room');
-  const capWrapper = document.getElementById('wrapper-extra-capacity');
-  const customTimeWrapper = document.getElementById('sec-extra-person-time-wrapper');
-  const extraCapInput = document.getElementById('cust-extra-persons');
 
-  if (isChecked) {
-    roomWrapper.classList.remove('hidden');
-    capWrapper.classList.remove('hidden');
-    if (customTimeWrapper) customTimeWrapper.classList.remove('hidden');
-
-    // Populate extra rooms list from Master Tab
-    populateExtraRoomDropdown();
-    
-    // Trigger initial capacity assignment
-    const selectedSelect = document.getElementById('cust-extra-room');
-    handleExtraRoomChange(selectedSelect ? selectedSelect.value : '');
-  } else {
-    roomWrapper.classList.add('hidden');
-    capWrapper.classList.add('hidden');
-    if (customTimeWrapper) customTimeWrapper.classList.add('hidden');
-    
-    if (extraCapInput) extraCapInput.value = 0;
-    calculateModalBilling();
-  }
+  // Restore previous selections if re-populating dynamically
+  Array.from(extraRoomSelect.options).forEach(opt => {
+    if (selectedValues.includes(opt.value)) {
+      opt.selected = true;
+    }
+  });
 }
 
-function handleExtraRoomChange(selectedRoomValue) {
+function handleExtraRoomChange() {
   const selectElem = document.getElementById('cust-extra-room');
   const capInput = document.getElementById('cust-extra-persons');
   if (!selectElem || !capInput) return;
 
-  const selectedOption = selectElem.options[selectElem.selectedIndex];
-  if (selectedOption && selectedOption.dataset.capacity !== undefined) {
-    // Reflect capacity into input box (remains editable by user)
-    capInput.value = selectedOption.dataset.capacity;
-  }
+  // Sum up capacity across ALL selected rooms in the multi-select
+  let totalCalculatedCapacity = 0;
+  Array.from(selectElem.selectedOptions).forEach(opt => {
+    totalCalculatedCapacity += parseInt(opt.dataset.capacity || 0, 10);
+  });
+
+  // Dynamically update capacity input field while keeping it fully editable by the user
+  capInput.value = totalCalculatedCapacity;
   
   calculateModalBilling();
 }

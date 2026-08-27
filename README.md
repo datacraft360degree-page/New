@@ -1382,6 +1382,32 @@ function checkBirthdayTrigger() {
         btn.disabled = false;
       }
     }
+function populateExtraRoomDropdown() {
+  const extraRoomSelect = document.getElementById('cust-extra-room');
+  if (!extraRoomSelect) return;
+
+  // Clear existing options
+  extraRoomSelect.innerHTML = '';
+
+  // Option 1: Default extra bed in same room
+  const defaultOption = document.createElement('option');
+  defaultOption.value = "Same room with extra bed";
+  defaultOption.textContent = "Same room with extra bed";
+  defaultOption.dataset.capacity = 1; // Default fallback capacity
+  extraRoomSelect.appendChild(defaultOption);
+
+  // Options 2+: Populated from Master tab state (state.roomsCapacity)
+  if (Array.isArray(state.roomsCapacity)) {
+    state.roomsCapacity.forEach(room => {
+      const opt = document.createElement('option');
+      opt.value = `Room ${String(room.roomNo).padStart(2, '0')}`;
+      opt.textContent = `Room ${String(room.roomNo).padStart(2, '0')}`;
+      opt.dataset.capacity = room.capacity || 1;
+      extraRoomSelect.appendChild(opt);
+    });
+  }
+}
+    
 
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbz6rME_OuYHucGBPCfCrV7EYjuE5YF0eqSeuqBjm42-HPXUYJzUSBu0mov9jCdM7zx5Ng/exec"; 
     

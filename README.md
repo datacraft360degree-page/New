@@ -1547,6 +1547,7 @@ function populateExtraRoomDropdown(preselectedRooms = []) {
 
 // 2. Handle Checkbox Toggles & Dynamically Calculate Extra Capacity
 // Handle Extra Room Checkbox Toggles with Availability Validation
+// Handle Extra Room Checkbox Toggles with Availability Validation
 function handleExtraRoomCheckboxChange(event, isAllToggle) {
   const menu = document.getElementById('extra-room-menu');
   const capInput = document.getElementById('cust-extra-persons');
@@ -1596,7 +1597,6 @@ function handleExtraRoomCheckboxChange(event, isAllToggle) {
   updateExtraRoomButtonText();
   calculateModalBilling();
 }
-
 // Validates if selected extra rooms are available for the specified stay window
 function validateExtraRoomAvailability(selectedRooms, checkInDateStr, checkOutDateStr, currentBookingId = null) {
   if (!selectedRooms || selectedRooms.length === 0) return true;

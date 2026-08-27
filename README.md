@@ -1039,13 +1039,13 @@
           <div id="cab-trips-container" class="space-y-2 max-h-40 overflow-y-auto pr-1 mt-2"></div>
         </div>
 
-        <!-- Billing Calculation Box -->
+      <!-- Billing Calculation Box -->
         <div id="sec-billing-summary" class="bg-blue-50/40 p-3 rounded-2xl border border-blue-100 space-y-2.5 transition-all">
           <h4 class="text-[9px] font-bold uppercase tracking-wider text-blue-700 flex items-center gap-1.5">
             <i class="fa-solid fa-calculator text-blue-600"></i> Billing Summary
           </h4>
           
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2 pb-2 border-b border-blue-200">
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-2 pb-2 border-b border-blue-200">
              <div>
                 <label class="block font-semibold text-slate-600 mb-0.5">Extra Person (₹)</label>
                 <input type="number" id="cust-extra-total" readonly="" class="w-full bg-slate-200/60 font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" />
@@ -1053,6 +1053,10 @@
              <div>
                 <label class="block font-semibold text-slate-600 mb-0.5">Cab Fare (₹)</label>
                 <input type="number" id="cust-cab-total" readonly="" class="w-full bg-slate-200/60 font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" />
+             </div>
+             <div>
+                <label class="block font-semibold text-slate-600 mb-0.5">Extra Food/Drink (₹)</label>
+                <input type="number" id="cust-food-total" readonly="" class="w-full bg-slate-200/60 font-bold text-amber-700 border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" value="0" />
              </div>
           </div>
           

@@ -3460,6 +3460,60 @@ function updateDashboardCards() {
       }
     }
 
+function addFoodItemRow(foodData = null) {
+  const container = document.getElementById('food-items-container');
+  const row = document.createElement('div');
+  row.className = 'food-item-row flex items-center gap-2 mb-2';
+  
+  row.innerHTML = `
+    <!-- Item Description / Name -->
+    <input type="text" 
+           placeholder="Item/Drink Name" 
+           value="${foodData ? foodData.name : ''}" 
+           class="flex-1 bg-white border border-indigo-200 rounded-xl px-2 py-1 text-indigo-900 focus:outline-none focus:border-indigo-500" />
+    
+    <!-- Price Input triggering dynamic total update -->
+    <input type="number" 
+           placeholder="Price (₹)" 
+           value="${foodData ? foodData.price : ''}" 
+           oninput="calculateFoodTotal()" 
+           class="food-price-input w-24 bg-white border border-indigo-200 rounded-xl px-2 py-1 font-bold text-indigo-900 focus:outline-none focus:border-indigo-500" />
+    
+    <!-- Delete Row Button -->
+    <button type="button" onclick="removeFoodItemRow(this)" class="text-rose-500 hover:text-rose-700 font-bold px-1">
+      <i class="fa-solid fa-trash-can"></i>
+    </button>
+  `;
+  
+  container.appendChild(row);
+  calculateFoodTotal(); // Recalculates total immediately when a row is added
+}
+function calculateFoodTotal() {
+  const priceInputs = document.querySelectorAll('.food-price-input');
+  let totalFoodCost = 0;
+  
+  priceInputs.forEach(input => {
+    const val = parseFloat(input.value) || 0;
+    totalFoodCost += val;
+  });
+  
+  // Updates the readonly Food/Drink Total field
+  const foodTotalElem = document.getElementById('cust-food-total');
+  if (foodTotalElem) {
+    foodTotalElem.value = totalFoodCost;
+  }
+  
+  // Triggers main grand total calculation immediately
+  calculateModalBilling();
+}
+
+function removeFoodItemRow(btn) {
+  const row = btn.closest('.food-item-row');
+  if (row) {
+    row.remove();
+    calculateFoodTotal(); // Recalculates total immediately after DOM removal
+  }
+}
     function setInputEnabled(elem, isEnabled) {
       if (!elem) return;
       elem.disabled = !isEnabled;

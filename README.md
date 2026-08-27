@@ -904,12 +904,32 @@
             </div>
 
             <!-- EXTRA PERSON(S) COUNT FIELD -->
-            <div>
-              <label class="block font-semibold text-amber-700 mb-0.5 flex items-center gap-1">
-                <i class="fa-solid fa-user-plus text-amber-600"></i> Add Extra Person(s)
-              </label>
-              <input type="number" id="cust-extra-persons" min="0" value="0" placeholder="0" oninput="calculateModalBilling()" class="w-full bg-amber-50 border border-amber-300 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-amber-500 font-bold text-amber-900" />
-            </div>
+            <!-- UPDATED EXTRA PERSON & ROOM SELECTION FIELD -->
+<div class="sm:col-span-4 grid grid-cols-1 sm:grid-cols-3 gap-2 bg-amber-50/50 p-2.5 rounded-2xl border border-amber-200/60">
+  
+  <!-- 1. Checkbox for Extra Person -->
+  <div class="flex items-center gap-2 pt-1">
+    <input type="checkbox" id="cust-extra-person-check" onchange="toggleExtraPersonSection(this.checked)" class="w-4 h-4 text-amber-600 rounded-md border-amber-300 focus:ring-amber-500 cursor-pointer" />
+    <label for="cust-extra-person-check" class="font-bold text-amber-900 cursor-pointer select-none text-[11px] flex items-center gap-1">
+      <i class="fa-solid fa-user-plus text-amber-600"></i> Add Extra Person(s)
+    </label>
+  </div>
+
+  <!-- 2. Extra Room Dropdown Selection -->
+  <div id="wrapper-extra-room" class="hidden">
+    <label class="block font-semibold text-amber-800 text-[10px] mb-0.5">Add Extra Room(s)</label>
+    <select id="cust-extra-room" onchange="handleExtraRoomChange(this.value)" class="w-full bg-white border border-amber-300 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-amber-500 font-bold text-amber-900 cursor-pointer">
+      <!-- Options dynamically populated by JS -->
+    </select>
+  </div>
+
+  <!-- 3. Editable Extra Person Capacity -->
+  <div id="wrapper-extra-capacity" class="hidden">
+    <label class="block font-semibold text-amber-800 text-[10px] mb-0.5">Extra Person(s) Capacity</label>
+    <input type="number" id="cust-extra-persons" min="0" value="0" placeholder="0" oninput="calculateModalBilling()" class="w-full bg-white border border-amber-300 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-amber-500 font-bold text-amber-900" />
+  </div>
+  
+</div>
 
             <!-- ADDITIONAL PERSON CUSTOM CHECK-IN & CHECK-OUT WINDOW -->
             <div id="sec-extra-person-time-wrapper" class="sm:col-span-4 hidden bg-amber-50/70 p-2.5 rounded-2xl border border-amber-200/80 space-y-2">

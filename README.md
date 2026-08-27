@@ -4072,6 +4072,9 @@ function openBookingModal(existingBooking = null) {
       
       const cabTotalInput = document.getElementById('cust-cab-total');
       if (cabTotalInput) cabTotalInput.value = cabFare;
+
+   const foodTotalInput = document.getElementById('cust-food-total');
+if (foodTotalInput) foodTotalInput.value = foodTotal;
     }
 
     function handleSaveBooking(e) {

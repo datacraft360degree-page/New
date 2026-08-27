@@ -3514,6 +3514,21 @@ function removeFoodItemRow(btn) {
     calculateFoodTotal(); // Recalculates total immediately after DOM removal
   }
 }
+function calculateModalBilling() {
+  const roomTariff = (parseFloat(document.getElementById('cust-price').value) || 0) * 
+                     (parseFloat(document.getElementById('cust-days').value) || 0);
+  const extraTotal = parseFloat(document.getElementById('cust-extra-total').value) || 0;
+  const cabTotal   = parseFloat(document.getElementById('cust-cab-total').value) || 0;
+  const foodTotal  = parseFloat(document.getElementById('cust-food-total').value) || 0;
+  const advance    = parseFloat(document.getElementById('cust-advance').value) || 0;
+
+  // Granular grand total formula
+  const grandTotal = roomTariff + extraTotal + cabTotal + foodTotal;
+  const dueAmount  = grandTotal - advance;
+
+  document.getElementById('cust-total').value = grandTotal;
+  document.getElementById('cust-due').value   = dueAmount > 0 ? dueAmount : 0;
+}
     function setInputEnabled(elem, isEnabled) {
       if (!elem) return;
       elem.disabled = !isEnabled;

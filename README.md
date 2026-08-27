@@ -1546,21 +1546,40 @@ function populateExtraRoomDropdown(preselectedRooms = []) {
 }
 
 // 2. Handle Checkbox Toggles & Dynamically Calculate Extra Capacity
+// Handle Extra Room Checkbox Toggles with Availability Validation
 function handleExtraRoomCheckboxChange(event, isAllToggle) {
   const menu = document.getElementById('extra-room-menu');
   const capInput = document.getElementById('cust-extra-persons');
   if (!menu || !capInput) return;
 
+  const checkInVal = document.getElementById('cust-checkin-date')?.value + 'T' + (document.getElementById('cust-checkin-time')?.value || '00:00');
+  const checkOutVal = document.getElementById('cust-checkout-date')?.value + 'T' + (document.getElementById('cust-checkout-time')?.value || '00:00');
+  const currentBookingId = document.getElementById('modal-booking-id')?.value || null;
+
   const checkboxes = Array.from(menu.querySelectorAll('input[type="checkbox"]'));
   const allToggle = checkboxes.find(cb => cb.value === 'ALL');
   const roomCheckboxes = checkboxes.filter(cb => cb.value !== 'ALL');
 
+  if (event.target.checked && event.target.value !== 'ALL' && event.target.value !== 'Same room with extra bed') {
+    const isValid = validateExtraRoomAvailability([event.target.value], checkInVal, checkOutVal, currentBookingId);
+    if (!isValid) {
+      event.target.checked = false;
+      return;
+    }
+  }
+
   if (isAllToggle) {
-    // Handle "Select all options" click
     const targetState = event.target.checked;
+    if (targetState) {
+      const roomsToTest = roomCheckboxes.map(cb => cb.value);
+      const isValid = validateExtraRoomAvailability(roomsToTest, checkInVal, checkOutVal, currentBookingId);
+      if (!isValid) {
+        event.target.checked = false;
+        return;
+      }
+    }
     roomCheckboxes.forEach(cb => cb.checked = targetState);
   } else if (allToggle) {
-    // Sync "Select all options" state based on individual checkboxes
     allToggle.checked = roomCheckboxes.every(cb => cb.checked);
   }
 
@@ -1572,13 +1591,63 @@ function handleExtraRoomCheckboxChange(event, isAllToggle) {
     }
   });
 
-  // Populate editable capacity box
   capInput.value = totalCapacity;
 
   updateExtraRoomButtonText();
   calculateModalBilling();
 }
 
+// Validates if selected extra rooms are available for the specified stay window
+function validateExtraRoomAvailability(selectedRooms, checkInDateStr, checkOutDateStr, currentBookingId = null) {
+  if (!selectedRooms || selectedRooms.length === 0) return true;
+
+  const targetCheckIn = parseDateMs(checkInDateStr);
+  const targetCheckOut = parseDateMs(checkOutDateStr);
+
+  if (isNaN(targetCheckIn) || isNaN(targetCheckOut)) return true;
+
+  // Filter existing active bookings (excluding current booking if editing)
+  const activeBookings = state.bookings.filter(b => 
+    !isInactiveBooking(b) && String(b.id) !== String(currentBookingId)
+  );
+
+  for (const b of activeBookings) {
+    const bCheckIn = parseDateMs(b.checkIn);
+    const bCheckOut = parseDateMs(b.checkOut || b.extendedCheckout);
+
+    // Check for stay date overlap
+    const isOverlapping = targetCheckIn < bCheckOut && targetCheckOut > bCheckIn;
+
+    if (isOverlapping) {
+      // Collect primary booked rooms and extra booked rooms
+      const primaryRooms = getBookingRooms(b);
+      const extraRooms = Array.isArray(b.extraRooms) 
+        ? b.extraRooms 
+        : (b.extraRooms ? String(b.extraRooms).split(',').map(r => r.trim()) : []);
+
+      const bookedRoomsInUse = [...primaryRooms, ...extraRooms];
+
+      // Check if any selected extra room collides with an already booked room
+      for (const room of selectedRooms) {
+        if (room === "Same room with extra bed" || room === "ALL") continue;
+        
+        // Extract room number format (e.g., "Room 01" -> "1" or "01")
+        const roomNum = room.replace(/[^0-9]/g, '');
+
+        const isConflict = bookedRoomsInUse.some(r => {
+          const bookedNum = String(r).replace(/[^0-9]/g, '');
+          return bookedNum === roomNum || r === room;
+        });
+
+        if (isConflict) {
+          alert(`Error: ${room} is not available or already booked during this time (Booking ID: ${b.id}). Please select another room number.`);
+          return false;
+        }
+      }
+    }
+  }
+  return true;
+}
 // Update Button Placeholder Text with Selected Counts / Labels
 // Update Button Text to display exact room numbers / option names instead of count
 function updateExtraRoomButtonText() {

@@ -3373,21 +3373,40 @@ function updateDashboardCards() {
   // Add this inside openBookingModal() when initializing values:
 function openBookingModal(existingBooking = null) {
   const extraCheck = document.getElementById('cust-extra-person-check');
+  const extraRoomSelect = document.getElementById('cust-extra-room');
+  const extraCapInput = document.getElementById('cust-extra-persons');
 
-  if (existingBooking && existingBooking.extraPersons > 0) {
-    // EDIT MODE: If existing booking has extra persons, show & populate fields
+  if (existingBooking && (existingBooking.extraPersons > 0 || (existingBooking.extraRooms && existingBooking.extraRooms.length > 0))) {
+    // EDIT MODE: Enable section and populate dropdown from saved record
     if (extraCheck) extraCheck.checked = true;
     toggleExtraPersonSection(true);
-    
-    document.getElementById('cust-extra-room').value = existingBooking.extraRoom || "Same room with extra bed";
-    document.getElementById('cust-extra-persons').value = existingBooking.extraPersons;
+
+    // Parse saved rooms (handles single string or array of selected rooms)
+    const savedRooms = Array.isArray(existingBooking.extraRooms) 
+      ? existingBooking.extraRooms 
+      : [existingBooking.extraRooms || "Same room with extra bed"];
+
+    // Select matching options in the multi-select dropdown
+    Array.from(extraRoomSelect.options).forEach(opt => {
+      opt.selected = savedRooms.includes(opt.value);
+    });
+
+    // Retain saved custom capacity value from edit record
+    if (extraCapInput) extraCapInput.value = existingBooking.extraPersons;
+
   } else {
-    // NEW / RESET MODE: Uncheck and hide extra person fields
+    // FRESH BOOKING MODE: Reset to default selection
     if (extraCheck) extraCheck.checked = false;
     toggleExtraPersonSection(false);
+
+    // Default to "Same room with extra bed" for new entries
+    if (extraRoomSelect && extraRoomSelect.options.length > 0) {
+      Array.from(extraRoomSelect.options).forEach((opt, index) => {
+        opt.selected = (index === 0); // Select first option by default
+      });
+    }
   }
 
-  // Recalculate totals after setting initial modal state
   calculateModalBilling();
 }
 

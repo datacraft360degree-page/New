@@ -3974,6 +3974,43 @@ function openBookingModal(existingBooking = null) {
       document.getElementById('cust-due').value = due;
     }
 
+    // Function to calculate and update all billing fields
+function calculateModalBilling() {
+  // 1. Calculate Extra Food Total
+  let totalFoodAmount = 0;
+  const foodPriceInputs = document.querySelectorAll('.food-item-price');
+  
+  foodPriceInputs.forEach(input => {
+    totalFoodAmount += parseFloat(input.value) || 0;
+  });
+
+  const foodTotalInput = document.getElementById('cust-food-total');
+  if (foodTotalInput) {
+    foodTotalInput.value = totalFoodAmount;
+  }
+
+  // 2. Fetch existing values for Extra Person and Cab Fare
+  const extraPersonTotal = parseFloat(document.getElementById('cust-extra-total')?.value) || 0;
+  const cabTotal = parseFloat(document.getElementById('cust-cab-total')?.value) || 0;
+  const basePrice = parseFloat(document.getElementById('cust-base-price')?.value) || 0; // Update with your actual Base Price input ID
+
+  // 3. Calculate Grand Total Amount
+  const grandTotal = basePrice + extraPersonTotal + cabTotal + totalFoodAmount;
+
+  // 4. Update Total Amount Field
+  const totalAmountInput = document.getElementById('cust-grand-total'); // Update with your actual Grand Total input ID
+  if (totalAmountInput) {
+    totalAmountInput.value = grandTotal;
+  }
+}
+
+// Attach Event Listeners to recalculate on typing/changing values
+document.addEventListener('input', function (event) {
+  // Check if the edited field is a food item price input
+  if (event.target.classList.contains('food-item-price')) {
+    calculateModalBilling();
+  }
+});
     function calculateModalBilling() {
       const inDate = document.getElementById('cust-checkin-date').value;
       const inTime = document.getElementById('cust-checkin-time').value || '00:00';

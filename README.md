@@ -4074,7 +4074,7 @@ function openBookingModal(existingBooking = null) {
       if (cabTotalInput) cabTotalInput.value = cabFare;
 
    const foodTotalInput = document.getElementById('cust-food-total');
-if (foodTotalInput) foodTotalInput.value = foodTotal;
+if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
     }
 
     function handleSaveBooking(e) {

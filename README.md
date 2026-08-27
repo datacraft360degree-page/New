@@ -1407,6 +1407,46 @@ function populateExtraRoomDropdown() {
     });
   }
 }
+function toggleExtraPersonSection(isChecked) {
+  const roomWrapper = document.getElementById('wrapper-extra-room');
+  const capWrapper = document.getElementById('wrapper-extra-capacity');
+  const customTimeWrapper = document.getElementById('sec-extra-person-time-wrapper');
+  const extraCapInput = document.getElementById('cust-extra-persons');
+
+  if (isChecked) {
+    roomWrapper.classList.remove('hidden');
+    capWrapper.classList.remove('hidden');
+    if (customTimeWrapper) customTimeWrapper.classList.remove('hidden');
+
+    // Populate extra rooms list from Master Tab
+    populateExtraRoomDropdown();
+    
+    // Trigger initial capacity assignment
+    const selectedSelect = document.getElementById('cust-extra-room');
+    handleExtraRoomChange(selectedSelect ? selectedSelect.value : '');
+  } else {
+    roomWrapper.classList.add('hidden');
+    capWrapper.classList.add('hidden');
+    if (customTimeWrapper) customTimeWrapper.classList.add('hidden');
+    
+    if (extraCapInput) extraCapInput.value = 0;
+    calculateModalBilling();
+  }
+}
+
+function handleExtraRoomChange(selectedRoomValue) {
+  const selectElem = document.getElementById('cust-extra-room');
+  const capInput = document.getElementById('cust-extra-persons');
+  if (!selectElem || !capInput) return;
+
+  const selectedOption = selectElem.options[selectElem.selectedIndex];
+  if (selectedOption && selectedOption.dataset.capacity !== undefined) {
+    // Reflect capacity into input box (remains editable by user)
+    capInput.value = selectedOption.dataset.capacity;
+  }
+  
+  calculateModalBilling();
+}
     
 
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbz6rME_OuYHucGBPCfCrV7EYjuE5YF0eqSeuqBjm42-HPXUYJzUSBu0mov9jCdM7zx5Ng/exec"; 

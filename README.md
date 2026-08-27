@@ -1576,21 +1576,22 @@ function handleExtraRoomCheckboxChange(event, isAllToggle) {
 }
 
 // Update Button Placeholder Text with Selected Counts / Labels
+// Update Button Text to display exact room numbers / option names instead of count
 function updateExtraRoomButtonText() {
   const menu = document.getElementById('extra-room-menu');
   const btnText = document.getElementById('extra-room-btn-text');
   if (!menu || !btnText) return;
 
+  // Extract all checked room values (excluding the "Select all options" toggle)
   const selectedRooms = Array.from(menu.querySelectorAll('input[type="checkbox"]:checked'))
     .filter(cb => cb.value !== 'ALL')
     .map(cb => cb.value);
 
   if (selectedRooms.length === 0) {
     btnText.textContent = "Select Room(s)...";
-  } else if (selectedRooms.length === 1) {
-    btnText.textContent = selectedRooms[0];
   } else {
-    btnText.textContent = `${selectedRooms.length} Rooms Selected`;
+    // Joins option names with commas (e.g., "Room 01, Room 02")
+    btnText.textContent = selectedRooms.join(', ');
   }
 }
 

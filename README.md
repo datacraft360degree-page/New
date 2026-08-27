@@ -3362,10 +3362,24 @@ function updateDashboardCards() {
          }
       }
   // Add this inside openBookingModal() when initializing values:
-const extraCheck = document.getElementById('cust-extra-person-check');
-if (extraCheck) {
-  extraCheck.checked = false;
-  toggleExtraPersonSection(false);
+function openBookingModal(existingBooking = null) {
+  const extraCheck = document.getElementById('cust-extra-person-check');
+
+  if (existingBooking && existingBooking.extraPersons > 0) {
+    // EDIT MODE: If existing booking has extra persons, show & populate fields
+    if (extraCheck) extraCheck.checked = true;
+    toggleExtraPersonSection(true);
+    
+    document.getElementById('cust-extra-room').value = existingBooking.extraRoom || "Same room with extra bed";
+    document.getElementById('cust-extra-persons').value = existingBooking.extraPersons;
+  } else {
+    // NEW / RESET MODE: Uncheck and hide extra person fields
+    if (extraCheck) extraCheck.checked = false;
+    toggleExtraPersonSection(false);
+  }
+
+  // Recalculate totals after setting initial modal state
+  calculateModalBilling();
 }
 
       const extraPersonsInput = document.getElementById('cust-extra-persons');

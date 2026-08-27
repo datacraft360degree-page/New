@@ -3975,6 +3975,26 @@ function openBookingModal(existingBooking = null) {
     }
 
     function calculateModalBilling() {
+
+  function calculateModalBilling() {
+  // Existing calculation logic ...
+  
+  // Calculate total extra food/drink amount
+  let totalFoodAmount = 0;
+  const foodPriceInputs = document.querySelectorAll('.food-item-price');
+  foodPriceInputs.forEach(input => {
+    totalFoodAmount += parseFloat(input.value) || 0;
+  });
+
+  // Display total extra food amount
+  const foodTotalInput = document.getElementById('cust-food-total');
+  if (foodTotalInput) {
+    foodTotalInput.value = totalFoodAmount;
+  }
+
+  // Include food total into grand total calculation if needed
+  // totalBill = basePrice + extraPersonTotal + cabTotal + totalFoodAmount;
+}
       const inDate = document.getElementById('cust-checkin-date').value;
       const inTime = document.getElementById('cust-checkin-time').value || '00:00';
       

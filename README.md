@@ -907,7 +907,7 @@
 <!-- UPDATED EXTRA PERSON & ROOM SELECTION FIELD -->
 <div class="sm:col-span-4 grid grid-cols-1 sm:grid-cols-3 gap-2 bg-amber-50/50 p-2.5 rounded-2xl border border-amber-200/60">
   
-  <!-- 1. Checkbox for Extra Person -->
+  <!-- 1. Checkbox to Enable/Disable Extra Person Section -->
   <div class="flex items-center gap-2 pt-1">
     <input type="checkbox" id="cust-extra-person-check" onchange="toggleExtraPersonSection(this.checked)" class="w-4 h-4 text-amber-600 rounded-md border-amber-300 focus:ring-amber-500 cursor-pointer" />
     <label for="cust-extra-person-check" class="font-bold text-amber-900 cursor-pointer select-none text-[11px] flex items-center gap-1">
@@ -915,28 +915,26 @@
     </label>
   </div>
 
-  <!-- 2. Checkbox-style Extra Room Selection Dropdown -->
+  <!-- 2. Checkbox-style Extra Room Selection Dropdown (Mirrors Room No Selection) -->
   <div id="wrapper-extra-room" class="relative hidden">
     <label class="block font-semibold text-amber-800 text-[10px] mb-0.5">Add Extra Room(s)</label>
-    
-    <!-- Custom Dropdown Trigger Button -->
-    <button type="button" id="extra-room-dropdown-btn" onclick="toggleExtraRoomMenu()" class="w-full bg-white border border-amber-300 rounded-xl px-2.5 py-1.5 text-left font-bold text-amber-900 text-xs flex justify-between items-center focus:outline-none focus:border-amber-500">
-      <span id="extra-room-btn-text">Select Room(s)...</span>
-      <i class="fa-solid fa-chevron-down text-amber-600 text-[10px]"></i>
-    </button>
-
-    <!-- Scrollable Checkbox Popover Menu -->
-    <div id="extra-room-menu" class="hidden absolute z-50 left-0 right-0 mt-1 bg-white border border-amber-300 rounded-xl shadow-lg max-h-48 overflow-y-auto p-1.5 space-y-1">
-      <!-- Dynamically populated room checkboxes -->
+    <div class="relative" id="extra-room-dropdown-container">
+      <button type="button" onclick="toggleExtraRoomDropdown()" id="extra-room-dropdown-btn" class="w-full bg-white border border-amber-300 rounded-xl px-2.5 focus:outline-none focus:border-amber-500 font-bold text-amber-900 text-left flex justify-between items-center" style="height: 34px;">
+        <span id="extra-room-dropdown-text" class="truncate pr-2">Select Extra Rooms...</span>
+        <i class="fa-solid fa-chevron-down text-amber-600"></i>
+      </button>
+      <div id="extra-room-checkboxes" class="hidden absolute z-50 w-full mt-1 bg-white border border-amber-300 rounded-xl shadow-xl max-h-48 overflow-y-auto p-2 space-y-1">
+        <!-- Dynamically Generated Checkboxes Go Here -->
+      </div>
     </div>
   </div>
 
-  <!-- 3. Editable Extra Person Capacity -->
+  <!-- 3. Dynamic Extra Person(s) Capacity Input (Mirrors Total Capacity) -->
   <div id="wrapper-extra-capacity" class="hidden">
     <label class="block font-semibold text-amber-800 text-[10px] mb-0.5">Extra Person(s) Capacity</label>
     <input type="number" id="cust-extra-persons" min="0" value="0" placeholder="0" oninput="calculateModalBilling()" class="w-full bg-white border border-amber-300 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-amber-500 font-bold text-amber-900" />
   </div>
-  
+
 </div>
             <!-- ADDITIONAL PERSON CUSTOM CHECK-IN & CHECK-OUT WINDOW -->
             <div id="sec-extra-person-time-wrapper" class="sm:col-span-4 hidden bg-amber-50/70 p-2.5 rounded-2xl border border-amber-200/80 space-y-2">

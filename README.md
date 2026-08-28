@@ -1027,7 +1027,6 @@
                 <label class="block font-semibold text-slate-600 mb-0.5">Cab Fare (₹)</label>
                 <input type="number" id="cust-cab-total" readonly="" class="w-full bg-slate-200/60 font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" />
              </div>
-          </div>
           <div>
                 <label class="block font-semibold text-slate-600 mb-0.5">Extra Food/Drink (₹)</label>
                 <input type="number" id="cust-food-total" readonly="" class="w-full bg-slate-200/60 font-bold text-amber-700 border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" value="0" />

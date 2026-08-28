@@ -1597,29 +1597,126 @@ function updateExtraRoomButtonText() {
   }
 }
 
-// 3. Dynamic Display Toggle
-function toggleExtraPersonSection(isChecked) {
-  const roomWrapper = document.getElementById('wrapper-extra-room');
-  const capWrapper = document.getElementById('wrapper-extra-capacity');
+// Toggle Visibility of Extra Person Section
+function toggleExtraPersonSection(enabled) {
+  const extraRoomWrapper = document.getElementById('wrapper-extra-room');
+  const extraCapWrapper = document.getElementById('wrapper-extra-capacity');
   const customTimeWrapper = document.getElementById('sec-extra-person-time-wrapper');
-  const extraCapInput = document.getElementById('cust-extra-persons');
 
-  if (isChecked) {
-    roomWrapper.classList.remove('hidden');
-    capWrapper.classList.remove('hidden');
+  if (enabled) {
+    extraRoomWrapper.classList.remove('hidden');
+    extraCapWrapper.classList.remove('hidden');
     if (customTimeWrapper) customTimeWrapper.classList.remove('hidden');
-
-    populateExtraRoomDropdown();
+    renderExtraRoomDropdown([]);
   } else {
-    roomWrapper.classList.add('hidden');
-    capWrapper.classList.add('hidden');
+    extraRoomWrapper.classList.add('hidden');
+    extraCapWrapper.classList.add('hidden');
     if (customTimeWrapper) customTimeWrapper.classList.add('hidden');
-    
-    if (extraCapInput) extraCapInput.value = 0;
-    calculateModalBilling();
+    document.getElementById('cust-extra-persons').value = 0;
+    renderExtraRoomDropdown([]);
+  }
+  calculateModalBilling();
+}
+
+// Toggle Extra Room Dropdown Visibility
+function toggleExtraRoomDropdown() {
+  const checkboxesContainer = document.getElementById('extra-room-checkboxes');
+  if (checkboxesContainer) {
+    checkboxesContainer.classList.toggle('hidden');
   }
 }
 
+// Close Dropdowns when clicking outside
+document.addEventListener('click', function(e) {
+  const extraContainer = document.getElementById('extra-room-dropdown-container');
+  const extraCheckboxes = document.getElementById('extra-room-checkboxes');
+  if (extraContainer && extraCheckboxes && !extraContainer.contains(e.target)) {
+    extraCheckboxes.classList.add('hidden');
+  }
+});
+
+// Render Extra Room Dropdown dynamically using state.roomsCapacity
+function renderExtraRoomDropdown(selectedExtraRooms = []) {
+  const container = document.getElementById('extra-room-checkboxes');
+  const btnText = document.getElementById('extra-room-dropdown-text');
+  if (!container || !btnText) return;
+
+  container.innerHTML = '';
+
+  // Standard fallback option + dynamic master rooms
+  const extraOptions = [
+    { roomNo: 'Same room with extra bed', capacity: 1 }
+  ];
+
+  if (Array.isArray(state.roomsCapacity)) {
+    state.roomsCapacity.forEach(r => {
+      extraOptions.push({
+        roomNo: `Room ${String(r.roomNo).padStart(2, '0')}`,
+        capacity: parseInt(r.capacity || 1, 10)
+      });
+    });
+  }
+
+  // Render Checkbox Options
+  extraOptions.forEach(item => {
+    const isChecked = selectedExtraRooms.includes(String(item.roomNo));
+    const div = document.createElement('div');
+    div.className = "flex items-center gap-2 px-1.5 py-1 hover:bg-amber-50 rounded-lg cursor-pointer";
+    div.innerHTML = `
+      <input type="checkbox" 
+             value="${item.roomNo}" 
+             data-capacity="${item.capacity}" 
+             ${isChecked ? 'checked' : ''} 
+             onchange="handleExtraRoomSelectionChange()" 
+             class="extra-room-checkbox w-4 h-4 text-amber-600 rounded border-amber-300 focus:ring-amber-500 cursor-pointer" />
+      <span class="text-xs font-semibold text-slate-700">${item.roomNo} (Cap: ${item.capacity})</span>
+    `;
+    container.appendChild(div);
+  });
+
+  updateExtraRoomDisplayText();
+}
+
+// Handle Checkbox Selection Changes & Compute Capacity
+function handleExtraRoomSelectionChange() {
+  const checkboxes = document.querySelectorAll('.extra-room-checkbox:checked');
+  let calculatedCapacity = 0;
+
+  checkboxes.forEach(cb => {
+    calculatedCapacity += parseInt(cb.getAttribute('data-capacity') || 0, 10);
+  });
+
+  // Automatically update Extra Persons Capacity field
+  const extraPersonsInput = document.getElementById('cust-extra-persons');
+  if (extraPersonsInput) {
+    extraPersonsInput.value = calculatedCapacity;
+  }
+
+  updateExtraRoomDisplayText();
+  calculateModalBilling();
+}
+
+// Update Dropdown Trigger Button Text
+function updateExtraRoomDisplayText() {
+  const selectedCheckboxes = document.querySelectorAll('.extra-room-checkbox:checked');
+  const btnText = document.getElementById('extra-room-dropdown-text');
+  if (!btnText) return;
+
+  const selectedRooms = Array.from(selectedCheckboxes).map(cb => cb.value);
+
+  if (selectedRooms.length === 0) {
+    btnText.textContent = "Select Extra Rooms...";
+  } else {
+    btnText.textContent = selectedRooms.join(', ');
+  }
+}
+
+// Helper to retrieve selected extra rooms array
+function getSelectedExtraRooms() {
+  const selectedCheckboxes = document.querySelectorAll('.extra-room-checkbox:checked');
+  return Array.from(selectedCheckboxes).map(cb => cb.value);
+}
+    
 // 4. Modal Handler (Fresh Booking Reset vs. Edit Mode Persistence)
 // Triggered when user clicks "+ Add Booking" button
 function handleAddBookingClick() {

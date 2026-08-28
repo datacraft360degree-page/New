@@ -3156,7 +3156,40 @@ function updateDashboardCards() {
       let isClosedBooking = false;
       let isUpcomingBooking = false;
       let isPast730Days = false;
+{/* Cab Fare Details Section */}
+<CabFareDetails 
+  bookingData={bookingData} 
+  isDisabled={ispast730days} 
+/>
 
+{/* Extra Food / Drink Orders List Section */}
+<ExtraFoodOrdersList 
+  bookingData={bookingData} 
+  isDisabled={ispast730days} 
+/>
+const CabFareDetails = ({ bookingData, isDisabled }) => {
+  return (
+    <div className={`cab-fare-section ${isDisabled ? 'read-only-mode' : ''}`}>
+      <h3>Cab Fare Details</h3>
+      
+      {/* Inputs */}
+      <input 
+        type="number" 
+        value={cabFareAmount} 
+        onChange={handleFareChange} 
+        disabled={isDisabled} 
+      />
+      
+      {/* Action Buttons */}
+      <button 
+        onClick={handleAddCabFare} 
+        disabled={isDisabled}
+      >
+        Add Cab Fare
+      </button>
+    </div>
+  );
+};
       let b = null;
       if (bookingId) {
         b = state.bookings.find(item => String(item.id) === String(bookingId));

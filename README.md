@@ -3262,16 +3262,6 @@ function updateDashboardCards() {
           addCabBtn.classList.remove('opacity-50', 'cursor-not-allowed');
         }
       }
-      
-        const removeCabTripRowBtn = document.getElementById('btn-remove-cab-trip-row');
-      if (removeCabTripRowBtn) {
-        removeCabTripRowBtn.disabled = isPast730Days;
-        if (isPast730Days) {
-          removeCabTripRowBtn.classList.add('opacity-50', 'cursor-not-allowed');
-        } else {
-          removeCabTripRowBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-        }
-      }
       setSectionEditability('sec-cab-fare', !isPast730Days);
       setSectionEditability('sec-billing-summary', !isPast730Days);
 

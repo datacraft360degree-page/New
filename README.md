@@ -1698,28 +1698,46 @@ function handleEditBookingClick(bookingRecord) {
 }
 
 function openBookingModal(existingBooking = null) {
+  const form = document.getElementById('booking-form');
+  if (form) form.reset();
+
   const extraCheck = document.getElementById('cust-extra-person-check');
-  const extraCapInput = document.getElementById('cust-extra-persons');
+  const extraPersonWrapper = document.getElementById('cust-extra-person-check')?.closest('.grid');
 
   if (existingBooking !== null) {
-    // =========================================================
-    // EDIT BOOKING MODE: (User clicked Edit on a Booking ID)
-    // =========================================================
-    
-    // 1. Force checkbox to CHECKED for editing existing record
-    if (extraCheck) extraCheck.checked = true;
+    // EDIT BOOKING MODE
+    document.getElementById('modal-title').innerHTML = `<i class="fa-solid fa-pen-to-square text-blue-600"></i> Edit Booking (${existingBooking.bookingId})`;
+    document.getElementById('modal-booking-id').value = existingBooking.bookingId;
 
-    // 2. Parse saved extra room selection(s) into an array
-    let savedRooms = [];
-    if (Array.isArray(existingBooking.extraRooms)) {
-      savedRooms = existingBooking.extraRooms;
-    } else if (typeof existingBooking.extraRooms === 'string' && existingBooking.extraRooms.trim() !== '') {
-      savedRooms = existingBooking.extraRooms.split(',').map(r => r.trim());
-    } else {
-      // Fallback default if extraRooms wasn't previously assigned
-      savedRooms = ["Same room with extra bed"];
+    // Enable Extra Person Checkbox for Editing existing bookings
+    if (extraCheck) {
+      extraCheck.disabled = false;
+      extraCheck.checked = isTrue(existingBooking.hasExtraPerson);
+      toggleExtraPersonSection(extraCheck.checked);
     }
 
+    // Populate extra rooms if checked
+    let savedExtraRooms = [];
+    if (Array.isArray(existingBooking.extraRooms)) {
+      savedExtraRooms = existingBooking.extraRooms;
+    } else if (typeof existingBooking.extraRooms === 'string' && existingBooking.extraRooms.trim() !== '') {
+      savedExtraRooms = existingBooking.extraRooms.split(',').map(r => r.trim());
+    }
+    populateExtraRoomDropdown(savedExtraRooms);
+
+  } else {
+    // FRESH BOOKING MODE
+    document.getElementById('modal-title').innerHTML = `<i class="fa-solid fa-calendar-plus text-blue-600"></i> Add New Booking`;
+    document.getElementById('modal-booking-id').value = '';
+
+    // Disable Extra Person Checkbox for Fresh Bookings
+    if (extraCheck) {
+      extraCheck.checked = false;
+      extraCheck.disabled = true;
+      toggleExtraPersonSection(false);
+    }
+  }
+}
     // 3. Show dynamic wrappers and populate room checkboxes with saved states
     toggleExtraPersonSection(true);
     populateExtraRoomDropdown(savedRooms);

@@ -3686,6 +3686,8 @@ function updateDashboardCards() {
       document.querySelectorAll('.cust-cab-rate').forEach(input => {
         cabFare += parseFloat(input.value) || 0;
       });
+    const foodTotalInput = document.getElementById('cust-food-total');
+if (foodTotalInput) foodTotalInput.value = foodTotalInput;
 
       const total = roomTotal + extraPersonTotal + foodTotalCharge + cabFare;
 

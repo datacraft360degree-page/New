@@ -3263,6 +3263,28 @@ function updateDashboardCards() {
         }
       }
 
+      // Function to update the Delete button/option state based on 730 days logic
+function updateCabTripDeleteButton(bookingId, tripIndex) {
+  // Check if booking ID has crossed 730 days
+  const isPast730Days = checkIsPast730Days(bookingId); // your existing 730 days logic function
+
+  // Target the specific delete button/element
+  const deleteCabBtn = document.getElementById(`btn-delete-cab-trip-${tripIndex}`);
+
+  if (deleteCabBtn) {
+    // Disable if crossed 730 days
+    deleteCabBtn.disabled = isPast730Days;
+
+    if (isPast730Days) {
+      deleteCabBtn.classList.add('opacity-50', 'cursor-not-allowed', 'pointer-events-none');
+      deleteCabBtn.title = "Delete option disabled: Booking exceeds 730 days limit";
+    } else {
+      deleteCabBtn.classList.remove('opacity-50', 'cursor-not-allowed', 'pointer-events-none');
+      deleteCabBtn.title = "Delete Cab Trip";
+    }
+  }
+}
+
       setSectionEditability('sec-cab-fare', !isPast730Days);
       setSectionEditability('sec-billing-summary', !isPast730Days);
 

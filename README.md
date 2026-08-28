@@ -3263,7 +3263,7 @@ function updateDashboardCards() {
         }
       }
 
-      setSectionEditability('sec-cab-fare', !isClosedBooking);
+      setSectionEditability('sec-cab-fare', !isPast730Days);
       setSectionEditability('sec-billing-summary', !isPast730Days);
 
       const btnSave = document.getElementById('btn-save-booking');

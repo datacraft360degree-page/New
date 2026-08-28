@@ -1686,52 +1686,43 @@ function openBookingModal(existingBooking = null) {
 
   if (existingBooking !== null) {
     // =========================================================
-    // EDIT BOOKING MODE: (User clicked Edit on a Booking ID)
+    // EDIT BOOKING MODE: Enable extra person options
     // =========================================================
-    
-    // 1. Force checkbox to CHECKED for editing existing record
-    if (extraCheck) extraCheck.checked = true;
+    if (extraCheck) {
+      extraCheck.disabled = false; // Requirement 3: Enabled for Edit mode
+      
+      // Requirement 4: Restore saved check state
+      const isExtraChecked = isTrue(existingBooking.hasExtraPerson) || (existingBooking.extraPersons && existingBooking.extraPersons > 0);
+      extraCheck.checked = isExtraChecked;
 
-    // 2. Parse saved extra room selection(s) into an array
-    let savedRooms = [];
-    if (Array.isArray(existingBooking.extraRooms)) {
-      savedRooms = existingBooking.extraRooms;
-    } else if (typeof existingBooking.extraRooms === 'string' && existingBooking.extraRooms.trim() !== '') {
-      savedRooms = existingBooking.extraRooms.split(',').map(r => r.trim());
-    } else {
-      // Fallback default if extraRooms wasn't previously assigned
-      savedRooms = ["Same room with extra bed"];
+      let savedRooms = [];
+      if (Array.isArray(existingBooking.extraRooms)) {
+        savedRooms = existingBooking.extraRooms;
+      } else if (typeof existingBooking.extraRooms === 'string' && existingBooking.extraRooms.trim() !== '') {
+        savedRooms = existingBooking.extraRooms.split(',').map(r => r.trim());
+      } else {
+        savedRooms = ["Same room with extra bed"];
+      }
+
+      toggleExtraPersonSection(isExtraChecked);
+      if (isExtraChecked) {
+        populateExtraRoomDropdown(savedRooms);
+      }
     }
 
-    // 3. Show dynamic wrappers and populate room checkboxes with saved states
-    toggleExtraPersonSection(true);
-    populateExtraRoomDropdown(savedRooms);
-
-    // 4. Restore the saved extra capacity value
     if (extraCapInput) {
       extraCapInput.value = existingBooking.extraPersons !== undefined ? existingBooking.extraPersons : 0;
     }
-
   } else {
     // =========================================================
-    // FRESH BOOKING MODE: (User clicked "+ Add Booking")
+    // FRESH BOOKING MODE: Disable extra person option
     // =========================================================
-    
-    // 1. Force checkbox to UNCHECKED
-    if (extraCheck) extraCheck.checked = false;
-
-    // 2. Hide dynamic wrappers and reset fields
+    if (extraCheck) {
+      extraCheck.checked = false;
+      extraCheck.disabled = true; // Requirement 3: Disabled for fresh bookings
+    }
     toggleExtraPersonSection(false);
-
-    // 3. Reset capacity input to 0
-    if (extraCapInput) extraCapInput.value = 0;
-
-    // 4. Clear room checkbox selections completely
-    populateExtraRoomDropdown([]);
   }
-
-  // Recalculate totals based on the newly initialized modal state
-  calculateModalBilling();
 }
     
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbz6rME_OuYHucGBPCfCrV7EYjuE5YF0eqSeuqBjm42-HPXUYJzUSBu0mov9jCdM7zx5Ng/exec"; 

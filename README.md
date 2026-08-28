@@ -3245,8 +3245,8 @@ function updateDashboardCards() {
 
       const addFoodBtn = document.getElementById('btn-add-food-order');
       if (addFoodBtn) {
-        addFoodBtn.disabled = isClosedBooking;
-        if (isClosedBooking) {
+        addFoodBtn.disabled = isPast730Days;
+        if (isPast730Days) {
           addFoodBtn.classList.add('opacity-50', 'cursor-not-allowed');
         } else {
           addFoodBtn.classList.remove('opacity-50', 'cursor-not-allowed');

@@ -3156,17 +3156,6 @@ function updateDashboardCards() {
       let isClosedBooking = false;
       let isUpcomingBooking = false;
       let isPast730Days = false;
-{/* Cab Fare Details Section */}
-<CabFareDetails 
-  bookingData={bookingData} 
-  isDisabled={ispast730days} 
-/>
-
-{/* Extra Food / Drink Orders List Section */}
-<ExtraFoodOrdersList 
-  bookingData={bookingData} 
-  isDisabled={ispast730days} 
-/>
 
       let b = null;
       if (bookingId) {

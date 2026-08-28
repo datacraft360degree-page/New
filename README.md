@@ -1724,7 +1724,24 @@ function openBookingModal(existingBooking = null) {
     toggleExtraPersonSection(false);
   }
 }
-    
+// Add these properties inside handleSaveBooking payload construction
+const extraPersonChecked = document.getElementById('cust-extra-person-check')?.checked || false;
+
+const bookingData = {
+  // ... existing booking payload fields ...
+  hasExtraPerson: extraPersonChecked, // Requirement 4: Save check state to sheet
+  extraPersons: extraPersonChecked ? (parseInt(document.getElementById('cust-extra-persons')?.value, 10) || 0) : 0,
+  extraRooms: extraPersonChecked ? getSelectedExtraRooms() : []
+};
+
+// Helper function to extract current selected extra rooms
+function getSelectedExtraRooms() {
+  const menu = document.getElementById('extra-room-menu');
+  if (!menu) return [];
+  return Array.from(menu.querySelectorAll('input[type="checkbox"]:checked'))
+    .filter(cb => cb.value !== 'ALL')
+    .map(cb => cb.value);
+}
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbz6rME_OuYHucGBPCfCrV7EYjuE5YF0eqSeuqBjm42-HPXUYJzUSBu0mov9jCdM7zx5Ng/exec"; 
     
     const ONE_HOUR_MS = 1 * 60 * 60 * 1000;

@@ -3255,8 +3255,8 @@ function updateDashboardCards() {
       
       const addCabBtn = document.getElementById('btn-add-cab-trip');
       if (addCabBtn) {
-        addCabBtn.disabled = isClosedBooking;
-        if (isClosedBooking) {
+        addCabBtn.disabled = isPast730Days;
+        if (isPast730Days) {
           addCabBtn.classList.add('opacity-50', 'cursor-not-allowed');
         } else {
           addCabBtn.classList.remove('opacity-50', 'cursor-not-allowed');

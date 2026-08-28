@@ -1738,37 +1738,7 @@ function openBookingModal(existingBooking = null) {
     }
   }
 }
-    // 3. Show dynamic wrappers and populate room checkboxes with saved states
-    toggleExtraPersonSection(true);
-    populateExtraRoomDropdown(savedRooms);
-
-    // 4. Restore the saved extra capacity value
-    if (extraCapInput) {
-      extraCapInput.value = existingBooking.extraPersons !== undefined ? existingBooking.extraPersons : 0;
-    }
-
-  } else {
-    // =========================================================
-    // FRESH BOOKING MODE: (User clicked "+ Add Booking")
-    // =========================================================
-    
-    // 1. Force checkbox to UNCHECKED
-    if (extraCheck) extraCheck.checked = false;
-
-    // 2. Hide dynamic wrappers and reset fields
-    toggleExtraPersonSection(false);
-
-    // 3. Reset capacity input to 0
-    if (extraCapInput) extraCapInput.value = 0;
-
-    // 4. Clear room checkbox selections completely
-    populateExtraRoomDropdown([]);
-  }
-
-  // Recalculate totals based on the newly initialized modal state
-  calculateModalBilling();
-}
-    
+   
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbz6rME_OuYHucGBPCfCrV7EYjuE5YF0eqSeuqBjm42-HPXUYJzUSBu0mov9jCdM7zx5Ng/exec"; 
     
     const ONE_HOUR_MS = 1 * 60 * 60 * 1000;

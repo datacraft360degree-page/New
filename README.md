@@ -1022,7 +1022,7 @@
           <div id="cab-trips-container" class="space-y-2 max-h-40 overflow-y-auto pr-1 mt-2"></div>
         </div>
 
-    <!-- BILLING SUMMARY -->
+      <!-- BILLING SUMMARY -->
 <div id="sec-billing-summary" class="bg-blue-50/40 p-3 rounded-2xl border border-blue-100 space-y-2.5 transition-all">
   <h4 class="text-[9px] font-bold uppercase tracking-wider text-blue-700 flex items-center gap-1.5">
     <i class="fa-solid fa-calculator text-blue-600"></i> Billing Summary
@@ -1092,6 +1092,7 @@
           <button type="button" onclick="closeBookingModal()" class="px-4 py-1.5 bg-slate-100 text-slate-700 rounded-xl font-semibold transition hover:bg-slate-200">Cancel</button>
           <button type="submit" id="btn-save-booking" class="px-5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold shadow-sm transition">Save Booking</button>
         </div>
+      </form>
     </div>
   </div>
 
@@ -3664,7 +3665,7 @@ function updateDashboardCards() {
         const outDateOnly = new Date(outDate);
         days = Math.max(1, Math.round((outDateOnly - inDateOnly) / (1000 * 60 * 60 * 24)));
       }
-  
+
       const price = parseFloat(document.getElementById('cust-price').value) || 0;
       const capacity = parseFloat(document.getElementById('cust-capacity').value) || 1;
 

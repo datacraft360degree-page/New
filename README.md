@@ -910,11 +910,22 @@
     </div>
 
     <!-- NEW FIELD: ADD EXTRA ROOM(S) -->
+<div id="sec-room-dates" class="bg-slate-50 p-3 rounded-2xl border border-slate-200/60 space-y-2.5 transition-all">
+  <h4 class="text-[9px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+    <i class="fa-solid fa-bed text-blue-600"></i> Room Selection &amp; Stay Dates
+  </h4>
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
     <div>
-      <label class="block font-semibold text-blue-700 mb-0.5 flex items-center gap-1">
-        <i class="fa-solid fa-door-open text-blue-600"></i> Add Extra Room(s)
-      </label>
-      <input type="number" id="cust-extra-rooms" min="0" value="0" placeholder="0" oninput="calculateModalBilling()" class="w-full bg-blue-50 border border-blue-300 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-blue-500 font-bold text-blue-900" />
+      <label class="block font-semibold text-slate-600 mb-0.5">Add Extra Room(s)</label>
+      <div class="relative" id="room-dropdown-container">
+        <button type="button" onclick="toggleRoomDropdown()" id="room-dropdown-btn" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 focus:outline-none focus:border-blue-500 font-bold text-blue-600 text-left flex justify-between items-center" style="height: 34px;">
+          <span id="room-dropdown-text" class="truncate pr-2">Select Rooms...</span>
+          <i class="fa-solid fa-chevron-down text-slate-400"></i>
+        </button>
+        <div id="room-checkboxes" class="hidden absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl max-h-48 overflow-y-auto p-2 space-y-1">
+          <!-- Generated Checkboxes Go Here -->
+        </div>
+      </div>
     </div>
 
     <!-- NEW FIELD: NAME -->

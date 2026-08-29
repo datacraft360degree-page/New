@@ -3730,7 +3730,7 @@ function updateDashboardCards() {
       const due = Math.max(0, total - currentAdvVal - clearBillVal);
 
       document.getElementById('cust-days').value = days;
-      document.getElementById('cust-extra-person-days').value = days;
+      document.getElementById('cust-extra-person-days').value = extraDaysCount;
       document.getElementById('cust-total').value = total;
       document.getElementById('cust-due').value = due;
       

@@ -3734,8 +3734,6 @@ function updateDashboardCards() {
       document.getElementById('cust-total').value = total;
       document.getElementById('cust-due').value = due;
       
-      const extraDays = parseFloat(document.getElementById('cust-extra-person-days').value) || 0;
-      
       const extraTotalInput = document.getElementById('cust-extra-total');
       if (extraTotalInput) extraTotalInput.value = extraPersonTotal;
       

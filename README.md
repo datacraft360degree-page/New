@@ -3730,6 +3730,7 @@ function updateDashboardCards() {
       const due = Math.max(0, total - currentAdvVal - clearBillVal);
 
       document.getElementById('cust-days').value = days;
+      document.getElementById('cust-extra-person-days').value = days;
       document.getElementById('cust-total').value = total;
       document.getElementById('cust-due').value = due;
       
@@ -4011,6 +4012,7 @@ if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
         extendedCheckOut: extendedCheckOut,
         includeMeals: includeMeals,
         noOfDays: parseInt(document.getElementById('cust-days').value) || 0,
+        extraPersonDays: parseInt(document.getElementById('cust-extra-person-days').value) || 0,
         perDayPrice: parseFloat(document.getElementById('cust-price').value) || 0,
         foodOrders: foodOrdersList,
         cabTrips: cabTripsList,

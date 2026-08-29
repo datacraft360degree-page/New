@@ -3658,18 +3658,7 @@ function updateDashboardCards() {
         const outDateOnly = new Date(outDate);
         days = Math.max(1, Math.round((outDateOnly - inDateOnly) / (1000 * 60 * 60 * 24)));
       }
-      // Add these lines inside calculateModalBilling():
-const days = parseFloat(document.getElementById('cust-days').value) || 0;
-const pricePerDay = parseFloat(document.getElementById('cust-price').value) || 0;
-const capacity = parseFloat(document.getElementById('cust-capacity').value) || 1;
-
-// Calculation: Days * Price/Day * Total capacity
-const mainPersonRate = days * pricePerDay * capacity;
-
-const mainPersonRateInput = document.getElementById('cust-main-person-rate');
-if (mainPersonRateInput) {
-  mainPersonRateInput.value = mainPersonRate;
-}
+  
       const price = parseFloat(document.getElementById('cust-price').value) || 0;
       const capacity = parseFloat(document.getElementById('cust-capacity').value) || 1;
 

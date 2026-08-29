@@ -910,8 +910,6 @@
     </div>
 
     <!-- NEW FIELD: ADD EXTRA ROOM(S) -->
-<div id="sec-room-dates" class="bg-slate-50 p-3 rounded-2xl border border-slate-200/60 space-y-2.5 transition-all">
-  <h4 class="text-[9px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
     <i class="fa-solid fa-bed text-blue-600"></i> Room Selection &amp; Stay Dates
   </h4>
   <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">

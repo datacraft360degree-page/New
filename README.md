@@ -1030,15 +1030,15 @@
   
   <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2 pb-2 border-b border-blue-200">
     <div>
-      <label class="block font-semibold text-slate-600 mb-0.5">Extra Person Days</label>
+      <label class="block font-semibold text-slate-600 mb-0.5">Extra Guest Days</label>
       <input type="number" id="cust-extra-person-days" readonly="" class="w-full bg-slate-200/60 font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" value="0" />
     </div>
     <div>
-      <label class="block font-semibold text-slate-600 mb-0.5">Extra Person Price/Day</label>
+      <label class="block font-semibold text-slate-600 mb-0.5">Extra Guest Price/Day</label>
       <input type="number" id="cust-extra-person-price" value="0" oninput="calculateModalBilling()" class="w-full bg-white font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 focus:outline-none focus:border-blue-500" />
     </div>
     <div>
-      <label class="block font-semibold text-slate-600 mb-0.5">Extra Person Rate (₹)</label>
+      <label class="block font-semibold text-slate-600 mb-0.5">Extra Guest Rate (₹)</label>
       <input type="number" id="cust-extra-total" readonly="" class="w-full bg-slate-200/60 font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" />
     </div>
     <div>
@@ -1053,15 +1053,15 @@
 
   <div class="grid grid-cols-2 sm:grid-cols-7 gap-2">
     <div>
-      <label class="block font-semibold text-slate-600 mb-0.5">Days</label>
+      <label class="block font-semibold text-slate-600 mb-0.5">Main Guest Days</label>
       <input type="number" id="cust-days" readonly="" class="w-full bg-slate-200/60 font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" />
     </div>
     <div>
-      <label class="block font-semibold text-slate-600 mb-0.5 leading-tight">Price/Day (₹)</label>
+      <label class="block font-semibold text-slate-600 mb-0.5 leading-tight">Main Guest Price/Day (₹)</label>
       <input type="number" id="cust-price" value="1200" oninput="calculateModalBilling()" class="w-full bg-white font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 focus:outline-none focus:border-blue-500" />
     </div>
     <div>
-      <label class="block font-semibold text-slate-600 mb-0.5 leading-tight">Main Person Rate (₹)</label>
+      <label class="block font-semibold text-slate-600 mb-0.5 leading-tight">Main Guest Rate (₹)</label>
       <input type="number" id="cust-main-person-rate" readonly="" class="w-full bg-slate-200/60 font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" value="0" />
     </div>
     <div>
@@ -3658,7 +3658,18 @@ function updateDashboardCards() {
         const outDateOnly = new Date(outDate);
         days = Math.max(1, Math.round((outDateOnly - inDateOnly) / (1000 * 60 * 60 * 24)));
       }
+      // Add these lines inside calculateModalBilling():
+const days = parseFloat(document.getElementById('cust-days').value) || 0;
+const pricePerDay = parseFloat(document.getElementById('cust-price').value) || 0;
+const capacity = parseFloat(document.getElementById('cust-capacity').value) || 1;
 
+// Calculation: Days * Price/Day * Total capacity
+const mainPersonRate = days * pricePerDay * capacity;
+
+const mainPersonRateInput = document.getElementById('cust-main-person-rate');
+if (mainPersonRateInput) {
+  mainPersonRateInput.value = mainPersonRate;
+}
       const price = parseFloat(document.getElementById('cust-price').value) || 0;
       const capacity = parseFloat(document.getElementById('cust-capacity').value) || 1;
 

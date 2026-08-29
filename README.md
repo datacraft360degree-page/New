@@ -1051,33 +1051,36 @@
     </div>
   </div>
 
-  <div class="grid grid-cols-2 sm:grid-cols-6 gap-2">
+  <div class="grid grid-cols-2 sm:grid-cols-7 gap-2">
     <div>
       <label class="block font-semibold text-slate-600 mb-0.5">Days</label>
       <input type="number" id="cust-days" readonly="" class="w-full bg-slate-200/60 font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" />
     </div>
     <div>
-      <label class="block font-semibold text-slate-600 mb-0.5">Price/Day (₹)</label>
+      <label class="block font-semibold text-slate-600 mb-0.5 leading-tight">Price/Day (₹)</label>
       <input type="number" id="cust-price" value="1200" oninput="calculateModalBilling()" class="w-full bg-white font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 focus:outline-none focus:border-blue-500" />
     </div>
     <div>
-      <label class="block font-semibold text-slate-600 mb-0.5">Total (₹)</label>
+      <label class="block font-semibold text-slate-600 mb-0.5 leading-tight">Main Person Rate (₹)</label>
+      <input type="number" id="cust-main-person-rate" readonly="" class="w-full bg-slate-200/60 font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" value="0" />
+    </div>
+    <div>
+      <label class="block font-semibold text-slate-600 mb-0.5 leading-tight">Total (₹)</label>
       <input type="number" id="cust-total" readonly="" class="w-full bg-slate-200/60 text-blue-700 font-bold border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" />
     </div>
     <div>
-      <label class="block font-semibold text-slate-600 mb-0.5">Advance (₹)</label>
+      <label class="block font-semibold text-slate-600 mb-0.5 leading-tight">Advance (₹)</label>
       <input type="number" id="cust-advance" value="0" oninput="calculateModalBilling()" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-blue-500 font-semibold text-emerald-600" />
     </div>
     <div>
-      <label class="block font-semibold text-slate-600 mb-0.5">Due (₹)</label>
+      <label class="block font-semibold text-slate-600 mb-0.5 leading-tight">Due (₹)</label>
       <input type="number" id="cust-due" readonly="" class="w-full bg-slate-200/60 text-rose-700 font-bold border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" />
     </div>
     <div>
-      <label class="block font-semibold text-slate-600 mb-0.5 text-[10px] text-emerald-700">Clear Bill (₹)</label>
+      <label class="block font-semibold text-slate-600 mb-0.5 leading-tight text-[10px] text-emerald-700">Clear Bill (₹)</label>
       <input type="number" id="cust-clear-bill" value="0" placeholder="0" oninput="handleClearBillPayment(this.value)" class="w-full bg-emerald-50 border border-emerald-300 font-bold text-emerald-800 rounded-xl px-2 py-1.5 focus:outline-none focus:border-emerald-500" title="Put payment amount to clear due bill" />
     </div>
   </div>
-</div>
         <div class="flex justify-end space-x-2 pt-1">
           <button type="button" onclick="closeBookingModal()" class="px-4 py-1.5 bg-slate-100 text-slate-700 rounded-xl font-semibold transition hover:bg-slate-200">Cancel</button>
           <button type="submit" id="btn-save-booking" class="px-5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold shadow-sm transition">Save Booking</button>

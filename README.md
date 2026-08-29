@@ -1053,11 +1053,11 @@
 
   <div class="grid grid-cols-2 sm:grid-cols-6 gap-2">
     <div>
-      <label class="block font-semibold text-slate-600 mb-0.5">Days</label>
+      <label class="block font-semibold text-slate-600 mb-0.5">Main Days</label>
       <input type="number" id="cust-days" readonly="" class="w-full bg-slate-200/60 font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" />
     </div>
     <div>
-      <label class="block font-semibold text-slate-600 mb-0.5">Price/Day (₹)</label>
+      <label class="block font-semibold text-slate-600 mb-0.5">Main Price/Day (₹)</label>
       <input type="number" id="cust-price" value="1200" oninput="calculateModalBilling()" class="w-full bg-white font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 focus:outline-none focus:border-blue-500" />
     </div>
     <div>

@@ -1022,12 +1022,13 @@
           <div id="cab-trips-container" class="space-y-2 max-h-40 overflow-y-auto pr-1 mt-2"></div>
         </div>
 
-      <!-- BILLING SUMMARY -->
+    <!-- BILLING SUMMARY -->
 <div id="sec-billing-summary" class="bg-blue-50/40 p-3 rounded-2xl border border-blue-100 space-y-2.5 transition-all">
   <h4 class="text-[9px] font-bold uppercase tracking-wider text-blue-700 flex items-center gap-1.5">
     <i class="fa-solid fa-calculator text-blue-600"></i> Billing Summary
   </h4>
   
+  <!-- Row 1: 4 Columns (Extra items + Cab) -->
   <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2 pb-2 border-b border-blue-200">
     <div>
       <label class="block font-semibold text-slate-600 mb-0.5">Extra Guest Days</label>
@@ -1045,13 +1046,14 @@
       <label class="block font-semibold text-slate-600 mb-0.5">Cab Fare (₹)</label>
       <input type="number" id="cust-cab-total" readonly="" class="w-full bg-slate-200/60 font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" />
     </div>
+  </div>
+
+  <!-- Row 2: 4 Columns (Food + Main Guest items) -->
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2 pb-2 border-b border-blue-200">
     <div>
       <label class="block font-semibold text-slate-600 mb-0.5">Extra Food/Drink (₹)</label>
       <input type="number" id="cust-food-total" readonly="" class="w-full bg-slate-200/60 font-bold text-amber-700 border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" value="0" />
     </div>
-  </div>
-
-  <div class="grid grid-cols-2 sm:grid-cols-7 gap-2">
     <div>
       <label class="block font-semibold text-slate-600 mb-0.5">Main Guest Days</label>
       <input type="number" id="cust-days" readonly="" class="w-full bg-slate-200/60 font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" />
@@ -1064,6 +1066,10 @@
       <label class="block font-semibold text-slate-600 mb-0.5 leading-tight">Main Guest Rate (₹)</label>
       <input type="number" id="cust-main-person-rate" readonly="" class="w-full bg-slate-200/60 font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" value="0" />
     </div>
+  </div>
+
+  <!-- Row 3: 4 Columns (Totals & Payments) -->
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
     <div>
       <label class="block font-semibold text-slate-600 mb-0.5 leading-tight">Total (₹)</label>
       <input type="number" id="cust-total" readonly="" class="w-full bg-slate-200/60 text-blue-700 font-bold border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" />
@@ -1081,6 +1087,7 @@
       <input type="number" id="cust-clear-bill" value="0" placeholder="0" oninput="handleClearBillPayment(this.value)" class="w-full bg-emerald-50 border border-emerald-300 font-bold text-emerald-800 rounded-xl px-2 py-1.5 focus:outline-none focus:border-emerald-500" title="Put payment amount to clear due bill" />
     </div>
   </div>
+</div>
         <div class="flex justify-end space-x-2 pt-1">
           <button type="button" onclick="closeBookingModal()" class="px-4 py-1.5 bg-slate-100 text-slate-700 rounded-xl font-semibold transition hover:bg-slate-200">Cancel</button>
           <button type="submit" id="btn-save-booking" class="px-5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold shadow-sm transition">Save Booking</button>

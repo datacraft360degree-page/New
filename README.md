@@ -1202,7 +1202,7 @@
 
   <script>
 
-// Function to check and display the birthday animation on August 20th
+// Function to check and display the birthday animation on September 27th
 function checkBirthdayTrigger() {
       const now = new Date();
       const currentMonth = now.getMonth() + 1; // Month 9 is September

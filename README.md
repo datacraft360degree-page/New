@@ -872,7 +872,7 @@
           </div>
         </div>
 
-      <!-- ROOM SELECTION & STAY DATES -->
+       <!-- ROOM SELECTION & STAY DATES -->
 <div id="sec-room-dates" class="bg-slate-50 p-3 rounded-2xl border border-slate-200/60 space-y-2.5 transition-all">
   <h4 class="text-[9px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
     <i class="fa-solid fa-bed text-blue-600"></i> Room Selection &amp; Stay Dates
@@ -909,20 +909,12 @@
       <input type="number" id="cust-extra-persons" min="0" value="0" placeholder="0" oninput="calculateModalBilling()" class="w-full bg-amber-50 border border-amber-300 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-amber-500 font-bold text-amber-900" />
     </div>
 
-    <!-- NEW MULTI-CHECKBOX DROPDOWN: ADD EXTRA ROOM(S) -->
+    <!-- NEW FIELD: ADD EXTRA ROOM(S) -->
     <div>
       <label class="block font-semibold text-blue-700 mb-0.5 flex items-center gap-1">
         <i class="fa-solid fa-door-open text-blue-600"></i> Add Extra Room(s)
       </label>
-      <div class="relative" id="extra-room-dropdown-container">
-        <button type="button" onclick="toggleExtraRoomDropdown()" id="extra-room-dropdown-btn" class="w-full bg-blue-50 border border-blue-300 rounded-xl px-2.5 focus:outline-none focus:border-blue-500 font-bold text-blue-900 text-left flex justify-between items-center" style="height: 34px;">
-          <span id="extra-room-dropdown-text" class="truncate pr-2">Select Extra Rooms...</span>
-          <i class="fa-solid fa-chevron-down text-blue-400"></i>
-        </button>
-        <div id="extra-room-checkboxes" class="hidden absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl max-h-48 overflow-y-auto p-2 space-y-1">
-          <!-- Generated Extra Room Checkboxes Go Here -->
-        </div>
-      </div>
+      <input type="number" id="cust-extra-rooms" min="0" value="0" placeholder="0" oninput="calculateModalBilling()" class="w-full bg-blue-50 border border-blue-300 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-blue-500 font-bold text-blue-900" />
     </div>
 
     <!-- NEW FIELD: NAME -->
@@ -2373,21 +2365,6 @@ function checkBirthdayTrigger() {
         yearSelect.appendChild(opt);
       }
     }
-  function toggleExtraRoomDropdown() {
-  const container = document.getElementById('extra-room-checkboxes');
-  if (container) {
-    container.classList.toggle('hidden');
-  }
-}
-
-// Close extra room dropdown when clicking outside
-document.addEventListener('click', function(e) {
-  const dropdown = document.getElementById('extra-room-dropdown-container');
-  const checkboxes = document.getElementById('extra-room-checkboxes');
-  if (dropdown && checkboxes && !dropdown.contains(e.target)) {
-    checkboxes.classList.add('hidden');
-  }
-});
 
     function toggleRoomDropdown() {
       document.getElementById('room-checkboxes').classList.toggle('hidden');
@@ -3565,49 +3542,29 @@ function updateDashboardCards() {
     }
 
     function handleExtraPersonDatesChange() {
-      const mainInDate = document.getElementById('cust-checkin-date')?.value;
-      const mainInTime = document.getElementById('cust-checkin-time')?.value || '12:00';
-      const mainOutDate = document.getElementById('cust-checkout-date')?.value;
-      const mainOutTime = document.getElementById('cust-checkout-time')?.value || '11:00';
-      const hasExt = document.getElementById('cust-has-extended-checkout')?.checked;
-      
-      let latestOutD = mainOutDate;
-      let latestOutT = mainOutTime;
+  const extraInDate = document.getElementById('cust-extra-person-date')?.value;
+  const extraOutDate = document.getElementById('cust-extra-person-out-date')?.value;
+  const extraDaysInput = document.getElementById('cust-extra-person-days');
 
-      if (hasExt) {
-        const extD = document.getElementById('cust-ext-checkout-date')?.value;
-        const extT = document.getElementById('cust-ext-checkout-time')?.value;
-        if (extD) {
-          latestOutD = extD;
-          latestOutT = extT || '12:00';
-        }
-      }
-      
-      const epInDateElem = document.getElementById('cust-extra-person-date');
-      const epInTimeElem = document.getElementById('cust-extra-person-time');
-      const epOutDateElem = document.getElementById('cust-extra-person-out-date');
-      const epOutTimeElem = document.getElementById('cust-extra-person-out-time');
-
-      if (epInDateElem && epInDateElem.value && mainInDate) {
-        const epInFull = new Date(`${epInDateElem.value}T${epInTimeElem.value || '12:00'}:00+05:30`);
-        const mainInFull = new Date(`${mainInDate}T${mainInTime}:00+05:30`);
-
-        if (epInFull < mainInFull) {
-          alert(`⚠️ Additional person check-in cannot be earlier than the main check-in (${formatDateTime(`${mainInDate}T${mainInTime}`)}). Please correct it.`);
-        }
-      }
-
-      if (epOutDateElem && epOutDateElem.value && latestOutD) {
-        const epOutFull = new Date(`${epOutDateElem.value}T${epOutTimeElem.value || '11:00'}:00+05:30`);
-        const mainOutFull = new Date(`${latestOutD}T${latestOutT}:00+05:30`);
-
-        if (epOutFull > mainOutFull) {
-          alert(`⚠️ Additional person check-out date cannot be later than the main/extended check-out date (${formatDateTime(`${latestOutD}T${latestOutT}`)}). Please correct it.`);
-        }
-      }
-      
-      calculateModalBilling();
+  if (extraInDate && extraOutDate) {
+    const dIn = new Date(extraInDate);
+    const dOut = new Date(extraOutDate);
+    
+    if (!isNaN(dIn.getTime()) && !isNaN(dOut.getTime())) {
+      const diffTime = dOut.getTime() - dIn.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      // Display calculated days (ensuring minimum count of 0)
+      extraDaysInput.value = diffDays > 0 ? diffDays : 0;
+    } else {
+      extraDaysInput.value = 0;
     }
+  } else {
+    extraDaysInput.value = 0;
+  }
+  
+  // Recalculate billing details
+  calculateModalBilling();
+}
 
     function handleStayDatesChange() {
       const inDateInput = document.getElementById('cust-checkin-date');

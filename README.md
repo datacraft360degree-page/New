@@ -1061,11 +1061,10 @@
       <input type="number" id="cust-price" value="1200" oninput="calculateModalBilling()" class="w-full bg-white font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 focus:outline-none focus:border-blue-500" />
     </div>
     <div>
- <!-- New Main Person Rate Field -->
-<div class="form-group col-md-4">
-  <label for="cust-main-person-rate">Main Guest Rate(₹)</label>
-  <input type="number" id="cust-main-person-rate" class="form-control" readonly placeholder="0">
-</div>
+ <div>
+      <label class="block font-semibold text-slate-600 mb-0.5">Main Guest Rate(₹)</label>
+      <input type="number" id="cust-price" value="1200" oninput="calculateModalBilling()" class="w-full bg-white font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 focus:outline-none focus:border-blue-500" />
+    </div>
       <label class="block font-semibold text-slate-600 mb-0.5">Total(₹)</label>
       <input type="number" id="cust-total" readonly="" class="w-full bg-slate-200/60 text-blue-700 font-bold border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" />
     </div>

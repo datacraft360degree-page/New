@@ -1030,54 +1030,50 @@
   
   <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2 pb-2 border-b border-blue-200">
     <div>
-      <label class="block font-semibold text-slate-600 mb-0.5">Extra Guest Day(s)</label>
+      <label class="block font-semibold text-slate-600 mb-0.5">Extra Person Days</label>
       <input type="number" id="cust-extra-person-days" readonly="" class="w-full bg-slate-200/60 font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" value="0" />
     </div>
     <div>
-      <label class="block font-semibold text-slate-600 mb-0.5">Extra Guest Price/Day</label>
+      <label class="block font-semibold text-slate-600 mb-0.5">Extra Person Price/Day</label>
       <input type="number" id="cust-extra-person-price" value="0" oninput="calculateModalBilling()" class="w-full bg-white font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 focus:outline-none focus:border-blue-500" />
     </div>
     <div>
-      <label class="block font-semibold text-slate-600 mb-0.5">Extra Guest Rate(₹)</label>
+      <label class="block font-semibold text-slate-600 mb-0.5">Extra Person Rate (₹)</label>
       <input type="number" id="cust-extra-total" readonly="" class="w-full bg-slate-200/60 font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" />
     </div>
     <div>
-      <label class="block font-semibold text-slate-600 mb-0.5">Cab Fare(₹)</label>
+      <label class="block font-semibold text-slate-600 mb-0.5">Cab Fare (₹)</label>
       <input type="number" id="cust-cab-total" readonly="" class="w-full bg-slate-200/60 font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" />
     </div>
     <div>
-      <label class="block font-semibold text-slate-600 mb-0.5">Extra Food/Drink(₹)</label>
+      <label class="block font-semibold text-slate-600 mb-0.5">Extra Food/Drink (₹)</label>
       <input type="number" id="cust-food-total" readonly="" class="w-full bg-slate-200/60 font-bold text-amber-700 border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" value="0" />
     </div>
   </div>
 
   <div class="grid grid-cols-2 sm:grid-cols-6 gap-2">
     <div>
-      <label class="block font-semibold text-slate-600 mb-0.5">Main Guest Day(s)</label>
+      <label class="block font-semibold text-slate-600 mb-0.5">Days</label>
       <input type="number" id="cust-days" readonly="" class="w-full bg-slate-200/60 font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" />
     </div>
     <div>
-      <label class="block font-semibold text-slate-600 mb-0.5">Main Guest Price/Day(₹)</label>
+      <label class="block font-semibold text-slate-600 mb-0.5">Price/Day (₹)</label>
       <input type="number" id="cust-price" value="1200" oninput="calculateModalBilling()" class="w-full bg-white font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 focus:outline-none focus:border-blue-500" />
     </div>
     <div>
- <div>
-      <label class="block font-semibold text-slate-600 mb-0.5">Main Guest Rate(₹)</label>
-      <input type="number" id="cust-price" value="1200" oninput="calculateModalBilling()" class="w-full bg-white font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 focus:outline-none focus:border-blue-500" />
-    </div>
-      <label class="block font-semibold text-slate-600 mb-0.5">Total(₹)</label>
+      <label class="block font-semibold text-slate-600 mb-0.5">Total (₹)</label>
       <input type="number" id="cust-total" readonly="" class="w-full bg-slate-200/60 text-blue-700 font-bold border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" />
     </div>
     <div>
-      <label class="block font-semibold text-slate-600 mb-0.5">Advance(₹)</label>
+      <label class="block font-semibold text-slate-600 mb-0.5">Advance (₹)</label>
       <input type="number" id="cust-advance" value="0" oninput="calculateModalBilling()" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-blue-500 font-semibold text-emerald-600" />
     </div>
     <div>
-      <label class="block font-semibold text-slate-600 mb-0.5">Due(₹)</label>
+      <label class="block font-semibold text-slate-600 mb-0.5">Due (₹)</label>
       <input type="number" id="cust-due" readonly="" class="w-full bg-slate-200/60 text-rose-700 font-bold border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" />
     </div>
     <div>
-      <label class="block font-semibold text-slate-600 mb-0.5 text-[10px] text-emerald-700">Clear Bill(₹)</label>
+      <label class="block font-semibold text-slate-600 mb-0.5 text-[10px] text-emerald-700">Clear Bill (₹)</label>
       <input type="number" id="cust-clear-bill" value="0" placeholder="0" oninput="handleClearBillPayment(this.value)" class="w-full bg-emerald-50 border border-emerald-300 font-bold text-emerald-800 rounded-xl px-2 py-1.5 focus:outline-none focus:border-emerald-500" title="Put payment amount to clear due bill" />
     </div>
   </div>
@@ -3546,29 +3542,49 @@ function updateDashboardCards() {
     }
 
     function handleExtraPersonDatesChange() {
-  const extraInDate = document.getElementById('cust-extra-person-date')?.value;
-  const extraOutDate = document.getElementById('cust-extra-person-out-date')?.value;
-  const extraDaysInput = document.getElementById('cust-extra-person-days');
+      const mainInDate = document.getElementById('cust-checkin-date')?.value;
+      const mainInTime = document.getElementById('cust-checkin-time')?.value || '12:00';
+      const mainOutDate = document.getElementById('cust-checkout-date')?.value;
+      const mainOutTime = document.getElementById('cust-checkout-time')?.value || '11:00';
+      const hasExt = document.getElementById('cust-has-extended-checkout')?.checked;
+      
+      let latestOutD = mainOutDate;
+      let latestOutT = mainOutTime;
 
-  if (extraInDate && extraOutDate) {
-    const dIn = new Date(extraInDate);
-    const dOut = new Date(extraOutDate);
-    
-    if (!isNaN(dIn.getTime()) && !isNaN(dOut.getTime())) {
-      const diffTime = dOut.getTime() - dIn.getTime();
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      // Display calculated days (ensuring minimum count of 0)
-      extraDaysInput.value = diffDays > 0 ? diffDays : 0;
-    } else {
-      extraDaysInput.value = 0;
+      if (hasExt) {
+        const extD = document.getElementById('cust-ext-checkout-date')?.value;
+        const extT = document.getElementById('cust-ext-checkout-time')?.value;
+        if (extD) {
+          latestOutD = extD;
+          latestOutT = extT || '12:00';
+        }
+      }
+      
+      const epInDateElem = document.getElementById('cust-extra-person-date');
+      const epInTimeElem = document.getElementById('cust-extra-person-time');
+      const epOutDateElem = document.getElementById('cust-extra-person-out-date');
+      const epOutTimeElem = document.getElementById('cust-extra-person-out-time');
+
+      if (epInDateElem && epInDateElem.value && mainInDate) {
+        const epInFull = new Date(`${epInDateElem.value}T${epInTimeElem.value || '12:00'}:00+05:30`);
+        const mainInFull = new Date(`${mainInDate}T${mainInTime}:00+05:30`);
+
+        if (epInFull < mainInFull) {
+          alert(`⚠️ Additional person check-in cannot be earlier than the main check-in (${formatDateTime(`${mainInDate}T${mainInTime}`)}). Please correct it.`);
+        }
+      }
+
+      if (epOutDateElem && epOutDateElem.value && latestOutD) {
+        const epOutFull = new Date(`${epOutDateElem.value}T${epOutTimeElem.value || '11:00'}:00+05:30`);
+        const mainOutFull = new Date(`${latestOutD}T${latestOutT}:00+05:30`);
+
+        if (epOutFull > mainOutFull) {
+          alert(`⚠️ Additional person check-out date cannot be later than the main/extended check-out date (${formatDateTime(`${latestOutD}T${latestOutT}`)}). Please correct it.`);
+        }
+      }
+      
+      calculateModalBilling();
     }
-  } else {
-    extraDaysInput.value = 0;
-  }
-  
-  // Recalculate billing details
-  calculateModalBilling();
-}
 
     function handleStayDatesChange() {
       const inDateInput = document.getElementById('cust-checkin-date');

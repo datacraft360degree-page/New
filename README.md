@@ -919,7 +919,7 @@
 
     <!-- NEW FIELD: NAME -->
     <div>
-      <label class="block font-semibold text-slate-600 mb-0.5">Extra Guest Name</label>
+      <label class="block font-semibold text-slate-600 mb-0.5">Name</label>
       <input type="text" id="cust-room-name" placeholder="Guest Name" oninput="this.value = formatTitleCase(this.value)" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-blue-500 font-medium" />
     </div>
 
@@ -3730,7 +3730,6 @@ function updateDashboardCards() {
       const due = Math.max(0, total - currentAdvVal - clearBillVal);
 
       document.getElementById('cust-days').value = days;
-      document.getElementById('cust-extra-person-days').value = extraGuestDays;
       document.getElementById('cust-total').value = total;
       document.getElementById('cust-due').value = due;
       
@@ -3985,51 +3984,42 @@ if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
       const countryCodeVal = document.getElementById('cust-country-code').value.trim() || '+91';
 
       const newBooking = {
-    id: id || `bk_${Date.now()}`,
-    bookingCode: existingCode,
-    invoiceNo: existingInv,
-    name: guestName,
-    address: formatTitleCase(document.getElementById('cust-address').value.trim()),
-    city: formatTitleCase(document.getElementById('cust-city').value.trim()),
-    state: formatTitleCase(document.getElementById('cust-state').value.trim()),
-    country: formatTitleCase(document.getElementById('cust-country').value.trim()),
-    zipCode: document.getElementById('cust-zip').value.trim(),
-    idNo: document.getElementById('cust-id').value.trim(),
-    countryCode: countryCodeVal,
-    contactNo: contactNoVal,
-    idProofBase64: document.getElementById('cust-id-file-base64').value,
-    idProofFileName: document.getElementById('cust-id-file-name').value,
-    roomNo: selectedRooms.join('|'),
-    agentInfo: document.getElementById('cust-agent').value,
-    capacity: parseInt(document.getElementById('cust-capacity').value) || 1,
-    extraPersons: extraPersons,
-    extraPersonJoined: extraPersonJoined,
-    extraPersonOut: extraPersonOut,
-    extraPersonDays: extraPersonDays,
-    checkIn: checkIn,
-    checkOut: checkOut,
-    hasExtendedCheckout: hasExtendedCheckout,
-    extendedCheckOut: extendedCheckOut,
-    includeMeals: includeMeals,
-    noOfDays: parseInt(document.getElementById('cust-days').value) || 0,
-    perDayPrice: parseFloat(document.getElementById('cust-price').value) || 0,
-    
-    // --- New Fields Added Below ---
-    extraGuestDays: parseInt(document.getElementById('cust-extra-person-days').value) || 0,
-    extraGuestPricePerDay: parseFloat(document.getElementById('cust-extra-person-price').value) || 0,
-    mainGuestRate: parseFloat(document.getElementById('cust-main-person-rate').value) || 0,
-    extraRooms: parseInt(document.getElementById('cust-extra-rooms').value) || 0,
-    roomName: formatTitleCase(document.getElementById('cust-room-name').value.trim()),
-    // ------------------------------
-    
-    foodOrders: foodOrdersList,
-    cabTrips: cabTripsList,
-    totalAmount: totalAmt,
-    initialAdv: initialAdvAmt,
-    clearedDue: clearedDueAmt,
-    totalDue: Math.max(0, totalAmt - totalPaid),
-    inactive: false
-};
+        id: id || `bk_${Date.now()}`,
+        bookingCode: existingCode,
+        invoiceNo: existingInv,
+        name: guestName,
+        address: formatTitleCase(document.getElementById('cust-address').value.trim()),
+        city: formatTitleCase(document.getElementById('cust-city').value.trim()),
+        state: formatTitleCase(document.getElementById('cust-state').value.trim()),
+        country: formatTitleCase(document.getElementById('cust-country').value.trim()),
+        zipCode: document.getElementById('cust-zip').value.trim(),
+        idNo: document.getElementById('cust-id').value.trim(),
+        countryCode: countryCodeVal,
+        contactNo: contactNoVal,
+        idProofBase64: document.getElementById('cust-id-file-base64').value,
+        idProofFileName: document.getElementById('cust-id-file-name').value,
+        roomNo: selectedRooms.join('|'),
+        agentInfo: document.getElementById('cust-agent').value,
+        capacity: parseInt(document.getElementById('cust-capacity').value) || 1,
+        extraPersons: extraPersons,
+        extraPersonJoined: extraPersonJoined,
+        extraPersonOut: extraPersonOut,
+        extraPersonDays: extraPersonDays,
+        checkIn: checkIn,
+        checkOut: checkOut,
+        hasExtendedCheckout: hasExtendedCheckout,
+        extendedCheckOut: extendedCheckOut,
+        includeMeals: includeMeals,
+        noOfDays: parseInt(document.getElementById('cust-days').value) || 0,
+        perDayPrice: parseFloat(document.getElementById('cust-price').value) || 0,
+        foodOrders: foodOrdersList,
+        cabTrips: cabTripsList,
+        totalAmount: totalAmt,
+        initialAdv: initialAdvAmt,
+        clearedDue: clearedDueAmt,
+        totalDue: Math.max(0, totalAmt - totalPaid),
+        inactive: false
+      };
 
       if (id) {
         const idx = state.bookings.findIndex(b => String(b.id) === String(id));

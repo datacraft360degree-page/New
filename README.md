@@ -2373,6 +2373,21 @@ function checkBirthdayTrigger() {
         yearSelect.appendChild(opt);
       }
     }
+  function toggleExtraRoomDropdown() {
+  const container = document.getElementById('extra-room-checkboxes');
+  if (container) {
+    container.classList.toggle('hidden');
+  }
+}
+
+// Close extra room dropdown when clicking outside
+document.addEventListener('click', function(e) {
+  const dropdown = document.getElementById('extra-room-dropdown-container');
+  const checkboxes = document.getElementById('extra-room-checkboxes');
+  if (dropdown && checkboxes && !dropdown.contains(e.target)) {
+    checkboxes.classList.add('hidden');
+  }
+});
 
     function toggleRoomDropdown() {
       document.getElementById('room-checkboxes').classList.toggle('hidden');

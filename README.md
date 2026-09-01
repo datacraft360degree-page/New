@@ -2389,7 +2389,40 @@ function checkBirthdayTrigger() {
 
     function populateRoomDropdown(selectedRoomNos = []) {
       const container = document.getElementById('room-checkboxes');
+    
+      if (!container) return;
+      container.innerHTML = '';
+
+      let selArr = [];
+      if (Array.isArray(selectedRoomNos)) selArr = selectedRoomNos.map(String);
+      else if (selectedRoomNos) selArr = String(selectedRoomNos).split(/[,|]/).map(s => s.trim());
+
+      const allDiv = document.createElement('div');
+      allDiv.className = "flex items-center gap-2 mb-1.5 pb-1.5 border-b border-slate-100";
+      allDiv.innerHTML = `
+        <input type="checkbox" id="room-all" value="ALL" onchange="handleRoomSelection(this)" class="w-3.5 h-3.5 text-blue-600 rounded border-slate-300 focus:ring-blue-500 cursor-pointer room-chk">
+        <label for="room-all" class="text-[11px] font-bold text-slate-700 cursor-pointer flex-1">Select all rooms</label>
+      `;
+      container.appendChild(allDiv);
+
+      state.roomsCapacity.forEach(m => {
+        const isChecked = selArr.includes(String(m.roomNo)) ? 'checked' : '';
+        const div = document.createElement('div');
+        div.className = "flex items-center gap-2 py-1";
+        div.innerHTML = `
+          <input type="checkbox" id="room-${m.roomNo}" value="${m.roomNo}" ${isChecked} onchange="handleRoomSelection(this)" class="w-3.5 h-3.5 text-blue-600 rounded border-slate-300 focus:ring-blue-500 cursor-pointer room-chk item-chk">
+          <label for="room-${m.roomNo}" class="text-[11px] font-bold text-slate-700 cursor-pointer flex-1">Room ${m.roomNo}</label>
+        `;
+        container.appendChild(div);
+      });
+
+      updateRoomDropdownText();
+      autoCaptureRoomDetails();
+    }
+
+  function populateRoomDropdown(selectedRoomNos = []) {
       const container = document.getElementById('room-checkboxes-extra');
+    
       if (!container) return;
       container.innerHTML = '';
 

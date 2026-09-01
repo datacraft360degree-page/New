@@ -2427,7 +2427,7 @@ function checkBirthdayTrigger() {
       autoCaptureRoomDetails();
     }
 
-  function populateRoomDropdown(selectedRoomNos = []) {
+  function populateextraRoomDropdown(selectedRoomNos = []) {
       const container = document.getElementById('room-checkboxes-extra');
     
       if (!container) return;
@@ -2437,6 +2437,9 @@ function checkBirthdayTrigger() {
       if (Array.isArray(selectedRoomNos)) selArr = selectedRoomNos.map(String);
       else if (selectedRoomNos) selArr = String(selectedRoomNos).split(/[,|]/).map(s => s.trim());
 
+      const isExtra = containerId === 'room-checkboxes-extra';
+      const allId = isExtra ? 'room-all-extra' : 'room-all';
+    
       const allDiv = document.createElement('div');
       allDiv.className = "flex items-center gap-2 mb-1.5 pb-1.5 border-b border-slate-100";
       allDiv.innerHTML = `
@@ -2456,9 +2459,12 @@ function checkBirthdayTrigger() {
         container.appendChild(div);
       });
 
-      updateRoomDropdownText();
-      autoCaptureRoomDetails();
-    }
+     if (isExtra) {
+    updateExtraRoomDropdownText();
+  } else {
+    updateRoomDropdownText();
+    autoCaptureRoomDetails();
+  }
 
     function handleRoomSelection(chk) {
       const allChk = document.getElementById('room-all');

@@ -2159,6 +2159,11 @@ function checkBirthdayTrigger() {
         const container = document.getElementById('room-dropdown-container');
         if (container && !container.contains(e.target)) {
           const boxes = document.getElementById('room-checkboxes');
+          if (boxes) boxes.classList.add('hidden');
+        }
+         document.addEventListener('click', function(e) {
+        const container = document.getElementById('room-dropdown-container-extra');
+        if (container && !container.contains(e.target)) {
           const boxes = document.getElementById('room-checkboxes-extra');
           if (boxes) boxes.classList.add('hidden');
         }

@@ -919,7 +919,7 @@
 
     <!-- NEW FIELD: NAME -->
     <div>
-      <label class="block font-semibold text-slate-600 mb-0.5">Name</label>
+      <label class="block font-semibold text-slate-600 mb-0.5">Extra Guest Name</label>
       <input type="text" id="cust-room-name" placeholder="Guest Name" oninput="this.value = formatTitleCase(this.value)" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-blue-500 font-medium" />
     </div>
 

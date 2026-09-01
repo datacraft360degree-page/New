@@ -1882,99 +1882,105 @@ function checkBirthdayTrigger() {
       }
     }
 
-    function processExport() {
-      const startDateStr = document.getElementById('export-start-date').value;
-      const endDateStr = document.getElementById('export-end-date').value;
+   function processExport() {
+  const startDateStr = document.getElementById('export-start-date').value;
+  const endDateStr = document.getElementById('export-end-date').value;
 
-      if (!startDateStr || !endDateStr) {
-        alert("Please select both Start and End dates.");
-        return;
-      }
+  if (!startDateStr || !endDateStr) {
+    alert("Please select both Start and End dates.");
+    return;
+  }
 
-      exportToExcel(startDateStr, endDateStr);
+  exportToExcel(startDateStr, endDateStr);
+}
+
+function exportToExcel(startDateStr, endDateStr) {
+  if (!state.bookings || state.bookings.length === 0) {
+    alert("No booking records available to export!");
+    return;
+  }
+
+  const filteredBookings = state.bookings.filter(b => {
+    if (!b.checkIn) return false;
+    
+    const bIn = String(b.checkIn).replace(' ', 'T').split('T')[0];
+    return (bIn >= startDateStr) && (bIn <= endDateStr);
+  });
+
+  if (filteredBookings.length === 0) {
+    alert(`No booking records found with a Check-In date between ${formatDate(startDateStr)} and ${formatDate(endDateStr)}!`);
+    return;
+  }
+
+  const now = new Date().getTime();
+
+  const exportData = filteredBookings.map(b => {
+    let bStatus = "Unknown";
+    if (isInactiveBooking(b)) {
+      bStatus = "Inactive";
+    } else {
+      const cIn = parseDateMs(b.checkIn);
+      const cOut = getEffectiveCheckoutTime(b);
+      if (now > cOut) bStatus = "Closed";
+      else if (now >= cIn && now <= cOut) bStatus = "Live";
+      else bStatus = "Upcoming";
     }
 
-    function exportToExcel(startDateStr, endDateStr) {
-      if (!state.bookings || state.bookings.length === 0) {
-        alert("No booking records available to export!");
-        return;
-      }
+    const foodList = parseJSONField(b.foodOrders);
+    const cabList = parseJSONField(b.cabTrips);
+    
+    return {
+      "Booking ID (System)": b.id || "",
+      "Booking ID": b.bookingCode || "",
+      "Invoice ID": b.invoiceNo || b.invoiceId || "",
+      "Booking Status": bStatus,
+      "Guest Name": b.name || "",
+      "Address": b.address || "",
+      "City": b.city || "",
+      "State": b.state || "",
+      "Country": b.country || "",
+      "Pin/Zip Code": b.zipCode || b.zip || "",
+      "ID Number": b.idNo || b.idNumber || "",
+      "Contact No": b.contactNo || b.contact || "",
+      "Country Code": b.countryCode || "",
+      "Attached ID Proof(Yes/No)": b.idProofBase64 || b.idProofFileName ? "Yes" : "No",
+      "Room No(s)": Array.isArray(b.roomNo) ? b.roomNo.join(", ") : (getBookingRooms(b).join(", ") || ""),
+      "Agent Info": b.agentInfo || b.agent || "",
+      "Main Guest Joined(Show count)": b.capacity || 1,
+      "Extra Guest Joined(Show count)": b.extraPersons || 0,
+      "Extra Room No(s)": b.extraRooms || 0,
+      "Extra Guest Name": b.extraGuestName || "",
+      "Extra Guest Check-In": format24hDate(b.extraPersonJoined || b.extraPersonCheckIn),
+      "Extra Guest Check-Out": format24hDate(b.extraPersonOut || b.extraPersonCheckOut),
+      "Check-In": format24hDate(b.checkIn),
+      "Check-Out": format24hDate(b.checkOut),
+      "Has Extended Check-Out(Yes/No)": isTrue(b.hasExtendedCheckout) ? "Yes" : "No",
+      "Extended Check-Out(Date & Time)": format24hDate(b.extendedCheckOut),
+      "Include Meals(Yes/No)": (b.includeMeals !== false && b.includeMeals !== 'false') ? "Yes" : "No",
+      "Food Orders Details(JSON)": JSON.stringify(foodList),
+      "Cab Trips Details(JSON)": JSON.stringify(cabList),
+      "Extra Guest Total Days": b.extraPersonDays || 0,
+      "Extra Guest Price/Day (₹)": b.extraPersonPrice || 0,
+      "Extra Guest Total Rate (₹)": b.extraTotal || 0,
+      "Cab Fare Total (₹)": b.cabTotal || 0,
+      "Extra Food/Drink Total (₹)": b.foodTotal || 0,
+      "Main Guest Total Days": b.noOfDays || b.days || 0,
+      "Main Guest Price/Day (₹)": b.perDayPrice || b.price || 0,
+      "Main Guest Total Rate (₹)": b.mainPersonRate || 0,
+      "Grand Total (₹)": b.totalAmount || b.total || 0,
+      "Initial Advance (₹)": b.initialAdv || b.advance || 0,
+      "Due (₹)": b.totalDue || b.due || 0,
+      "Clear Bill (₹)": b.clearedDue || b.clearBill || 0
+    };
+  });
 
-      const filteredBookings = state.bookings.filter(b => {
-        if(!b.checkIn) return false;
-        
-        const bIn = String(b.checkIn).replace(' ', 'T').split('T')[0];
-        return (bIn >= startDateStr) && (bIn <= endDateStr);
-      });
+  const worksheet = XLSX.utils.json_to_sheet(exportData);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Bookings");
 
-      if (filteredBookings.length === 0) {
-        alert(`No booking records found with a Check-In date between ${formatDate(startDateStr)} and ${formatDate(endDateStr)}!`);
-        return;
-      }
-
-      const now = new Date().getTime();
-
-      const exportData = filteredBookings.map(b => {
-        let bStatus = "Unknown";
-        if (isInactiveBooking(b)) {
-            bStatus = "Inactive";
-        } else {
-            const cIn = parseDateMs(b.checkIn);
-            const cOut = getEffectiveCheckoutTime(b);
-            if (now > cOut) bStatus = "Closed";
-            else if (now >= cIn && now <= cOut) bStatus = "Live";
-            else bStatus = "Upcoming";
-        }
-
-        const foodList = parseJSONField(b.foodOrders);
-        const cabList = parseJSONField(b.cabTrips);
-        
-        return {
-          "Booking ID (System)": b.id || "",
-          "Booking ID": b.bookingCode || "",
-          "Invoice ID": b.invoiceNo || "",
-          "Booking Status": bStatus,
-          "Guest Name": b.name || "",
-          "Contact No": b.contactNo || "",
-          "Country Code": b.countryCode || "",
-          "ID Number": b.idNo || "",
-          "Attached ID File Name": b.idProofFileName || "",
-          "Address": b.address || "",
-          "City": b.city || "",
-          "State": b.state || "",
-          "Country": b.country || "",
-          "Pin/Zip Code": b.zipCode || "",
-          "Room No(s)": getBookingRooms(b).join(" | "),
-          "Capacity": b.capacity || 1,
-          "Extra Persons": b.extraPersons || 0,
-          "Extra Person Joined": format24hDate(b.extraPersonJoined),
-          "Extra Person Check-Out": format24hDate(b.extraPersonOut),
-          "Extra Person Days": b.extraPersonDays || 0,
-          "Agent Info": b.agentInfo || "",
-          "Check-In": format24hDate(b.checkIn),
-          "Check-Out": format24hDate(b.checkOut),
-          "Has Extended Check-Out": isTrue(b.hasExtendedCheckout) ? "Yes" : "No",
-          "Extended Check-Out": format24hDate(b.extendedCheckOut),
-          "Include Meals": (b.includeMeals !== false && b.includeMeals !== 'false') ? "Yes" : "No",
-          "Stay Days": b.noOfDays || 0,
-          "Price / Day": b.perDayPrice || 0,
-          "Food Orders Details": foodList.map(f => `${f.foodDesc} (${format24hDate(f.foodDateTime)}): ${f.plates} pl @ ₹${f.itemPrice} = ₹${f.foodCharge}`).join('\n'),
-          "Cab Trips Details": cabList.map(c => `${c.tripName} (${format24hDate(c.dateTime)}): ₹${c.rate} ${c.remark ? `[${c.remark}]` : ''}`).join('\n'),
-          "Total Amount": b.totalAmount || 0,
-          "Initial Advance": b.initialAdv || 0,
-          "Cleared Due": b.clearedDue || 0,
-          "Balance Due": b.totalDue || 0
-        };
-      });
-
-      const worksheet = XLSX.utils.json_to_sheet(exportData);
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, "Bookings");
-
-      XLSX.writeFile(workbook, `Booking_Report_${startDateStr}_to_${endDateStr}.xlsx`);
-      closeExportModal();
-    }
-
+  XLSX.writeFile(workbook, `Booking_Report_${startDateStr}_to_${endDateStr}.xlsx`);
+  closeExportModal();
+}
     function searchBookingByDate() {
       const dateVal = document.getElementById('booking-date-search').value;
       renderBookingsTable(dateVal);

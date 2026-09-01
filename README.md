@@ -1882,7 +1882,7 @@ function checkBirthdayTrigger() {
       }
     }
 
-  function processExport() {
+function processExport() {
   const startDateStr = document.getElementById('export-start-date').value;
   const endDateStr = document.getElementById('export-end-date').value;
 
@@ -1913,7 +1913,21 @@ function exportToExcel(startDateStr, endDateStr) {
 
   const now = new Date().getTime();
 
-  const exportData = filteredBookings.map(b => {
+  // Define exact 41 header fields
+  const headers = [
+    "Booking ID (System)", "Booking ID", "Invoice ID", "Booking Status", "Guest Name",
+    "Address", "City", "State", "Country", "Pin/Zip Code", "ID Number",
+    "Contact No", "Country Code", "Attached ID Proof(Yes/No)", "Room No(s)", "Agent Info",
+    "Main Guest Joined(Show count)", "Extra Guest Joined(Show count)", "Extra Room No(s)",
+    "Extra Guest Name", "Extra Guest Check-In", "Extra Guest Check-Out", "Check-In", "Check-Out",
+    "Has Extended Check-Out(Yes/No)", "Extended Check-Out(Date & Time)", "Include Meals(Yes/No)",
+    "Food Orders Details(JSON)", "Cab Trips Details(JSON)", "Extra Guest Total Days",
+    "Extra Guest Price/Day (₹)", "Extra Guest Total Rate (₹)", "Cab Fare Total (₹)",
+    "Extra Food/Drink Total (₹)", "Main Guest Total Days", "Main Guest Price/Day (₹)",
+    "Main Guest Total Rate (₹)", "Grand Total (₹)", "Initial Advance (₹)", "Due (₹)", "Clear Bill (₹)"
+  ];
+
+  const rows = filteredBookings.map(b => {
     let bStatus = "Unknown";
     if (isInactiveBooking(b)) {
       bStatus = "Inactive";
@@ -1928,56 +1942,54 @@ function exportToExcel(startDateStr, endDateStr) {
     const foodList = parseJSONField(b.foodOrders);
     const cabList = parseJSONField(b.cabTrips);
 
-    return {
-      "Booking ID (System)": b.id || "",
-      "Booking ID": b.bookingCode || "",
-      "Invoice ID": b.invoiceNo || "",
-      "Booking Status": bStatus,
-      "Guest Name": b.name || "",
-      "Address": b.address || "",
-      "City": b.city || "",
-      "State": b.state || "",
-      "Country": b.country || "",
-      "Address ": b.extraAddress || b.address || "",
-      "City ": b.extraCity || b.city || "",
-      "State ": b.extraState || b.state || "",
-      "Country ": b.extraCountry || b.country || "",
-      "Pin/Zip Code": b.zipCode || "",
-      "ID Number": b.idNo || "",
-      "Contact No": b.contactNo || "",
-      "Country Code": b.countryCode || "",
-      "Attached ID Proof(Yes/No)": b.idProofFileName ? "Yes" : "No",
-      "Room No(s)": getBookingRooms(b).join(" | "),
-      "Agent Info": b.agentInfo || "",
-      "Main Guest Joined(Show count)": b.mainGuestCount || 1,
-      "Extra Guest Joined(Show count)": b.extraPersons || 0,
-      "Extra Room No(s)": b.extraRoomNos || "",
-      "Extra Guest Name": b.extraGuestName || "",
-      "Extra Guest Check-In": format24hDate(b.extraPersonJoined),
-      "Extra Guest Check-Out": format24hDate(b.extraPersonOut),
-      "Check-In": format24hDate(b.checkIn),
-      "Check-Out": format24hDate(b.checkOut),
-      "Has Extended Check-Out(Yes/No)": isTrue(b.hasExtendedCheckout) ? "Yes" : "No",
-      "Extended Check-Out(Date & Time)": format24hDate(b.extendedCheckOut),
-      "Include Meals(Yes/No)": (b.includeMeals !== false && b.includeMeals !== 'false') ? "Yes" : "No",
-      "Food Orders Details(JSON)": typeof b.foodOrders === 'string' ? b.foodOrders : JSON.stringify(foodList),
-      "Cab Trips Details(JSON)": typeof b.cabTrips === 'string' ? b.cabTrips : JSON.stringify(cabList),
-      "Extra Guest Total Days": b.extraPersonDays || 0,
-      "Extra Guest Price/Day (₹)": b.extraPersonPricePerDay || 0,
-      "Extra Guest Total Rate (₹)": b.extraPersonTotalRate || 0,
-      "Cab Fare Total (₹)": b.cabFareTotal || 0,
-      "Extra Food/Drink Total (₹)": b.extraFoodTotal || 0,
-      "Main Guest Total Days": b.noOfDays || 0,
-      "Main Guest Price/Day (₹)": b.perDayPrice || 0,
-      "Main Guest Total Rate (₹)": b.mainGuestTotalRate || 0,
-      "Grand Total (₹)": b.totalAmount || 0,
-      "Initial Advance (₹)": b.initialAdv || 0,
-      "Due (₹)": b.totalDue || 0,
-      "Clear Bill (₹)": b.clearedDue || 0
-    };
+    // Map each booking to an array corresponding exactly to the headers order
+    return [
+      b.id || "",
+      b.bookingCode || "",
+      b.invoiceNo || "",
+      bStatus,
+      b.name || "",
+      b.address || "",
+      b.city || "",
+      b.state || "",
+      b.country || "",
+      b.zipCode || "",
+      b.idNo || "",
+      b.contactNo || "",
+      b.countryCode || "",
+      b.idProofFileName ? "Yes" : "No",
+      getBookingRooms(b).join(" | "),
+      b.agentInfo || "",
+      b.mainGuestCount || 1,
+      b.extraPersons || 0,
+      b.extraRoomNos || "",
+      b.extraGuestName || "",
+      format24hDate(b.extraPersonJoined),
+      format24hDate(b.extraPersonOut),
+      format24hDate(b.checkIn),
+      format24hDate(b.checkOut),
+      isTrue(b.hasExtendedCheckout) ? "Yes" : "No",
+      format24hDate(b.extendedCheckOut),
+      (b.includeMeals !== false && b.includeMeals !== 'false') ? "Yes" : "No",
+      typeof b.foodOrders === 'string' ? b.foodOrders : JSON.stringify(foodList || []),
+      typeof b.cabTrips === 'string' ? b.cabTrips : JSON.stringify(cabList || []),
+      b.extraPersonDays || 0,
+      b.extraPersonPricePerDay || 0,
+      b.extraPersonTotalRate || 0,
+      b.cabFareTotal || 0,
+      b.extraFoodTotal || 0,
+      b.noOfDays || 0,
+      b.perDayPrice || 0,
+      b.mainGuestTotalRate || 0,
+      b.totalAmount || 0,
+      b.initialAdv || 0,
+      b.totalDue || 0,
+      b.clearedDue || 0
+    ];
   });
 
-  const worksheet = XLSX.utils.json_to_sheet(exportData);
+  // Construct sheet using Array of Arrays to prevent missing key drops
+  const worksheet = XLSX.utils.aoa_to_sheet([headers, ...rows]);
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, "Bookings");
 

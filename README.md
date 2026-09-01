@@ -1075,7 +1075,7 @@
       <input type="number" id="cust-total" readonly="" class="w-full bg-slate-200/60 text-blue-700 font-bold border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" />
     </div>
     <div>
-      <label class="block font-semibold text-slate-600 mb-0.5 leading-tight">Advance (₹)</label>
+      <label class="block font-semibold text-slate-600 mb-0.5 leading-tight">Initial Advance (₹)</label>
       <input type="number" id="cust-advance" value="0" oninput="calculateModalBilling()" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-blue-500 font-semibold text-emerald-600" />
     </div>
     <div>

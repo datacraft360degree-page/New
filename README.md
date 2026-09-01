@@ -3641,185 +3641,112 @@ function updateDashboardCards() {
       document.getElementById('cust-due').value = due;
     }
 
-    function calculateModalBilling() {
-    const isExtended = document.getElementById('cust-has-extended-checkout')?.checked;
-    const inDate = document.getElementById('cust-checkin-date')?.value;
-    const inTime = document.getElementById('cust-checkin-time')?.value || '00:00';
+   function calculateModalBilling() {
+  const inDate = document.getElementById('cust-checkin-date')?.value;
+  const inTime = document.getElementById('cust-checkin-time')?.value || '00:00';
 
-    let outDate = document.getElementById('cust-checkout-date')?.value;
-    let outTime = document.getElementById('cust-checkout-time')?.value || '00:00';
+  const hasExtCheckout = document.getElementById('cust-has-extended-checkout')?.checked;
+  let outDate = document.getElementById('cust-checkout-date')?.value;
+  let outTime = document.getElementById('cust-checkout-time')?.value || '00:00';
 
-    if (isExtended) {
+  if (hasExtCheckout) {
     const extDate = document.getElementById('cust-ext-checkout-date')?.value;
-    const extTime = document.getElementById('cust-ext-checkout-time')?.value || '00:00';
+    const extTime = document.getElementById('cust-ext-checkout-time')?.value;
     if (extDate) outDate = extDate;
     if (extTime) outTime = extTime;
   }
-      // --- Main Guest Days Calculation ---
-  let mainGuestDays = 0;
+
+  // --- 1. Main Guest Days Calculation ---
+  let days = 0;
   if (inDate && outDate) {
-    const startMs = parseDateMs(`${inDate}T${inTime}`);
-    const endMs = parseDateMs(`${outDate}T${outTime}`);
-    if (!isNaN(startMs) && !isNaN(endMs) && endMs > startMs) {
-      const diffMs = endMs - startMs;
-      mainGuestDays = Math.max(1, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
-    }
+    const inDateOnly = new Date(inDate);
+    const outDateOnly = new Date(outDate);
+    days = Math.max(1, Math.round((outDateOnly - inDateOnly) / (1000 * 60 * 60 * 24)));
   }
 
-      const daysField = document.getElementById('cust-days');
-  if (daysField) daysField.value = mainGuestDays;
+  // --- 2. Extra Guest Days Calculation ---
+  // Formula: Extra Person Check-In to Extra Person Check-Out (days count)
+  let extraPersonDays = 0;
+  const epInDate = document.getElementById('cust-extra-person-date')?.value;
+  const epOutDate = document.getElementById('cust-extra-person-out-date')?.value;
 
-  // --- Extra Guest Days Calculation ---
-  // Formula: Extra Guest Days = Extra Person Check-In to Extra Person Check-Out (days count)
-  let extraGuestDays = 0;
-  const extraInDate = document.getElementById('cust-extra-person-date')?.value;
-  const extraInTime = document.getElementById('cust-extra-person-time')?.value || '00:00';
-  const extraOutDate = document.getElementById('cust-extra-person-out-date')?.value;
-  const extraOutTime = document.getElementById('cust-extra-person-out-time')?.value || '00:00';
-
-  if (extraInDate && extraOutDate) {
-    const exStartMs = parseDateMs(`${extraInDate}T${extraInTime}`);
-    const exEndMs = parseDateMs(`${extraOutDate}T${extraOutTime}`);
-    if (!isNaN(exStartMs) && !isNaN(exEndMs) && exEndMs > exStartMs) {
-      const exDiffMs = exEndMs - exStartMs;
-      extraGuestDays = Math.max(1, Math.ceil(exDiffMs / (1000 * 60 * 60 * 24)));
+  if (epInDate && epOutDate) {
+    const epInOnly = new Date(epInDate);
+    const epOutOnly = new Date(epOutDate);
+    if (epOutOnly >= epInOnly) {
+      const diffDays = Math.round((epOutOnly - epInOnly) / (1000 * 60 * 60 * 24));
+      extraPersonDays = Math.max(1, diffDays);
     }
   }
-
-  const extraDaysField = document.getElementById('cust-extra-person-days');
-  if (extraDaysField) extraDaysField.value = extraGuestDays;
 
   // --- Input Values ---
-  const extraPersons = parseFloat(document.getElementById('cust-extra-persons')?.value) || 0;
-  const extraPrice = parseFloat(document.getElementById('cust-extra-person-price')?.value) || 0;
-  const mainPrice = parseFloat(document.getElementById('cust-price')?.value) || 0;
-  const totalCapacity = parseFloat(document.getElementById('cust-capacity')?.value) || 1;
+  const price = parseFloat(document.getElementById('cust-price')?.value) || 0;
+  const capacity = parseFloat(document.getElementById('cust-capacity')?.value) || 1;
+  const extraPersons = parseInt(document.getElementById('cust-extra-persons')?.value) || 0;
+  const extraPersonPrice = parseFloat(document.getElementById('cust-extra-person-price')?.value) || 0;
 
-  // --- Calculations ---
-  // Formula: Extra Guest Rate (₹) = Extra Guest Price/Day * Extra Guest Days * Add Extra Person(s)
-  const extraTotal = extraPrice * extraGuestDays * extraPersons;
-
+  // --- 3. Rate Calculations ---
   // Formula: Main Guest Rate (₹) = Main Guest Price/Day (₹) * Main Guest Days * Total Capacity
-  const mainGuestRate = mainPrice * mainGuestDays * totalCapacity;
+  const roomTotal = price * days * capacity;
 
-  // --- Output Updates ---
-  const extraTotalField = document.getElementById('cust-extra-total');
-  if (extraTotalField) extraTotalField.value = extraTotal;
+  // Formula: Extra Guest Rate (₹) = Extra Guest Price/Day * Extra Guest Days * Add Extra Person(s)
+  const extraPersonTotal = extraPersonPrice * extraPersonDays * extraPersons;
 
-  const mainRateField = document.getElementById('cust-main-person-rate');
-  if (mainRateField) mainRateField.value = mainGuestRate;
+  // --- Food & Cab Charges ---
+  let foodTotalCharge = 0;
+  document.querySelectorAll('.cust-food-charge').forEach(input => {
+    foodTotalCharge += parseFloat(input.value) || 0;
+  });
 
-  // --- Additional Totals (Food, Cab, Advance, Clear Bill) ---
-  const cabTotal = calculateCabTripsTotal();
-  const cabTotalField = document.getElementById('cust-cab-total');
-  if (cabTotalField) cabTotalField.value = cabTotal;
+  let cabFare = 0;
+  document.querySelectorAll('.cust-cab-rate').forEach(input => {
+    cabFare += parseFloat(input.value) || 0;
+  });
 
-  const foodTotal = calculateFoodOrdersTotal();
-  const foodTotalField = document.getElementById('cust-food-total');
-  if (foodTotalField) foodTotalField.value = foodTotal;
+  // --- Total & Balance Calculations ---
+  const total = roomTotal + extraPersonTotal + foodTotalCharge + cabFare;
 
-  // Grand Total Calculation
-  const grandTotal = mainGuestRate + extraTotal + cabTotal + foodTotal;
-  const grandTotalField = document.getElementById('cust-total');
-  if (grandTotalField) grandTotalField.value = grandTotal;
+  const advanceInput = document.getElementById('cust-advance');
+  let currentAdvVal = parseFloat(advanceInput?.value) || 0;
 
-  // Advance & Due Calculation
-  const advance = parseFloat(document.getElementById('cust-advance')?.value) || 0;
-  const clearBill = parseFloat(document.getElementById('cust-clear-bill')?.value) || 0;
-  const due = Math.max(0, grandTotal - advance - clearBill);
+  if (advanceInput && currentAdvVal > total) {
+    alert(`⚠️ Advance payment (₹${currentAdvVal}) cannot exceed the total bill amount (₹${total})!`);
+    currentAdvVal = total;
+    advanceInput.value = total;
+  }
 
-  const dueField = document.getElementById('cust-due');
-  if (dueField) dueField.value = due;
+  if (advanceInput) {
+    advanceInput.setAttribute('data-initial-adv', currentAdvVal);
+  }
+
+  const clearBillVal = parseFloat(document.getElementById('cust-clear-bill')?.value) || 0;
+  const due = Math.max(0, total - currentAdvVal - clearBillVal);
+
+  // --- UI Field Updates ---
+  const daysInput = document.getElementById('cust-days');
+  if (daysInput) daysInput.value = days;
+
+  const extraDaysInput = document.getElementById('cust-extra-person-days');
+  if (extraDaysInput) extraDaysInput.value = extraPersonDays;
+
+  const mainRateInput = document.getElementById('cust-main-person-rate');
+  if (mainRateInput) mainRateInput.value = roomTotal;
+
+  const extraTotalInput = document.getElementById('cust-extra-total');
+  if (extraTotalInput) extraTotalInput.value = extraPersonTotal;
+
+  const totalInput = document.getElementById('cust-total');
+  if (totalInput) totalInput.value = total;
+
+  const dueInput = document.getElementById('cust-due');
+  if (dueInput) dueInput.value = due;
+
+  const cabTotalInput = document.getElementById('cust-cab-total');
+  if (cabTotalInput) cabTotalInput.value = cabFare;
+
+  const foodTotalInput = document.getElementById('cust-food-total');
+  if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
 }
-    
-      let days = 0;
-      let latestMainCheckoutDt = null;
-
-      if (inDate && outDate) {
-        latestMainCheckoutDt = new Date(`${outDate}T${outTime}:00+05:30`);
-        const inDateOnly = new Date(inDate);
-        const outDateOnly = new Date(outDate);
-        days = Math.max(1, Math.round((outDateOnly - inDateOnly) / (1000 * 60 * 60 * 24)));
-      }
-
-      const price = parseFloat(document.getElementById('cust-price').value) || 0;
-      const capacity = parseFloat(document.getElementById('cust-capacity').value) || 1;
-
-      const extraPersons = parseInt(document.getElementById('cust-extra-persons')?.value) || 0;
-      let extraPersonDays = 0;
-
-      if (extraPersons > 0 && latestMainCheckoutDt) {
-        const epInDate = document.getElementById('cust-extra-person-date')?.value;
-        const epInTime = document.getElementById('cust-extra-person-time')?.value;
-        let epOutDate = document.getElementById('cust-extra-person-out-date')?.value;
-        let epOutTime = document.getElementById('cust-extra-person-out-time')?.value;
-
-        if (epInDate && epOutDate && epInTime && epOutTime) {
-          const epInDt = new Date(`${epInDate}T${epInTime}:00+05:30`);
-          let epOutDt = new Date(`${epOutDate}T${epOutTime}:00+05:30`);
-
-          if (epOutDt > latestMainCheckoutDt) {
-            epOutDt = new Date(latestMainCheckoutDt.getTime());
-            epOutDate = toLocalISOString(epOutDt).split('T')[0];
-          }
-
-          if (epInDt < epOutDt) {
-            const epInOnly = new Date(epInDate);
-            const epOutOnly = new Date(epOutDate);
-            const diffDays = Math.round((epOutOnly - epInOnly) / (1000 * 60 * 60 * 24));
-            extraPersonDays = Math.max(1, diffDays);
-          } else {
-            extraPersonDays = 0;
-          }
-        } else {
-           extraPersonDays = 0; 
-        }
-      }
-
-      const roomTotal = days * price * capacity;
-      const extraPersonTotal = extraPersons * extraPersonDays * price;
-
-      let foodTotalCharge = 0;
-      document.querySelectorAll('.cust-food-charge').forEach(input => {
-        foodTotalCharge += parseFloat(input.value) || 0;
-      });
-      
-      let cabFare = 0;
-      document.querySelectorAll('.cust-cab-rate').forEach(input => {
-        cabFare += parseFloat(input.value) || 0;
-      });
-
-      const total = roomTotal + extraPersonTotal + foodTotalCharge + cabFare;
-
-      const advanceInput = document.getElementById('cust-advance');
-      let currentAdvVal = parseFloat(advanceInput.value) || 0;
-
-      if (currentAdvVal > total) {
-        alert(`⚠️ Advance payment (₹${currentAdvVal}) cannot exceed the total bill amount (₹${total})!`);
-        currentAdvVal = total;
-        advanceInput.value = total;
-      }
-
-      advanceInput.setAttribute('data-initial-adv', currentAdvVal);
-
-      const clearBillVal = parseFloat(document.getElementById('cust-clear-bill')?.value) || 0;
-      const due = Math.max(0, total - currentAdvVal - clearBillVal);
-
-      document.getElementById('cust-days').value = days;
-      document.getElementById('cust-extra-person-days').value = days;
-      document.getElementById('cust-total').value = total;
-      document.getElementById('cust-due').value = due;
-      
-      const extraTotalInput = document.getElementById('cust-extra-total');
-      if (extraTotalInput) extraTotalInput.value = extraPersonTotal;
-      
-      const cabTotalInput = document.getElementById('cust-cab-total');
-      if (cabTotalInput) cabTotalInput.value = cabFare;
-
-         const foodTotalInput = document.getElementById('cust-food-total');
-if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
-  
-    }
 
     function handleSaveBooking(e) {
       e.preventDefault();

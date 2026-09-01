@@ -3642,20 +3642,96 @@ function updateDashboardCards() {
     }
 
     function calculateModalBilling() {
-      const inDate = document.getElementById('cust-checkin-date').value;
-      const inTime = document.getElementById('cust-checkin-time').value || '00:00';
-      
-      const hasExtCheckout = document.getElementById('cust-has-extended-checkout')?.checked;
-      let outDate = document.getElementById('cust-checkout-date').value;
-      let outTime = document.getElementById('cust-checkout-time').value || '00:00';
+    const isExtended = document.getElementById('cust-has-extended-checkout')?.checked;
+    const inDate = document.getElementById('cust-checkin-date')?.value;
+    const inTime = document.getElementById('cust-checkin-time')?.value || '00:00';
 
-      if (hasExtCheckout) {
-        const extDate = document.getElementById('cust-ext-checkout-date')?.value;
-        const extTime = document.getElementById('cust-ext-checkout-time')?.value;
-        if (extDate) outDate = extDate;
-        if (extTime) outTime = extTime;
-      }
+    let outDate = document.getElementById('cust-checkout-date')?.value;
+    let outTime = document.getElementById('cust-checkout-time')?.value || '00:00';
 
+    if (isExtended) {
+    const extDate = document.getElementById('cust-ext-checkout-date')?.value;
+    const extTime = document.getElementById('cust-ext-checkout-time')?.value || '00:00';
+    if (extDate) outDate = extDate;
+    if (extTime) outTime = extTime;
+  }
+      // --- Main Guest Days Calculation ---
+  let mainGuestDays = 0;
+  if (inDate && outDate) {
+    const startMs = parseDateMs(`${inDate}T${inTime}`);
+    const endMs = parseDateMs(`${outDate}T${outTime}`);
+    if (!isNaN(startMs) && !isNaN(endMs) && endMs > startMs) {
+      const diffMs = endMs - startMs;
+      mainGuestDays = Math.max(1, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
+    }
+  }
+
+      const daysField = document.getElementById('cust-days');
+  if (daysField) daysField.value = mainGuestDays;
+
+  // --- Extra Guest Days Calculation ---
+  // Formula: Extra Guest Days = Extra Person Check-In to Extra Person Check-Out (days count)
+  let extraGuestDays = 0;
+  const extraInDate = document.getElementById('cust-extra-person-date')?.value;
+  const extraInTime = document.getElementById('cust-extra-person-time')?.value || '00:00';
+  const extraOutDate = document.getElementById('cust-extra-person-out-date')?.value;
+  const extraOutTime = document.getElementById('cust-extra-person-out-time')?.value || '00:00';
+
+  if (extraInDate && extraOutDate) {
+    const exStartMs = parseDateMs(`${extraInDate}T${extraInTime}`);
+    const exEndMs = parseDateMs(`${extraOutDate}T${extraOutTime}`);
+    if (!isNaN(exStartMs) && !isNaN(exEndMs) && exEndMs > exStartMs) {
+      const exDiffMs = exEndMs - exStartMs;
+      extraGuestDays = Math.max(1, Math.ceil(exDiffMs / (1000 * 60 * 60 * 24)));
+    }
+  }
+
+  const extraDaysField = document.getElementById('cust-extra-person-days');
+  if (extraDaysField) extraDaysField.value = extraGuestDays;
+
+  // --- Input Values ---
+  const extraPersons = parseFloat(document.getElementById('cust-extra-persons')?.value) || 0;
+  const extraPrice = parseFloat(document.getElementById('cust-extra-person-price')?.value) || 0;
+  const mainPrice = parseFloat(document.getElementById('cust-price')?.value) || 0;
+  const totalCapacity = parseFloat(document.getElementById('cust-capacity')?.value) || 1;
+
+  // --- Calculations ---
+  // Formula: Extra Guest Rate (₹) = Extra Guest Price/Day * Extra Guest Days * Add Extra Person(s)
+  const extraTotal = extraPrice * extraGuestDays * extraPersons;
+
+  // Formula: Main Guest Rate (₹) = Main Guest Price/Day (₹) * Main Guest Days * Total Capacity
+  const mainGuestRate = mainPrice * mainGuestDays * totalCapacity;
+
+  // --- Output Updates ---
+  const extraTotalField = document.getElementById('cust-extra-total');
+  if (extraTotalField) extraTotalField.value = extraTotal;
+
+  const mainRateField = document.getElementById('cust-main-person-rate');
+  if (mainRateField) mainRateField.value = mainGuestRate;
+
+  // --- Additional Totals (Food, Cab, Advance, Clear Bill) ---
+  const cabTotal = calculateCabTripsTotal();
+  const cabTotalField = document.getElementById('cust-cab-total');
+  if (cabTotalField) cabTotalField.value = cabTotal;
+
+  const foodTotal = calculateFoodOrdersTotal();
+  const foodTotalField = document.getElementById('cust-food-total');
+  if (foodTotalField) foodTotalField.value = foodTotal;
+
+  // Grand Total Calculation
+  const grandTotal = mainGuestRate + extraTotal + cabTotal + foodTotal;
+  const grandTotalField = document.getElementById('cust-total');
+  if (grandTotalField) grandTotalField.value = grandTotal;
+
+  // Advance & Due Calculation
+  const advance = parseFloat(document.getElementById('cust-advance')?.value) || 0;
+  const clearBill = parseFloat(document.getElementById('cust-clear-bill')?.value) || 0;
+  const due = Math.max(0, grandTotal - advance - clearBill);
+
+  const dueField = document.getElementById('cust-due');
+  if (dueField) dueField.value = due;
+}
+    
       let days = 0;
       let latestMainCheckoutDt = null;
 

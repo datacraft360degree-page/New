@@ -910,18 +910,12 @@
     </div>
 
     <!-- NEW FIELD: ADD EXTRA ROOM(S) -->
-  <div>
-  <label class="block font-semibold text-slate-600 mb-0.5">Add Extra Room No(s)</label>
-  <div class="relative" id="room-dropdown-container-extra">
-    <button type="button" onclick="toggleextraRoomDropdown()" id="room-dropdown-btn-extra" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 focus:outline-none focus:border-blue-500 font-bold text-blue-600 text-left flex justify-between items-center" style="height: 34px;">
-      <span id="room-dropdown-text-extra" class="truncate pr-2">Select Rooms...</span>
-      <i class="fa-solid fa-chevron-down text-slate-400"></i>
-    </button>
-    <div id="room-checkboxes-extra" class="hidden absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl max-h-48 overflow-y-auto p-2 space-y-1">
-      <!-- Generated Checkboxes Go Here -->
+    <div>
+      <label class="block font-semibold text-blue-700 mb-0.5 flex items-center gap-1">
+        <i class="fa-solid fa-door-open text-blue-600"></i> Add Extra Room(s)
+      </label>
+      <input type="number" id="cust-extra-rooms" min="0" value="0" placeholder="0" oninput="calculateModalBilling()" class="w-full bg-blue-50 border border-blue-300 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-blue-500 font-bold text-blue-900" />
     </div>
-  </div>
-</div>
 
     <!-- NEW FIELD: NAME -->
     <div>
@@ -2161,11 +2155,6 @@ function checkBirthdayTrigger() {
           const boxes = document.getElementById('room-checkboxes');
           if (boxes) boxes.classList.add('hidden');
         }
-        const containerextra = document.getElementById('room-dropdown-container-extra');
-        if (containerextra && !containerextra.contains(e.target)) {
-          const boxesextra = document.getElementById('room-checkboxes-extra');
-          if (boxesextra) boxesextra.classList.add('hidden');
-        }
       });
 
       checkUpcomingCheckoutsWithDue();
@@ -2390,13 +2379,9 @@ function checkBirthdayTrigger() {
     function toggleRoomDropdown() {
       document.getElementById('room-checkboxes').classList.toggle('hidden');
     }
-        function toggleextraRoomDropdown() {
-      document.getElementById('room-checkboxes-extra').classList.toggle('hidden');
-    }
 
     function populateRoomDropdown(selectedRoomNos = []) {
       const container = document.getElementById('room-checkboxes');
-    
       if (!container) return;
       container.innerHTML = '';
 
@@ -2426,45 +2411,6 @@ function checkBirthdayTrigger() {
       updateRoomDropdownText();
       autoCaptureRoomDetails();
     }
-
-  function populateRoomDropdown(selectedRoomNos = []) {
-      const container = document.getElementById('room-checkboxes-extra');
-    
-      if (!container) return;
-      container.innerHTML = '';
-
-      let selArr = [];
-      if (Array.isArray(selectedRoomNos)) selArr = selectedRoomNos.map(String);
-      else if (selectedRoomNos) selArr = String(selectedRoomNos).split(/[,|]/).map(s => s.trim());
-
-      const isExtra = containerId === 'room-checkboxes-extra';
-      const allId = isExtra ? 'room-all-extra' : 'room-all';
-    
-      const allDiv = document.createElement('div');
-      allDiv.className = "flex items-center gap-2 mb-1.5 pb-1.5 border-b border-slate-100";
-      allDiv.innerHTML = `
-        <input type="checkbox" id="room-all" value="ALL" onchange="handleRoomSelection(this)" class="w-3.5 h-3.5 text-blue-600 rounded border-slate-300 focus:ring-blue-500 cursor-pointer room-chk">
-        <label for="room-all" class="text-[11px] font-bold text-slate-700 cursor-pointer flex-1">Select all rooms</label>
-      `;
-      container.appendChild(allDiv);
-
-      state.roomsCapacity.forEach(m => {
-        const isChecked = selArr.includes(String(m.roomNo)) ? 'checked' : '';
-        const div = document.createElement('div');
-        div.className = "flex items-center gap-2 py-1";
-        div.innerHTML = `
-          <input type="checkbox" id="room-${m.roomNo}" value="${m.roomNo}" ${isChecked} onchange="handleRoomSelection(this)" class="w-3.5 h-3.5 text-blue-600 rounded border-slate-300 focus:ring-blue-500 cursor-pointer room-chk item-chk">
-          <label for="room-${m.roomNo}" class="text-[11px] font-bold text-slate-700 cursor-pointer flex-1">Room ${m.roomNo}</label>
-        `;
-        container.appendChild(div);
-      });
-
-     if (isExtra) {
-    updateExtraRoomDropdownText();
-  } else {
-    updateRoomDropdownText();
-    autoCaptureRoomDetails();
-  }
 
     function handleRoomSelection(chk) {
       const allChk = document.getElementById('room-all');

@@ -2389,6 +2389,7 @@ function checkBirthdayTrigger() {
 
     function populateRoomDropdown(selectedRoomNos = []) {
       const container = document.getElementById('room-checkboxes');
+      const container = document.getElementById('room-checkboxes-extra');
       if (!container) return;
       container.innerHTML = '';
 

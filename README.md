@@ -930,14 +930,14 @@
       </label>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
         <div>
-          <label class="block font-semibold text-amber-800 text-[10px] mb-0.5">Extra Person Check-In</label>
+          <label class="block font-semibold text-amber-800 text-[10px] mb-0.5">Extra Guest Check-In</label>
           <div class="flex gap-1">
             <input type="date" id="cust-extra-person-date" onchange="handleExtraPersonDatesChange()" class="w-2/3 bg-white border border-amber-200 rounded-xl px-2 py-1.5 focus:outline-none focus:border-amber-500 font-semibold text-amber-900" />
             <input type="time" id="cust-extra-person-time" onchange="handleExtraPersonDatesChange()" class="w-1/3 bg-white border border-amber-200 rounded-xl px-1.5 py-1.5 focus:outline-none focus:border-amber-500 font-semibold text-amber-900" />
           </div>
         </div>
         <div>
-          <label class="block font-semibold text-amber-800 text-[10px] mb-0.5">Extra Person Check-Out</label>
+          <label class="block font-semibold text-amber-800 text-[10px] mb-0.5">Extra Guest Check-Out</label>
           <div class="flex gap-1">
             <input type="date" id="cust-extra-person-out-date" onchange="handleExtraPersonDatesChange()" class="w-2/3 bg-white border border-amber-200 rounded-xl px-2 py-1.5 focus:outline-none focus:border-amber-500 font-semibold text-amber-900" />
             <input type="time" id="cust-extra-person-out-time" onchange="handleExtraPersonDatesChange()" class="w-1/3 bg-white border border-amber-200 rounded-xl px-1.5 py-1.5 focus:outline-none focus:border-amber-500 font-semibold text-amber-900" />

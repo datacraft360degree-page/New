@@ -2427,7 +2427,7 @@ function checkBirthdayTrigger() {
       autoCaptureRoomDetails();
     }
 
-  function populateextraRoomDropdown(selectedRoomNos = []) {
+  function populateRoomDropdown(selectedRoomNos = []) {
       const container = document.getElementById('room-checkboxes-extra');
     
       if (!container) return;

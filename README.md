@@ -897,7 +897,7 @@
     </div>
 
     <div>
-      <label class="block font-semibold text-slate-600 mb-0.5">Total Capacity</label>
+      <label class="block font-semibold text-slate-600 mb-0.5">Main Guest Joined</label>
       <input type="number" id="cust-capacity" min="1" value="1" oninput="calculateModalBilling()" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-blue-500 font-bold text-slate-700" />
     </div>
 
@@ -1031,7 +1031,7 @@
   <!-- Row 1: 4 Columns (Extra items + Cab) -->
   <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2 pb-2 border-b border-blue-200">
     <div>
-      <label class="block font-semibold text-slate-600 mb-0.5">Extra Guest Days</label>
+      <label class="block font-semibold text-slate-600 mb-0.5">Extra Guest Total Days</label>
       <input type="number" id="cust-extra-person-days" readonly="" class="w-full bg-slate-200/60 font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" value="0" />
     </div>
     <div>
@@ -1039,7 +1039,7 @@
       <input type="number" id="cust-extra-person-price" value="0" oninput="calculateModalBilling()" class="w-full bg-white font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 focus:outline-none focus:border-blue-500" />
     </div>
     <div>
-      <label class="block font-semibold text-slate-600 mb-0.5">Extra Guest Rate (₹)</label>
+      <label class="block font-semibold text-slate-600 mb-0.5">Extra Guest Total Rate (₹)</label>
       <input type="number" id="cust-extra-total" readonly="" class="w-full bg-slate-200/60 font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" />
     </div>
     <div>
@@ -1051,11 +1051,11 @@
   <!-- Row 2: 4 Columns (Food + Main Guest items) -->
   <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2 pb-2 border-b border-blue-200">
     <div>
-      <label class="block font-semibold text-slate-600 mb-0.5">Extra Food/Drink (₹)</label>
+      <label class="block font-semibold text-slate-600 mb-0.5">Extra Food/Drink Total (₹)</label>
       <input type="number" id="cust-food-total" readonly="" class="w-full bg-slate-200/60 font-bold text-amber-700 border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" value="0" />
     </div>
     <div>
-      <label class="block font-semibold text-slate-600 mb-0.5">Main Guest Days</label>
+      <label class="block font-semibold text-slate-600 mb-0.5">Main Guest Total Days</label>
       <input type="number" id="cust-days" readonly="" class="w-full bg-slate-200/60 font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" />
     </div>
     <div>
@@ -1071,7 +1071,7 @@
   <!-- Row 3: 4 Columns (Totals & Payments) -->
   <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
     <div>
-      <label class="block font-semibold text-slate-600 mb-0.5 leading-tight">Total (₹)</label>
+      <label class="block font-semibold text-slate-600 mb-0.5 leading-tight">Grand Total (₹)</label>
       <input type="number" id="cust-total" readonly="" class="w-full bg-slate-200/60 text-blue-700 font-bold border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" />
     </div>
     <div>

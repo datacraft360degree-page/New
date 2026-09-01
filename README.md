@@ -913,7 +913,7 @@
   <div>
   <label class="block font-semibold text-slate-600 mb-0.5">Add Extra Room No(s)</label>
   <div class="relative" id="room-dropdown-container-extra">
-    <button type="button" onclick="toggleRoomDropdown()" id="room-dropdown-btn-extra" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 focus:outline-none focus:border-blue-500 font-bold text-blue-600 text-left flex justify-between items-center" style="height: 34px;">
+    <button type="button" onclick="toggleextraRoomDropdown()" id="room-dropdown-btn-extra" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 focus:outline-none focus:border-blue-500 font-bold text-blue-600 text-left flex justify-between items-center" style="height: 34px;">
       <span id="room-dropdown-text-extra" class="truncate pr-2">Select Rooms...</span>
       <i class="fa-solid fa-chevron-down text-slate-400"></i>
     </button>
@@ -2389,6 +2389,8 @@ function checkBirthdayTrigger() {
 
     function toggleRoomDropdown() {
       document.getElementById('room-checkboxes').classList.toggle('hidden');
+    }
+        function toggleextraRoomDropdown() {
       document.getElementById('room-checkboxes-extra').classList.toggle('hidden');
     }
 

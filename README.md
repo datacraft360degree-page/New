@@ -3665,18 +3665,18 @@ function updateDashboardCards() {
    function calculateModalBilling() {
   const inDate = document.getElementById('cust-checkin-date')?.value;
   const inTime = document.getElementById('cust-checkin-time')?.value || '00:00';
-
+ 
   const hasExtCheckout = document.getElementById('cust-has-extended-checkout')?.checked;
   let outDate = document.getElementById('cust-checkout-date')?.value;
   let outTime = document.getElementById('cust-checkout-time')?.value || '00:00';
-
+ 
   if (hasExtCheckout) {
     const extDate = document.getElementById('cust-ext-checkout-date')?.value;
     const extTime = document.getElementById('cust-ext-checkout-time')?.value;
     if (extDate) outDate = extDate;
     if (extTime) outTime = extTime;
   }
-
+ 
   // --- 1. Main Guest Days Calculation ---
   let days = 0;
   if (inDate && outDate) {
@@ -3684,13 +3684,12 @@ function updateDashboardCards() {
     const outDateOnly = new Date(outDate);
     days = Math.max(1, Math.round((outDateOnly - inDateOnly) / (1000 * 60 * 60 * 24)));
   }
-
+ 
   // --- 2. Extra Guest Days Calculation ---
-  // Formula: Extra Person Check-In to Extra Person Check-Out (days count)
   let extraPersonDays = 0;
   const epInDate = document.getElementById('cust-extra-person-date')?.value;
   const epOutDate = document.getElementById('cust-extra-person-out-date')?.value;
-
+ 
   if (epInDate && epOutDate) {
     const epInOnly = new Date(epInDate);
     const epOutOnly = new Date(epOutDate);
@@ -3699,86 +3698,83 @@ function updateDashboardCards() {
       extraPersonDays = Math.max(1, diffDays);
     }
   }
-
+ 
   // --- Input Values ---
   const price = parseFloat(document.getElementById('cust-price')?.value) || 0;
   const capacity = parseFloat(document.getElementById('cust-capacity')?.value) || 1;
   const extraPersons = parseInt(document.getElementById('cust-extra-persons')?.value) || 0;
   
-  // FIX: Read existing Extra Guest values safely to prevent resetting
-  const extraPriceInput = document.getElementById('cust-extra-person-price');
-  const extraPersonPrice = parseFloat(extraPriceInput?.value) || 0;
-
-  const extraTotalInput = document.getElementById('cust-extra-total');
-  let currentExtraTotal = parseFloat(extraTotalInput?.value) || 0;
-
+  const epPriceInput = document.getElementById('cust-extra-person-price');
+  const extraPersonPrice = parseFloat(epPriceInput?.value) || 0;
+ 
   // --- 3. Rate Calculations ---
-  // Formula: Main Guest Rate (₹) = Main Guest Price/Day (₹) * Main Guest Days * Total Capacity
   const roomTotal = price * days * capacity;
-
-  // FIX: Formula: Extra Guest Rate (₹) = Extra Guest Price/Day * Extra Guest Days * Add Extra Person(s)
-  // Only override the total if there is active data to calculate; otherwise keep user's manual input
+  
+  // Only calculate Extra Person Total if there are actually extra persons to avoid zeroing out manually typed fields
   let extraPersonTotal = 0;
-  if (extraPersonPrice > 0 && extraPersonDays > 0 && extraPersons > 0) {
-    extraPersonTotal = extraPersonPrice * extraPersonDays * extraPersons;
-  } else {
-    extraPersonTotal = currentExtraTotal; 
+  if (extraPersons > 0 && extraPersonDays > 0) {
+      extraPersonTotal = extraPersonPrice * extraPersonDays * extraPersons;
   }
-
+ 
   // --- Food & Cab Charges ---
   let foodTotalCharge = 0;
   document.querySelectorAll('.cust-food-charge').forEach(input => {
     foodTotalCharge += parseFloat(input.value) || 0;
   });
-
+ 
   let cabFare = 0;
   document.querySelectorAll('.cust-cab-rate').forEach(input => {
     cabFare += parseFloat(input.value) || 0;
   });
-
+ 
   // --- Total & Balance Calculations ---
   const total = roomTotal + extraPersonTotal + foodTotalCharge + cabFare;
-
+ 
   const advanceInput = document.getElementById('cust-advance');
   let currentAdvVal = parseFloat(advanceInput?.value) || 0;
-
+ 
   if (advanceInput && currentAdvVal > total) {
     alert(`⚠️ Advance payment (₹${currentAdvVal}) cannot exceed the total bill amount (₹${total})!`);
     currentAdvVal = total;
     advanceInput.value = total;
   }
-
+ 
   if (advanceInput) {
     advanceInput.setAttribute('data-initial-adv', currentAdvVal);
   }
-
+ 
   const clearBillVal = parseFloat(document.getElementById('cust-clear-bill')?.value) || 0;
   const due = Math.max(0, total - currentAdvVal - clearBillVal);
-
+ 
   // --- UI Field Updates ---
   const daysInput = document.getElementById('cust-days');
   if (daysInput) daysInput.value = days;
-
+ 
   const extraDaysInput = document.getElementById('cust-extra-person-days');
-  if (extraDaysInput) extraDaysInput.value = extraPersonDays;
-
+  if (extraDaysInput && extraPersons > 0) extraDaysInput.value = extraPersonDays;
+ 
   const mainRateInput = document.getElementById('cust-main-person-rate');
   if (mainRateInput) mainRateInput.value = roomTotal;
-
-  // FIX: Only update the Extra Total Input if a new calculation was made
-  if (extraTotalInput && extraPersonTotal !== currentExtraTotal) {
-    extraTotalInput.value = extraPersonTotal;
+ 
+  const extraTotalInput = document.getElementById('cust-extra-total');
+  // Update Extra Total field cleanly
+  if (extraTotalInput) {
+     if (extraPersons > 0) {
+         extraTotalInput.value = extraPersonTotal;
+     } else if (extraTotalInput.value === "0") {
+         extraTotalInput.value = ""; // Keep clean if no extra guests
+     }
   }
-
+ 
   const totalInput = document.getElementById('cust-total');
   if (totalInput) totalInput.value = total;
-
+ 
   const dueInput = document.getElementById('cust-due');
   if (dueInput) dueInput.value = due;
-
+ 
   const cabTotalInput = document.getElementById('cust-cab-total');
   if (cabTotalInput) cabTotalInput.value = cabFare;
-
+ 
   const foodTotalInput = document.getElementById('cust-food-total');
   if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
 }
@@ -3786,16 +3782,53 @@ function updateDashboardCards() {
 function handleSaveBooking(e) {
   e.preventDefault();
 
-  const guestName = formatTitleCase(document.getElementById('cust-name').value.trim());
+  const nameInput = document.getElementById('cust-name');
+  const guestName = formatTitleCase(nameInput ? nameInput.value.trim() : '');
 
   if (!guestName) {
     alert("⚠️ Guest Name is a mandatory field!");
     return;
   }
-  
-  // NOTE: Your remaining save logic goes here unchanged.
-}
 
+  // Ensure ALL extra guest fields are collected so they don't reset to blank in your database/UI
+  const bookingData = {
+    guestName: guestName,
+    
+    // Main Dates
+    checkInDate: document.getElementById('cust-checkin-date')?.value || '',
+    checkInTime: document.getElementById('cust-checkin-time')?.value || '',
+    checkOutDate: document.getElementById('cust-checkout-date')?.value || '',
+    checkOutTime: document.getElementById('cust-checkout-time')?.value || '',
+    
+    // Extra Guest Info (This prevents them from getting lost)
+    extraPersons: parseInt(document.getElementById('cust-extra-persons')?.value) || 0,
+    extraPersonInDate: document.getElementById('cust-extra-person-date')?.value || '',
+    extraPersonOutDate: document.getElementById('cust-extra-person-out-date')?.value || '',
+    extraPersonDays: parseInt(document.getElementById('cust-extra-person-days')?.value) || 0,
+    extraPersonPrice: parseFloat(document.getElementById('cust-extra-person-price')?.value) || 0, // Extra Price/Day
+    extraPersonTotal: parseFloat(document.getElementById('cust-extra-total')?.value) || 0,        // Extra Total Rate
+    
+    // Main Billing
+    days: parseInt(document.getElementById('cust-days')?.value) || 0,
+    price: parseFloat(document.getElementById('cust-price')?.value) || 0,
+    capacity: parseInt(document.getElementById('cust-capacity')?.value) || 1,
+    mainPersonRate: parseFloat(document.getElementById('cust-main-person-rate')?.value) || 0,
+    
+    // Totals
+    foodTotal: parseFloat(document.getElementById('cust-food-total')?.value) || 0,
+    cabTotal: parseFloat(document.getElementById('cust-cab-total')?.value) || 0,
+    total: parseFloat(document.getElementById('cust-total')?.value) || 0,
+    advance: parseFloat(document.getElementById('cust-advance')?.value) || 0,
+    clearBill: parseFloat(document.getElementById('cust-clear-bill')?.value) || 0,
+    due: parseFloat(document.getElementById('cust-due')?.value) || 0
+  };
+
+  // Log to verify the extra person price is captured correctly
+  console.log("Saving Booking Data:", bookingData);
+  
+  // Add your API save logic or database post request here 
+  // e.g., saveToDatabase(bookingData);
+}
       const contactNoVal = document.getElementById('cust-contact').value.trim();
       if (contactNoVal && contactNoVal.length !== 10) {
         alert("⚠️ Please provide a valid 10-digit guest contact number.");

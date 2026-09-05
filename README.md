@@ -3536,6 +3536,7 @@ function updateDashboardCards() {
         }
 
         document.getElementById('cust-price').value = 1200;
+        document.getElementById('cust-extra-person-price').value = 0;
         
         const advanceElem = document.getElementById('cust-advance');
         advanceElem.value = 0;

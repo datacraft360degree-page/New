@@ -3704,14 +3704,26 @@ function updateDashboardCards() {
   const price = parseFloat(document.getElementById('cust-price')?.value) || 0;
   const capacity = parseFloat(document.getElementById('cust-capacity')?.value) || 1;
   const extraPersons = parseInt(document.getElementById('cust-extra-persons')?.value) || 0;
-  const extraPersonPrice = parseFloat(document.getElementById('cust-extra-person-price')?.value) || 0;
+  
+  // FIX: Read existing Extra Guest values safely to prevent resetting
+  const extraPriceInput = document.getElementById('cust-extra-person-price');
+  const extraPersonPrice = parseFloat(extraPriceInput?.value) || 0;
+
+  const extraTotalInput = document.getElementById('cust-extra-total');
+  let currentExtraTotal = parseFloat(extraTotalInput?.value) || 0;
 
   // --- 3. Rate Calculations ---
   // Formula: Main Guest Rate (₹) = Main Guest Price/Day (₹) * Main Guest Days * Total Capacity
   const roomTotal = price * days * capacity;
 
-  // Formula: Extra Guest Rate (₹) = Extra Guest Price/Day * Extra Guest Days * Add Extra Person(s)
-  const extraPersonTotal = extraPersonPrice * extraPersonDays * extraPersons;
+  // FIX: Formula: Extra Guest Rate (₹) = Extra Guest Price/Day * Extra Guest Days * Add Extra Person(s)
+  // Only override the total if there is active data to calculate; otherwise keep user's manual input
+  let extraPersonTotal = 0;
+  if (extraPersonPrice > 0 && extraPersonDays > 0 && extraPersons > 0) {
+    extraPersonTotal = extraPersonPrice * extraPersonDays * extraPersons;
+  } else {
+    extraPersonTotal = currentExtraTotal; 
+  }
 
   // --- Food & Cab Charges ---
   let foodTotalCharge = 0;
@@ -3753,8 +3765,10 @@ function updateDashboardCards() {
   const mainRateInput = document.getElementById('cust-main-person-rate');
   if (mainRateInput) mainRateInput.value = roomTotal;
 
-  const extraTotalInput = document.getElementById('cust-extra-total');
-  if (extraTotalInput) extraTotalInput.value = extraPersonTotal;
+  // FIX: Only update the Extra Total Input if a new calculation was made
+  if (extraTotalInput && extraPersonTotal !== currentExtraTotal) {
+    extraTotalInput.value = extraPersonTotal;
+  }
 
   const totalInput = document.getElementById('cust-total');
   if (totalInput) totalInput.value = total;
@@ -3769,15 +3783,18 @@ function updateDashboardCards() {
   if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
 }
 
-    function handleSaveBooking(e) {
-      e.preventDefault();
+function handleSaveBooking(e) {
+  e.preventDefault();
 
-      const guestName = formatTitleCase(document.getElementById('cust-name').value.trim());
+  const guestName = formatTitleCase(document.getElementById('cust-name').value.trim());
 
-      if (!guestName) {
-        alert("⚠️ Guest Name is a mandatory field!");
-        return;
-      }
+  if (!guestName) {
+    alert("⚠️ Guest Name is a mandatory field!");
+    return;
+  }
+  
+  // NOTE: Your remaining save logic goes here unchanged.
+}
 
       const contactNoVal = document.getElementById('cust-contact').value.trim();
       if (contactNoVal && contactNoVal.length !== 10) {

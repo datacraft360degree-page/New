@@ -1974,7 +1974,7 @@ function exportToExcel(startDateStr, endDateStr) {
       typeof b.foodOrders === 'string' ? b.foodOrders : JSON.stringify(foodList || []),
       typeof b.cabTrips === 'string' ? b.cabTrips : JSON.stringify(cabList || []),
       b.extraPersonDays || 0,
-      b.extraPersonPricePerDay || 0,
+      b.extraPersonPrice || 0,
       b.extraPersonTotalRate || 0,
       b.cabFareTotal || 0,
       b.extraFoodTotal || 0,
@@ -3454,7 +3454,7 @@ function updateDashboardCards() {
         }
 
         document.getElementById('cust-price').value = b.perDayPrice || 0;
-        document.getElementById('cust-extra-person-price').value = b.extrapersonpriceperday || 0;
+        document.getElementById('cust-extra-person-price').value = b.extrapersonprice || 0;
         
         const advanceElem = document.getElementById('cust-advance');
         const baseAdv = b.initialAdv || 0;
@@ -4039,7 +4039,7 @@ function updateDashboardCards() {
         noOfDays: parseInt(document.getElementById('cust-days').value) || 0,
         extraPersonDays: parseInt(document.getElementById('cust-extra-person-days').value) || 0,
         perDayPrice: parseFloat(document.getElementById('cust-price').value) || 0,
-        extraPersonPricePerDays: parseInt(document.getElementById('cust-extra-person-price').value) || 0,
+        extraPersonPrice: parseInt(document.getElementById('cust-extra-person-price').value) || 0,
         foodOrders: foodOrdersList,
         cabTrips: cabTripsList,
         totalAmount: totalAmt,

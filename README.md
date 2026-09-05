@@ -4042,7 +4042,7 @@ const newBooking = {
         extraPersonDays: parseInt(document.getElementById('cust-extra-person-days').value) || 0,
         perDayPrice: parseFloat(document.getElementById('cust-price').value) || 0,
         extraPersonPrice: parseInt(document.getElementById('cust-extra-person-price').value) || 0,
-        extraTotal: const extraPersonTotal,
+        extraTotal: extraPersonTotal,
         foodOrders: foodOrdersList,
         cabTrips: cabTripsList,
         totalAmount: totalAmt,

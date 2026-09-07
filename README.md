@@ -1974,7 +1974,7 @@ function exportToExcel(startDateStr, endDateStr) {
       typeof b.foodOrders === 'string' ? b.foodOrders : JSON.stringify(foodList || []),
       typeof b.cabTrips === 'string' ? b.cabTrips : JSON.stringify(cabList || []),
       b.extraPersonDays || 0,
-      b.extraPersonPrice || 0,
+      b.extraPersonPricePerDay || 0,
       b.extraPersonTotalRate || 0,
       b.cabFareTotal || 0,
       b.extraFoodTotal || 0,
@@ -3453,8 +3453,7 @@ function updateDashboardCards() {
           });
         }
 
-        document.getElementById('cust-price').value = b.perDayPrice || 0;
-        document.getElementById('cust-extra-person-price').value = b.extrapersonprice || 0;
+        document.getElementById('cust-price').value = b.perDayPrice;
         
         const advanceElem = document.getElementById('cust-advance');
         const baseAdv = b.initialAdv || 0;
@@ -4009,9 +4008,7 @@ function updateDashboardCards() {
       const totalPaid = initialAdvAmt + clearedDueAmt;
       const countryCodeVal = document.getElementById('cust-country-code').value.trim() || '+91';
 
-      Update the below code field with attached codegs
-
-const newBooking = {
+      const newBooking = {
         id: id || `bk_${Date.now()}`,
         bookingCode: existingCode,
         invoiceNo: existingInv,
@@ -4041,7 +4038,6 @@ const newBooking = {
         noOfDays: parseInt(document.getElementById('cust-days').value) || 0,
         extraPersonDays: parseInt(document.getElementById('cust-extra-person-days').value) || 0,
         perDayPrice: parseFloat(document.getElementById('cust-price').value) || 0,
-        extraPersonPrice: parseInt(document.getElementById('cust-extra-person-price').value) || 0,
         foodOrders: foodOrdersList,
         cabTrips: cabTripsList,
         totalAmount: totalAmt,
@@ -4049,7 +4045,7 @@ const newBooking = {
         clearedDue: clearedDueAmt,
         totalDue: Math.max(0, totalAmt - totalPaid),
         inactive: false
-};
+      };
 
       if (id) {
         const idx = state.bookings.findIndex(b => String(b.id) === String(id));

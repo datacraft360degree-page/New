@@ -872,119 +872,129 @@
           </div>
         </div>
 
-        <!-- Room & Stay Schedule Box -->
-        <div id="sec-room-dates" class="bg-slate-50 p-3 rounded-2xl border border-slate-200/60 space-y-2.5 transition-all">
-          <h4 class="text-[9px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-            <i class="fa-solid fa-bed text-blue-600"></i> Room Selection &amp; Stay Dates
-          </h4>
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-            <div>
-              <label class="block font-semibold text-slate-600 mb-0.5">Room No(s)</label>
-              <div class="relative" id="room-dropdown-container">
-                <button type="button" onclick="toggleRoomDropdown()" id="room-dropdown-btn" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 focus:outline-none focus:border-blue-500 font-bold text-blue-600 text-left flex justify-between items-center" style="height: 34px;">
-                  <span id="room-dropdown-text" class="truncate pr-2">Select Rooms...</span>
-                  <i class="fa-solid fa-chevron-down text-slate-400"></i>
-                </button>
-                <div id="room-checkboxes" class="hidden absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl max-h-48 overflow-y-auto p-2 space-y-1">
-                  <!-- Generated Checkboxes Go Here -->
-                </div>
-              </div>
-            </div>
-            
-            <div class="flex flex-col gap-2">
-              <div>
-                <label class="block font-semibold text-slate-600 mb-0.5">Agent Info</label>
-                <select id="cust-agent" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-blue-500 font-bold text-slate-700"></select>
-              </div>
+       <!-- ROOM SELECTION & STAY DATES -->
+<div id="sec-room-dates" class="bg-slate-50 p-3 rounded-2xl border border-slate-200/60 space-y-2.5 transition-all">
+  <h4 class="text-[9px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+    <i class="fa-solid fa-bed text-blue-600"></i> Room Selection &amp; Stay Dates
+  </h4>
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+    <div>
+      <label class="block font-semibold text-slate-600 mb-0.5">Room No(s)</label>
+      <div class="relative" id="room-dropdown-container">
+        <button type="button" onclick="toggleRoomDropdown()" id="room-dropdown-btn" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 focus:outline-none focus:border-blue-500 font-bold text-blue-600 text-left flex justify-between items-center" style="height: 34px;">
+          <span id="room-dropdown-text" class="truncate pr-2">Select Rooms...</span>
+          <i class="fa-solid fa-chevron-down text-slate-400"></i>
+        </button>
+        <div id="room-checkboxes" class="hidden absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl max-h-48 overflow-y-auto p-2 space-y-1">
+          <!-- Generated Checkboxes Go Here -->
+        </div>
+      </div>
+    </div>
+    
+    <div>
+      <label class="block font-semibold text-slate-600 mb-0.5">Agent Info</label>
+      <select id="cust-agent" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-blue-500 font-bold text-slate-700"></select>
+    </div>
 
-              <div>
-                <label class="block font-semibold text-slate-600 mb-0.5">Total Capacity</label>
-                <input type="number" id="cust-capacity" min="1" value="1" oninput="calculateModalBilling()" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-blue-500 font-bold text-slate-700" />
-              </div>
-            </div>
+    <div>
+      <label class="block font-semibold text-slate-600 mb-0.5">Main Guest Joined</label>
+      <input type="number" id="cust-capacity" min="1" value="1" oninput="calculateModalBilling()" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-blue-500 font-bold text-slate-700" />
+    </div>
 
-            <!-- EXTRA PERSON(S) COUNT FIELD -->
-            <div>
-              <label class="block font-semibold text-amber-700 mb-0.5 flex items-center gap-1">
-                <i class="fa-solid fa-user-plus text-amber-600"></i> Add Extra Person(s)
-              </label>
-              <input type="number" id="cust-extra-persons" min="0" value="0" placeholder="0" oninput="calculateModalBilling()" class="w-full bg-amber-50 border border-amber-300 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-amber-500 font-bold text-amber-900" />
-            </div>
+    <!-- EXTRA PERSON(S) COUNT FIELD -->
+    <div>
+      <label class="block font-semibold text-amber-700 mb-0.5 flex items-center gap-1">
+        <i class="fa-solid fa-user-plus text-amber-600"></i> Add Extra Guest(s)
+      </label>
+      <input type="number" id="cust-extra-persons" min="0" value="0" placeholder="0" oninput="calculateModalBilling()" class="w-full bg-amber-50 border border-amber-300 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-amber-500 font-bold text-amber-900" />
+    </div>
 
-            <!-- ADDITIONAL PERSON CUSTOM CHECK-IN & CHECK-OUT WINDOW -->
-            <div id="sec-extra-person-time-wrapper" class="sm:col-span-4 hidden bg-amber-50/70 p-2.5 rounded-2xl border border-amber-200/80 space-y-2">
-              <label class="block font-bold text-amber-900 mb-1 flex items-center gap-1">
-                <i class="fa-solid fa-clock-rotate-left text-amber-600"></i> Additional Person Stay Window (Custom Dates Required)
-              </label>
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                <div>
-                  <label class="block font-semibold text-amber-800 text-[10px] mb-0.5">Extra Person Check-In</label>
-                  <div class="flex gap-1">
-                    <input type="date" id="cust-extra-person-date" onchange="handleExtraPersonDatesChange()" class="w-2/3 bg-white border border-amber-200 rounded-xl px-2 py-1.5 focus:outline-none focus:border-amber-500 font-semibold text-amber-900" />
-                    <input type="time" id="cust-extra-person-time" onchange="handleExtraPersonDatesChange()" class="w-1/3 bg-white border border-amber-200 rounded-xl px-1.5 py-1.5 focus:outline-none focus:border-amber-500 font-semibold text-amber-900" />
-                  </div>
-                </div>
-                <div>
-                  <label class="block font-semibold text-amber-800 text-[10px] mb-0.5">Extra Person Check-Out</label>
-                  <div class="flex gap-1">
-                    <input type="date" id="cust-extra-person-out-date" onchange="handleExtraPersonDatesChange()" class="w-2/3 bg-white border border-amber-200 rounded-xl px-2 py-1.5 focus:outline-none focus:border-amber-500 font-semibold text-amber-900" />
-                    <input type="time" id="cust-extra-person-out-time" onchange="handleExtraPersonDatesChange()" class="w-1/3 bg-white border border-amber-200 rounded-xl px-1.5 py-1.5 focus:outline-none focus:border-amber-500 font-semibold text-amber-900" />
-                  </div>
-                </div>
-              </div>
-            </div>
+    <!-- NEW FIELD: ADD EXTRA ROOM(S) -->
+    <div>
+      <label class="block font-semibold text-blue-700 mb-0.5 flex items-center gap-1">
+        <i class="fa-solid fa-door-open text-blue-600"></i> Add Extra Room No(s)
+      </label>
+      <input type="number" id="cust-extra-rooms" min="0" value="0" placeholder="0" oninput="calculateModalBilling()" class="w-full bg-blue-50 border border-blue-300 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-blue-500 font-bold text-blue-900" />
+    </div>
 
-            <div class="sm:col-span-4 grid grid-cols-2 gap-2 pt-1 border-t border-slate-200/60">
-              <div>
-                <label class="block font-semibold text-slate-600 mb-0.5"><i class="fa-solid fa-plane-arrival text-emerald-600 mr-1"></i> Check In</label>
-                <div class="flex gap-1">
-                  <input type="date" id="cust-checkin-date" onchange="handleStayDatesChange()" required="" class="w-2/3 bg-white border border-slate-200 rounded-xl px-2 py-1.5 focus:outline-none focus:border-blue-500 font-medium" />
-                  <input type="time" id="cust-checkin-time" onchange="handleStayDatesChange()" required="" class="w-1/3 bg-white border border-slate-200 rounded-xl px-1.5 py-1.5 focus:outline-none focus:border-blue-500 font-medium" />
-                </div>
-              </div>
+    <!-- NEW FIELD: NAME -->
+    <div>
+      <label class="block font-semibold text-slate-600 mb-0.5">Extra Guest Name</label>
+      <input type="text" id="cust-room-name" placeholder="Guest Name" oninput="this.value = formatTitleCase(this.value)" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-blue-500 font-medium" />
+    </div>
 
-              <div>
-                <label class="block font-semibold text-slate-600 mb-0.5"><i class="fa-solid fa-plane-departure text-rose-500 mr-1"></i> Check Out</label>
-                <div class="flex gap-1">
-                  <input type="date" id="cust-checkout-date" onchange="handleStayDatesChange()" required="" class="w-2/3 bg-white border border-slate-200 rounded-xl px-2 py-1.5 focus:outline-none focus:border-blue-500 font-medium" />
-                  <input type="time" id="cust-checkout-time" onchange="handleStayDatesChange()" required="" class="w-1/3 bg-white border border-slate-200 rounded-xl px-1.5 py-1.5 focus:outline-none focus:border-blue-500 font-medium" />
-                </div>
-              </div>
-            </div>
-
-            <!-- Extended Check Out Checkbox & Fields -->
-            <div id="sec-extended-checkout-wrapper" class="sm:col-span-4 pt-2 border-t border-slate-200/60">
-              <div class="flex items-center gap-2 mb-1">
-                <input type="checkbox" id="cust-has-extended-checkout" onchange="toggleExtendedCheckoutFields(this.checked)" class="w-4 h-4 text-blue-600 rounded-md border-slate-300 focus:ring-blue-500 cursor-pointer" />
-                <label for="cust-has-extended-checkout" id="lbl-has-extended-checkout" class="font-bold text-slate-700 cursor-pointer flex items-center gap-1 select-none text-[11px]">
-                  <i class="fa-solid fa-clock-rotate-left text-blue-600"></i> Extended Check-out Date &amp; Time <span id="ext-checkout-timer-notice" class="text-[9px] text-amber-700 font-normal ml-1 hidden">(Active post check-out)</span>
-                </label>
-              </div>
-
-              <div id="extended-checkout-container" class="hidden bg-blue-50/70 p-2.5 rounded-2xl border border-blue-200/80 mt-1.5">
-                <label class="block font-bold text-blue-900 mb-1 flex items-center gap-1">
-                  <i class="fa-solid fa-calendar-plus text-blue-600"></i> New Check-out Date &amp; Time
-                </label>
-                <div class="flex gap-1.5">
-                  <input type="date" id="cust-ext-checkout-date" onchange="handleStayDatesChange()" class="w-2/3 bg-white border border-blue-200 rounded-xl px-2 py-1.5 focus:outline-none focus:border-blue-500 font-semibold text-blue-900" />
-                  <input type="time" id="cust-ext-checkout-time" onchange="handleStayDatesChange()" class="w-1/3 bg-white border border-blue-200 rounded-xl px-1.5 py-1.5 focus:outline-none focus:border-blue-500 font-semibold text-blue-900" />
-                </div>
-              </div>
-            </div>
-
-            <!-- Meal Plan Inclusions Checkbox -->
-            <div class="sm:col-span-4 pt-2 border-t border-slate-200/60">
-              <div class="flex items-center gap-2">
-                <input type="checkbox" id="cust-include-meals" checked="" class="w-4 h-4 text-blue-600 rounded-md border-slate-300 focus:ring-blue-500 cursor-pointer" />
-                <label for="cust-include-meals" class="font-bold text-slate-700 cursor-pointer flex items-center gap-1 select-none text-[11px]">
-                  <i class="fa-solid fa-utensils text-emerald-600"></i> Include Meal (*Include Breakfast, Lunch, Evening snack &amp; Dinner)
-                </label>
-              </div>
-            </div>
-
+    <!-- ADDITIONAL PERSON CUSTOM CHECK-IN & CHECK-OUT WINDOW -->
+    <div id="sec-extra-person-time-wrapper" class="sm:col-span-4 hidden bg-amber-50/70 p-2.5 rounded-2xl border border-amber-200/80 space-y-2">
+      <label class="block font-bold text-amber-900 mb-1 flex items-center gap-1">
+        <i class="fa-solid fa-clock-rotate-left text-amber-600"></i> Additional Person Stay Window (Custom Dates Required)
+      </label>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        <div>
+          <label class="block font-semibold text-amber-800 text-[10px] mb-0.5">Extra Guest Check-In</label>
+          <div class="flex gap-1">
+            <input type="date" id="cust-extra-person-date" onchange="handleExtraPersonDatesChange()" class="w-2/3 bg-white border border-amber-200 rounded-xl px-2 py-1.5 focus:outline-none focus:border-amber-500 font-semibold text-amber-900" />
+            <input type="time" id="cust-extra-person-time" onchange="handleExtraPersonDatesChange()" class="w-1/3 bg-white border border-amber-200 rounded-xl px-1.5 py-1.5 focus:outline-none focus:border-amber-500 font-semibold text-amber-900" />
           </div>
         </div>
+        <div>
+          <label class="block font-semibold text-amber-800 text-[10px] mb-0.5">Extra Guest Check-Out</label>
+          <div class="flex gap-1">
+            <input type="date" id="cust-extra-person-out-date" onchange="handleExtraPersonDatesChange()" class="w-2/3 bg-white border border-amber-200 rounded-xl px-2 py-1.5 focus:outline-none focus:border-amber-500 font-semibold text-amber-900" />
+            <input type="time" id="cust-extra-person-out-time" onchange="handleExtraPersonDatesChange()" class="w-1/3 bg-white border border-amber-200 rounded-xl px-1.5 py-1.5 focus:outline-none focus:border-amber-500 font-semibold text-amber-900" />
+          </div>
+        </div>
+      </div>
+    </div>
 
+    <div class="sm:col-span-4 grid grid-cols-2 gap-2 pt-1 border-t border-slate-200/60">
+      <div>
+        <label class="block font-semibold text-slate-600 mb-0.5"><i class="fa-solid fa-plane-arrival text-emerald-600 mr-1"></i> Check In</label>
+        <div class="flex gap-1">
+          <input type="date" id="cust-checkin-date" onchange="handleStayDatesChange()" required="" class="w-2/3 bg-white border border-slate-200 rounded-xl px-2 py-1.5 focus:outline-none focus:border-blue-500 font-medium" />
+          <input type="time" id="cust-checkin-time" onchange="handleStayDatesChange()" required="" class="w-1/3 bg-white border border-slate-200 rounded-xl px-1.5 py-1.5 focus:outline-none focus:border-blue-500 font-medium" />
+        </div>
+      </div>
+
+      <div>
+        <label class="block font-semibold text-slate-600 mb-0.5"><i class="fa-solid fa-plane-departure text-rose-500 mr-1"></i> Check Out</label>
+        <div class="flex gap-1">
+          <input type="date" id="cust-checkout-date" onchange="handleStayDatesChange()" required="" class="w-2/3 bg-white border border-slate-200 rounded-xl px-2 py-1.5 focus:outline-none focus:border-blue-500 font-medium" />
+          <input type="time" id="cust-checkout-time" onchange="handleStayDatesChange()" required="" class="w-1/3 bg-white border border-slate-200 rounded-xl px-1.5 py-1.5 focus:outline-none focus:border-blue-500 font-medium" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Extended Check Out Checkbox & Fields -->
+    <div id="sec-extended-checkout-wrapper" class="sm:col-span-4 pt-2 border-t border-slate-200/60">
+      <div class="flex items-center gap-2 mb-1">
+        <input type="checkbox" id="cust-has-extended-checkout" onchange="toggleExtendedCheckoutFields(this.checked)" class="w-4 h-4 text-blue-600 rounded-md border-slate-300 focus:ring-blue-500 cursor-pointer" />
+        <label for="cust-has-extended-checkout" id="lbl-has-extended-checkout" class="font-bold text-slate-700 cursor-pointer flex items-center gap-1 select-none text-[11px]">
+          <i class="fa-solid fa-clock-rotate-left text-blue-600"></i> Extended Check-out Date &amp; Time <span id="ext-checkout-timer-notice" class="text-[9px] text-amber-700 font-normal ml-1 hidden">(Active post check-out)</span>
+        </label>
+      </div>
+
+      <div id="extended-checkout-container" class="hidden bg-blue-50/70 p-2.5 rounded-2xl border border-blue-200/80 mt-1.5">
+        <label class="block font-bold text-blue-900 mb-1 flex items-center gap-1">
+          <i class="fa-solid fa-calendar-plus text-blue-600"></i> New Check-out Date &amp; Time
+        </label>
+        <div class="flex gap-1.5">
+          <input type="date" id="cust-ext-checkout-date" onchange="handleStayDatesChange()" class="w-2/3 bg-white border border-blue-200 rounded-xl px-2 py-1.5 focus:outline-none focus:border-blue-500 font-semibold text-blue-900" />
+          <input type="time" id="cust-ext-checkout-time" onchange="handleStayDatesChange()" class="w-1/3 bg-white border border-blue-200 rounded-xl px-1.5 py-1.5 focus:outline-none focus:border-blue-500 font-semibold text-blue-900" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Meal Plan Inclusions Checkbox -->
+    <div class="sm:col-span-4 pt-2 border-t border-slate-200/60">
+      <div class="flex items-center gap-2">
+        <input type="checkbox" id="cust-include-meals" checked="" class="w-4 h-4 text-blue-600 rounded-md border-slate-300 focus:ring-blue-500 cursor-pointer" />
+        <label for="cust-include-meals" class="font-bold text-slate-700 cursor-pointer flex items-center gap-1 select-none text-[11px]">
+          <i class="fa-solid fa-utensils text-emerald-600"></i> Include Meal (*Include Breakfast, Lunch, Evening snack &amp; Dinner)
+        </label>
+      </div>
+    </div>
+  </div>
+</div>
         <!-- EXTRA FOOD SECTION WITH DATE & TIME -->
         <div id="sec-extra-food" class="bg-amber-50/60 p-3 rounded-2xl border border-amber-200/80 space-y-2.5 transition-all">
           <div class="flex justify-between items-center">
@@ -1012,60 +1022,72 @@
           <div id="cab-trips-container" class="space-y-2 max-h-40 overflow-y-auto pr-1 mt-2"></div>
         </div>
 
-        <!-- Billing Calculation Box -->
-        <div id="sec-billing-summary" class="bg-blue-50/40 p-3 rounded-2xl border border-blue-100 space-y-2.5 transition-all">
-          <h4 class="text-[9px] font-bold uppercase tracking-wider text-blue-700 flex items-center gap-1.5">
-            <i class="fa-solid fa-calculator text-blue-600"></i> Billing Summary
-          </h4>
-          
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2 pb-2 border-b border-blue-200">
-             <div>
-  <label class="block font-semibold text-amber-700 mb-0.5 flex items-center gap-1">
-    <i class="fa-solid fa-indian-rupee-sign text-amber-600"></i> Extra Rate/Day (₹)
-  </label>
-  <input type="number" id="cust-extra-rate" min="0" value="0" placeholder="0" oninput="calculateModalBilling()" class="w-full bg-amber-50 border border-amber-300 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-amber-500 font-bold text-amber-900" />
-</div>
-             <div>
-                <label class="block font-semibold text-slate-600 mb-0.5">Extra Person (₹)</label>
-                <input type="number" id="cust-extra-total" readonly="" class="w-full bg-slate-200/60 font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" />
-             </div>
-             <div>
-                <label class="block font-semibold text-slate-600 mb-0.5">Cab Fare (₹)</label>
-                <input type="number" id="cust-cab-total" readonly="" class="w-full bg-slate-200/60 font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" />
-             </div>
-          <div>
-                <label class="block font-semibold text-slate-600 mb-0.5">Extra Food/Drink (₹)</label>
-                <input type="number" id="cust-food-total" readonly="" class="w-full bg-slate-200/60 font-bold text-amber-700 border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" value="0" />
-             </div>
-          </div>
-          <div class="grid grid-cols-2 sm:grid-cols-6 gap-2">
-            <div>
-              <label class="block font-semibold text-slate-600 mb-0.5">Days</label>
-              <input type="number" id="cust-days" readonly="" class="w-full bg-slate-200/60 font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" />
-            </div>
-            <div>
-              <label class="block font-semibold text-slate-600 mb-0.5">Price/Day (₹)</label>
-              <input type="number" id="cust-price" value="1200" oninput="calculateModalBilling()" class="w-full bg-white font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 focus:outline-none focus:border-blue-500" />
-            </div>
-            <div>
-              <label class="block font-semibold text-slate-600 mb-0.5">Total (₹)</label>
-              <input type="number" id="cust-total" readonly="" class="w-full bg-slate-200/60 text-blue-700 font-bold border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" />
-            </div>
-            <div>
-              <label class="block font-semibold text-slate-600 mb-0.5">Advance (₹)</label>
-              <input type="number" id="cust-advance" value="0" oninput="calculateModalBilling()" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-blue-500 font-semibold text-emerald-600" />
-            </div>
-            <div>
-              <label class="block font-semibold text-slate-600 mb-0.5">Due (₹)</label>
-              <input type="number" id="cust-due" readonly="" class="w-full bg-slate-200/60 text-rose-700 font-bold border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" />
-            </div>
-            <div>
-              <label class="block font-semibold text-slate-600 mb-0.5 text-[10px] text-emerald-700">Clear Bill (₹)</label>
-              <input type="number" id="cust-clear-bill" value="0" placeholder="0" oninput="handleClearBillPayment(this.value)" class="w-full bg-emerald-50 border border-emerald-300 font-bold text-emerald-800 rounded-xl px-2 py-1.5 focus:outline-none focus:border-emerald-500" title="Put payment amount to clear due bill" />
-            </div>
-          </div>
-        </div>
+      <!-- BILLING SUMMARY -->
+<div id="sec-billing-summary" class="bg-blue-50/40 p-3 rounded-2xl border border-blue-100 space-y-2.5 transition-all">
+  <h4 class="text-[9px] font-bold uppercase tracking-wider text-blue-700 flex items-center gap-1.5">
+    <i class="fa-solid fa-calculator text-blue-600"></i> Billing Summary
+  </h4>
+  
+  <!-- Row 1: 4 Columns (Extra items + Cab) -->
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2 pb-2 border-b border-blue-200">
+    <div>
+      <label class="block font-semibold text-slate-600 mb-0.5">Extra Guest Total Days</label>
+      <input type="number" id="cust-extra-person-days" readonly="" class="w-full bg-slate-200/60 font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" value="0" />
+    </div>
+    <div>
+      <label class="block font-semibold text-slate-600 mb-0.5">Extra Guest Price/Day</label>
+      <input type="number" id="cust-extra-person-price" value="0" oninput="calculateModalBilling()" class="w-full bg-white font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 focus:outline-none focus:border-blue-500" />
+    </div>
+    <div>
+      <label class="block font-semibold text-slate-600 mb-0.5">Extra Guest Total Rate (₹)</label>
+      <input type="number" id="cust-extra-total" readonly="" class="w-full bg-slate-200/60 font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" />
+    </div>
+    <div>
+      <label class="block font-semibold text-slate-600 mb-0.5">Cab Fare Total (₹)</label>
+      <input type="number" id="cust-cab-total" readonly="" class="w-full bg-slate-200/60 font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" />
+    </div>
+  </div>
 
+  <!-- Row 2: 4 Columns (Food + Main Guest items) -->
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2 pb-2 border-b border-blue-200">
+    <div>
+      <label class="block font-semibold text-slate-600 mb-0.5">Extra Food/Drink Total (₹)</label>
+      <input type="number" id="cust-food-total" readonly="" class="w-full bg-slate-200/60 font-bold text-amber-700 border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" value="0" />
+    </div>
+    <div>
+      <label class="block font-semibold text-slate-600 mb-0.5">Main Guest Total Days</label>
+      <input type="number" id="cust-days" readonly="" class="w-full bg-slate-200/60 font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" />
+    </div>
+    <div>
+      <label class="block font-semibold text-slate-600 mb-0.5 leading-tight">Main Guest Price/Day (₹)</label>
+      <input type="number" id="cust-price" value="1200" oninput="calculateModalBilling()" class="w-full bg-white font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 focus:outline-none focus:border-blue-500" />
+    </div>
+    <div>
+      <label class="block font-semibold text-slate-600 mb-0.5 leading-tight">Main Guest Total Rate (₹)</label>
+      <input type="number" id="cust-main-person-rate" readonly="" class="w-full bg-slate-200/60 font-bold text-slate-700 border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" value="0" />
+    </div>
+  </div>
+
+  <!-- Row 3: 4 Columns (Totals & Payments) -->
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+    <div>
+      <label class="block font-semibold text-slate-600 mb-0.5 leading-tight">Grand Total (₹)</label>
+      <input type="number" id="cust-total" readonly="" class="w-full bg-slate-200/60 text-blue-700 font-bold border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" />
+    </div>
+    <div>
+      <label class="block font-semibold text-slate-600 mb-0.5 leading-tight">Initial Advance (₹)</label>
+      <input type="number" id="cust-advance" value="0" oninput="calculateModalBilling()" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 focus:outline-none focus:border-blue-500 font-semibold text-emerald-600" />
+    </div>
+    <div>
+      <label class="block font-semibold text-slate-600 mb-0.5 leading-tight">Due (₹)</label>
+      <input type="number" id="cust-due" readonly="" class="w-full bg-slate-200/60 text-rose-700 font-bold border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" />
+    </div>
+    <div>
+      <label class="block font-semibold text-slate-600 mb-0.5 leading-tight text-[10px] text-emerald-700">Clear Bill (₹)</label>
+      <input type="number" id="cust-clear-bill" value="0" placeholder="0" oninput="handleClearBillPayment(this.value)" class="w-full bg-emerald-50 border border-emerald-300 font-bold text-emerald-800 rounded-xl px-2 py-1.5 focus:outline-none focus:border-emerald-500" title="Put payment amount to clear due bill" />
+    </div>
+  </div>
+</div>
         <div class="flex justify-end space-x-2 pt-1">
           <button type="button" onclick="closeBookingModal()" class="px-4 py-1.5 bg-slate-100 text-slate-700 rounded-xl font-semibold transition hover:bg-slate-200">Cancel</button>
           <button type="submit" id="btn-save-booking" class="px-5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold shadow-sm transition">Save Booking</button>
@@ -1180,7 +1202,7 @@
 
   <script>
 
-// Function to check and display the birthday animation on August 20th
+// Function to check and display the birthday animation on September 27th
 function checkBirthdayTrigger() {
       const now = new Date();
       const currentMonth = now.getMonth() + 1; // Month 9 is September
@@ -1860,100 +1882,120 @@ function checkBirthdayTrigger() {
       }
     }
 
-    function processExport() {
-      const startDateStr = document.getElementById('export-start-date').value;
-      const endDateStr = document.getElementById('export-end-date').value;
+function processExport() {
+  const startDateStr = document.getElementById('export-start-date').value;
+  const endDateStr = document.getElementById('export-end-date').value;
 
-      if (!startDateStr || !endDateStr) {
-        alert("Please select both Start and End dates.");
-        return;
-      }
+  if (!startDateStr || !endDateStr) {
+    alert("Please select both Start and End dates.");
+    return;
+  }
 
-      exportToExcel(startDateStr, endDateStr);
+  exportToExcel(startDateStr, endDateStr);
+}
+
+function exportToExcel(startDateStr, endDateStr) {
+  if (!state.bookings || state.bookings.length === 0) {
+    alert("No booking records available to export!");
+    return;
+  }
+
+  const filteredBookings = state.bookings.filter(b => {
+    if (!b.checkIn) return false;
+    const bIn = String(b.checkIn).replace(' ', 'T').split('T')[0];
+    return (bIn >= startDateStr) && (bIn <= endDateStr);
+  });
+
+  if (filteredBookings.length === 0) {
+    alert(`No booking records found with a Check-In date between ${formatDate(startDateStr)} and ${formatDate(endDateStr)}!`);
+    return;
+  }
+
+  const now = new Date().getTime();
+
+  // Define exact 41 header fields
+  const headers = [
+    "Booking ID (System)", "Booking ID", "Invoice ID", "Booking Status", "Guest Name",
+    "Address", "City", "State", "Country", "Pin/Zip Code", "ID Number",
+    "Contact No", "Country Code", "Attached ID Proof(Yes/No)", "Room No(s)", "Agent Info",
+    "Main Guest Joined(Show count)", "Extra Guest Joined(Show count)", "Extra Room No(s)",
+    "Extra Guest Name", "Extra Guest Check-In", "Extra Guest Check-Out", "Check-In", "Check-Out",
+    "Has Extended Check-Out(Yes/No)", "Extended Check-Out(Date & Time)", "Include Meals(Yes/No)",
+    "Food Orders Details(JSON)", "Cab Trips Details(JSON)", "Extra Guest Total Days",
+    "Extra Guest Price/Day (₹)", "Extra Guest Total Rate (₹)", "Cab Fare Total (₹)",
+    "Extra Food/Drink Total (₹)", "Main Guest Total Days", "Main Guest Price/Day (₹)",
+    "Main Guest Total Rate (₹)", "Grand Total (₹)", "Initial Advance (₹)", "Due (₹)", "Clear Bill (₹)"
+  ];
+
+  const rows = filteredBookings.map(b => {
+    let bStatus = "Unknown";
+    if (isInactiveBooking(b)) {
+      bStatus = "Inactive";
+    } else {
+      const cIn = parseDateMs(b.checkIn);
+      const cOut = getEffectiveCheckoutTime(b);
+      if (now > cOut) bStatus = "Closed";
+      else if (now >= cIn && now <= cOut) bStatus = "Live";
+      else bStatus = "Upcoming";
     }
 
-    function exportToExcel(startDateStr, endDateStr) {
-      if (!state.bookings || state.bookings.length === 0) {
-        alert("No booking records available to export!");
-        return;
-      }
+    const foodList = parseJSONField(b.foodOrders);
+    const cabList = parseJSONField(b.cabTrips);
 
-      const filteredBookings = state.bookings.filter(b => {
-        if(!b.checkIn) return false;
-        
-        const bIn = String(b.checkIn).replace(' ', 'T').split('T')[0];
-        return (bIn >= startDateStr) && (bIn <= endDateStr);
-      });
+    // Map each booking to an array corresponding exactly to the headers order
+    return [
+      b.id || "",
+      b.bookingCode || "",
+      b.invoiceNo || "",
+      bStatus,
+      b.name || "",
+      b.address || "",
+      b.city || "",
+      b.state || "",
+      b.country || "",
+      b.zipCode || "",
+      b.idNo || "",
+      b.contactNo || "",
+      b.countryCode || "",
+      b.idProofFileName ? "Yes" : "No",
+      getBookingRooms(b).join(" | "),
+      b.agentInfo || "",
+      b.mainGuestCount || 1,
+      b.extraPersons || 0,
+      b.extraRoomNos || "",
+      b.extraGuestName || "",
+      format24hDate(b.extraPersonJoined),
+      format24hDate(b.extraPersonOut),
+      format24hDate(b.checkIn),
+      format24hDate(b.checkOut),
+      isTrue(b.hasExtendedCheckout) ? "Yes" : "No",
+      format24hDate(b.extendedCheckOut),
+      (b.includeMeals !== false && b.includeMeals !== 'false') ? "Yes" : "No",
+      typeof b.foodOrders === 'string' ? b.foodOrders : JSON.stringify(foodList || []),
+      typeof b.cabTrips === 'string' ? b.cabTrips : JSON.stringify(cabList || []),
+      b.extraPersonDays || 0,
+      b.extraPersonPricePerDay || 0,
+      b.extraPersonTotalRate || 0,
+      b.cabFareTotal || 0,
+      b.extraFoodTotal || 0,
+      b.noOfDays || 0,
+      b.perDayPrice || 0,
+      b.mainGuestTotalRate || 0,
+      b.totalAmount || 0,
+      b.initialAdv || 0,
+      b.totalDue || 0,
+      b.clearedDue || 0
+    ];
+  });
 
-      if (filteredBookings.length === 0) {
-        alert(`No booking records found with a Check-In date between ${formatDate(startDateStr)} and ${formatDate(endDateStr)}!`);
-        return;
-      }
+  // Construct sheet using Array of Arrays to prevent missing key drops
+  const worksheet = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Bookings");
 
-      const now = new Date().getTime();
-
-      const exportData = filteredBookings.map(b => {
-        let bStatus = "Unknown";
-        if (isInactiveBooking(b)) {
-            bStatus = "Inactive";
-        } else {
-            const cIn = parseDateMs(b.checkIn);
-            const cOut = getEffectiveCheckoutTime(b);
-            if (now > cOut) bStatus = "Closed";
-            else if (now >= cIn && now <= cOut) bStatus = "Live";
-            else bStatus = "Upcoming";
-        }
-
-        const foodList = parseJSONField(b.foodOrders);
-        const cabList = parseJSONField(b.cabTrips);
-        
-        return {
-          "Booking ID (System)": b.id || "",
-          "Booking ID": b.bookingCode || "",
-          "Invoice ID": b.invoiceNo || "",
-          "Booking Status": bStatus,
-          "Guest Name": b.name || "",
-          "Contact No": b.contactNo || "",
-          "Country Code": b.countryCode || "",
-          "ID Number": b.idNo || "",
-          "Attached ID File Name": b.idProofFileName || "",
-          "Address": b.address || "",
-          "City": b.city || "",
-          "State": b.state || "",
-          "Country": b.country || "",
-          "Pin/Zip Code": b.zipCode || "",
-          "Room No(s)": getBookingRooms(b).join(" | "),
-          "Capacity": b.capacity || 1,
-          "Extra Persons": b.extraPersons || 0,
-          "Extra Person Joined": format24hDate(b.extraPersonJoined),
-          "Extra Person Check-Out": format24hDate(b.extraPersonOut),
-          "Extra Person Days": b.extraPersonDays || 0,
-          "Agent Info": b.agentInfo || "",
-          "Check-In": format24hDate(b.checkIn),
-          "Check-Out": format24hDate(b.checkOut),
-          "Has Extended Check-Out": isTrue(b.hasExtendedCheckout) ? "Yes" : "No",
-          "Extended Check-Out": format24hDate(b.extendedCheckOut),
-          "Include Meals": (b.includeMeals !== false && b.includeMeals !== 'false') ? "Yes" : "No",
-          "Stay Days": b.noOfDays || 0,
-          "Price / Day": b.perDayPrice || 0,
-          "Extra Person Price / Day": b.ExtraperDayPrice || 0,
-          "Food Orders Details": foodList.map(f => `${f.foodDesc} (${format24hDate(f.foodDateTime)}): ${f.plates} pl @ ₹${f.itemPrice} = ₹${f.foodCharge}`).join('\n'),
-          "Cab Trips Details": cabList.map(c => `${c.tripName} (${format24hDate(c.dateTime)}): ₹${c.rate} ${c.remark ? `[${c.remark}]` : ''}`).join('\n'),
-          "Total Amount": b.totalAmount || 0,
-          "Initial Advance": b.initialAdv || 0,
-          "Cleared Due": b.clearedDue || 0,
-          "Balance Due": b.totalDue || 0
-        };
-      });
-
-      const worksheet = XLSX.utils.json_to_sheet(exportData);
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, "Bookings");
-
-      XLSX.writeFile(workbook, `Booking_Report_${startDateStr}_to_${endDateStr}.xlsx`);
-      closeExportModal();
-    }
-
+  XLSX.writeFile(workbook, `Booking_Report_${startDateStr}_to_${endDateStr}.xlsx`);
+  closeExportModal();
+}
     function searchBookingByDate() {
       const dateVal = document.getElementById('booking-date-search').value;
       renderBookingsTable(dateVal);
@@ -2909,7 +2951,7 @@ function updateDashboardCards() {
       tbody.appendChild(roomTr);
 
       if (b.extraPersons && b.extraPersons > 0 && b.extraPersonDays > 0) {
-        const extraPersonTotal = b.extraPersons * b.extraPersonDays * (b.ExtraperDayPrice || 0);
+        const extraPersonTotal = b.extraPersons * b.extraPersonDays * (b.perDayPrice || 0);
         const extraJoinedFmt = b.extraPersonJoined ? formatDateTime(b.extraPersonJoined) : '';
         const extraOutFmt = b.extraPersonOut ? formatDateTime(b.extraPersonOut) : '';
         const extraDaysCount = parseInt(b.extraPersonDays) || 0;
@@ -2922,7 +2964,7 @@ function updateDashboardCards() {
             <span class="text-[9px] text-amber-700 font-normal block">Stay: ${extraJoinedFmt} to ${extraOutFmt || 'Check-Out'}</span>
           </td>
           <td class="p-2.5 text-center">${extraDaysFormattedStr}</td>
-          <td class="p-2.5 text-right">₹${(b.ExtraperDayPrice || 0).toLocaleString('en-IN')}</td>
+          <td class="p-2.5 text-right">₹${(b.perDayPrice || 0).toLocaleString('en-IN')}</td>
           <td class="p-2.5 text-right font-semibold text-amber-900">₹${extraPersonTotal.toLocaleString('en-IN')}</td>
         `;
         tbody.appendChild(extraTr);
@@ -3412,7 +3454,6 @@ function updateDashboardCards() {
         }
 
         document.getElementById('cust-price').value = b.perDayPrice;
-        document.getElementById('cust-extra-rate').value = b.ExtraperDayPrice;
         
         const advanceElem = document.getElementById('cust-advance');
         const baseAdv = b.initialAdv || 0;
@@ -3621,114 +3662,112 @@ function updateDashboardCards() {
       document.getElementById('cust-due').value = due;
     }
 
-    function calculateModalBilling() {
-      const inDate = document.getElementById('cust-checkin-date').value;
-      const inTime = document.getElementById('cust-checkin-time').value || '00:00';
-      
-      const hasExtCheckout = document.getElementById('cust-has-extended-checkout')?.checked;
-      let outDate = document.getElementById('cust-checkout-date').value;
-      let outTime = document.getElementById('cust-checkout-time').value || '00:00';
+   function calculateModalBilling() {
+  const inDate = document.getElementById('cust-checkin-date')?.value;
+  const inTime = document.getElementById('cust-checkin-time')?.value || '00:00';
 
-      if (hasExtCheckout) {
-        const extDate = document.getElementById('cust-ext-checkout-date')?.value;
-        const extTime = document.getElementById('cust-ext-checkout-time')?.value;
-        if (extDate) outDate = extDate;
-        if (extTime) outTime = extTime;
-      }
+  const hasExtCheckout = document.getElementById('cust-has-extended-checkout')?.checked;
+  let outDate = document.getElementById('cust-checkout-date')?.value;
+  let outTime = document.getElementById('cust-checkout-time')?.value || '00:00';
 
-      let days = 0;
-      let latestMainCheckoutDt = null;
+  if (hasExtCheckout) {
+    const extDate = document.getElementById('cust-ext-checkout-date')?.value;
+    const extTime = document.getElementById('cust-ext-checkout-time')?.value;
+    if (extDate) outDate = extDate;
+    if (extTime) outTime = extTime;
+  }
 
-      if (inDate && outDate) {
-        latestMainCheckoutDt = new Date(`${outDate}T${outTime}:00+05:30`);
-        const inDateOnly = new Date(inDate);
-        const outDateOnly = new Date(outDate);
-        days = Math.max(1, Math.round((outDateOnly - inDateOnly) / (1000 * 60 * 60 * 24)));
-      }
+  // --- 1. Main Guest Days Calculation ---
+  let days = 0;
+  if (inDate && outDate) {
+    const inDateOnly = new Date(inDate);
+    const outDateOnly = new Date(outDate);
+    days = Math.max(1, Math.round((outDateOnly - inDateOnly) / (1000 * 60 * 60 * 24)));
+  }
 
-      const price = parseFloat(document.getElementById('cust-price').value) || 0;
-      const Extraprice = parseFloat(document.getElementById('cust-extra-rate').value) || 0;
-      const capacity = parseFloat(document.getElementById('cust-capacity').value) || 1;
+  // --- 2. Extra Guest Days Calculation ---
+  // Formula: Extra Person Check-In to Extra Person Check-Out (days count)
+  let extraPersonDays = 0;
+  const epInDate = document.getElementById('cust-extra-person-date')?.value;
+  const epOutDate = document.getElementById('cust-extra-person-out-date')?.value;
 
-      const extraPersons = parseInt(document.getElementById('cust-extra-persons')?.value) || 0;
-      let extraPersonDays = 0;
-
-      if (extraPersons > 0 && latestMainCheckoutDt) {
-        const epInDate = document.getElementById('cust-extra-person-date')?.value;
-        const epInTime = document.getElementById('cust-extra-person-time')?.value;
-        let epOutDate = document.getElementById('cust-extra-person-out-date')?.value;
-        let epOutTime = document.getElementById('cust-extra-person-out-time')?.value;
-
-        if (epInDate && epOutDate && epInTime && epOutTime) {
-          const epInDt = new Date(`${epInDate}T${epInTime}:00+05:30`);
-          let epOutDt = new Date(`${epOutDate}T${epOutTime}:00+05:30`);
-
-          if (epOutDt > latestMainCheckoutDt) {
-            epOutDt = new Date(latestMainCheckoutDt.getTime());
-            epOutDate = toLocalISOString(epOutDt).split('T')[0];
-          }
-
-          if (epInDt < epOutDt) {
-            const epInOnly = new Date(epInDate);
-            const epOutOnly = new Date(epOutDate);
-            const diffDays = Math.round((epOutOnly - epInOnly) / (1000 * 60 * 60 * 24));
-            extraPersonDays = Math.max(1, diffDays);
-          } else {
-            extraPersonDays = 0;
-          }
-        } else {
-           extraPersonDays = 0; 
-        }
-      }
-
-      const roomTotal = days * price * capacity;
-      const extraPersonTotal = extraPersons * extraPersonDays * Extraprice;
-
-      let foodTotalCharge = 0;
-      document.querySelectorAll('.cust-food-charge').forEach(input => {
-        foodTotalCharge += parseFloat(input.value) || 0;
-      });
-      
-      let cabFare = 0;
-      document.querySelectorAll('.cust-cab-rate').forEach(input => {
-        cabFare += parseFloat(input.value) || 0;
-      });
-
-      const total = roomTotal + extraPersonTotal + foodTotalCharge + cabFare;
-
-      const advanceInput = document.getElementById('cust-advance');
-      let currentAdvVal = parseFloat(advanceInput.value) || 0;
-
-      if (currentAdvVal > total) {
-        alert(`⚠️ Advance payment (₹${currentAdvVal}) cannot exceed the total bill amount (₹${total})!`);
-        currentAdvVal = total;
-        advanceInput.value = total;
-      }
-
-      advanceInput.setAttribute('data-initial-adv', currentAdvVal);
-
-      const clearBillVal = parseFloat(document.getElementById('cust-clear-bill')?.value) || 0;
-      const due = Math.max(0, total - currentAdvVal - clearBillVal);
-
-      document.getElementById('cust-days').value = days;
-      document.getElementById('cust-total').value = total;
-      document.getElementById('cust-due').value = due;
-      
-    // NEW DE-LINKED CODE:
-const extraPersonsCount = parseFloat(document.getElementById('cust-extra-persons').value) || 0;
-const extraPersonRate = parseFloat(document.getElementById('cust-extra-rate').value) || 0;
-
-// Calculates extra total based on extra guests, extra rate, and duration days
-const extrapersonTotal = extraPersonsCount * extraPersonRate * days;
-document.getElementById('cust-extra-total').value = Math.round(extrapersonTotal);
-      
-      const cabTotalInput = document.getElementById('cust-cab-total');
-      if (cabTotalInput) cabTotalInput.value = cabFare;
-
-         const foodTotalInput = document.getElementById('cust-food-total');
-if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
-  
+  if (epInDate && epOutDate) {
+    const epInOnly = new Date(epInDate);
+    const epOutOnly = new Date(epOutDate);
+    if (epOutOnly >= epInOnly) {
+      const diffDays = Math.round((epOutOnly - epInOnly) / (1000 * 60 * 60 * 24));
+      extraPersonDays = Math.max(1, diffDays);
     }
+  }
+
+  // --- Input Values ---
+  const price = parseFloat(document.getElementById('cust-price')?.value) || 0;
+  const capacity = parseFloat(document.getElementById('cust-capacity')?.value) || 1;
+  const extraPersons = parseInt(document.getElementById('cust-extra-persons')?.value) || 0;
+  const extraPersonPrice = parseFloat(document.getElementById('cust-extra-person-price')?.value) || 0;
+
+  // --- 3. Rate Calculations ---
+  // Formula: Main Guest Rate (₹) = Main Guest Price/Day (₹) * Main Guest Days * Total Capacity
+  const roomTotal = price * days * capacity;
+
+  // Formula: Extra Guest Rate (₹) = Extra Guest Price/Day * Extra Guest Days * Add Extra Person(s)
+  const extraPersonTotal = extraPersonPrice * extraPersonDays * extraPersons;
+
+  // --- Food & Cab Charges ---
+  let foodTotalCharge = 0;
+  document.querySelectorAll('.cust-food-charge').forEach(input => {
+    foodTotalCharge += parseFloat(input.value) || 0;
+  });
+
+  let cabFare = 0;
+  document.querySelectorAll('.cust-cab-rate').forEach(input => {
+    cabFare += parseFloat(input.value) || 0;
+  });
+
+  // --- Total & Balance Calculations ---
+  const total = roomTotal + extraPersonTotal + foodTotalCharge + cabFare;
+
+  const advanceInput = document.getElementById('cust-advance');
+  let currentAdvVal = parseFloat(advanceInput?.value) || 0;
+
+  if (advanceInput && currentAdvVal > total) {
+    alert(`⚠️ Advance payment (₹${currentAdvVal}) cannot exceed the total bill amount (₹${total})!`);
+    currentAdvVal = total;
+    advanceInput.value = total;
+  }
+
+  if (advanceInput) {
+    advanceInput.setAttribute('data-initial-adv', currentAdvVal);
+  }
+
+  const clearBillVal = parseFloat(document.getElementById('cust-clear-bill')?.value) || 0;
+  const due = Math.max(0, total - currentAdvVal - clearBillVal);
+
+  // --- UI Field Updates ---
+  const daysInput = document.getElementById('cust-days');
+  if (daysInput) daysInput.value = days;
+
+  const extraDaysInput = document.getElementById('cust-extra-person-days');
+  if (extraDaysInput) extraDaysInput.value = extraPersonDays;
+
+  const mainRateInput = document.getElementById('cust-main-person-rate');
+  if (mainRateInput) mainRateInput.value = roomTotal;
+
+  const extraTotalInput = document.getElementById('cust-extra-total');
+  if (extraTotalInput) extraTotalInput.value = extraPersonTotal;
+
+  const totalInput = document.getElementById('cust-total');
+  if (totalInput) totalInput.value = total;
+
+  const dueInput = document.getElementById('cust-due');
+  if (dueInput) dueInput.value = due;
+
+  const cabTotalInput = document.getElementById('cust-cab-total');
+  if (cabTotalInput) cabTotalInput.value = cabFare;
+
+  const foodTotalInput = document.getElementById('cust-food-total');
+  if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
+}
 
     function handleSaveBooking(e) {
       e.preventDefault();
@@ -3997,8 +4036,8 @@ if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
         extendedCheckOut: extendedCheckOut,
         includeMeals: includeMeals,
         noOfDays: parseInt(document.getElementById('cust-days').value) || 0,
+        extraPersonDays: parseInt(document.getElementById('cust-extra-person-days').value) || 0,
         perDayPrice: parseFloat(document.getElementById('cust-price').value) || 0,
-        ExtraperDayPrice: parseFloat(document.getElementById('cust-extra-rate').value) || 0,
         foodOrders: foodOrdersList,
         cabTrips: cabTripsList,
         totalAmount: totalAmt,

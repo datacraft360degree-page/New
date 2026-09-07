@@ -4038,13 +4038,6 @@ function updateDashboardCards() {
         noOfDays: parseInt(document.getElementById('cust-days').value) || 0,
         extraPersonDays: parseInt(document.getElementById('cust-extra-person-days').value) || 0,
         perDayPrice: parseFloat(document.getElementById('cust-price').value) || 0,
-        extraGuestName: document.getElementById('cust-room-name').value
-        extraPersonPrice: parseFloat(document.getElementById('cust-extra-person-price').value) || 0
-        extraPersonRate: parseFloat(document.getElementById('cust-extra-total').value) || 0
-        mainPersonRate: parseFloat(document.getElementById('cust-main-person-rate').value) || 0
-        extraFoodTotal: parseFloat(document.getElementById('cust-food-total').value) || 0
-        cabFareTotal: parseFloat(document.getElementById('cust-cab-total').value) || 0
-        
         foodOrders: foodOrdersList,
         cabTrips: cabTripsList,
         totalAmount: totalAmt,

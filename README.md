@@ -2685,8 +2685,6 @@ function updateDashboardCards() {
     }
 
     // Active Status Categorization (Live / Upcoming / Closed)
-    // Overall financial totals are tracked separately so a valid booking
-    // is still included even if its date window cannot be classified.
     if (!isNaN(checkInMs) && !isNaN(checkOutMs)) {
       if (now >= checkInMs && now <= checkOutMs) {
         stats.live.count++;
@@ -2705,12 +2703,6 @@ function updateDashboardCards() {
         stats.closed.adv += adv;
         stats.closed.due += due;
       }
-    } else {
-      // Keep financially valid bookings in the dashboard overall totals.
-      stats.closed.count++;
-      stats.closed.amount += amt;
-      stats.closed.adv += adv;
-      stats.closed.due += due;
     }
   });
 

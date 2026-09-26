@@ -3451,7 +3451,7 @@ function updateDashboardCards() {
         setInputEnabled(document.getElementById('cust-checkout-date'), true);
         setInputEnabled(document.getElementById('cust-checkout-time'), true);
 
-        // Allow main Check-In and Check-Out dates in the past, present, or future.
+        // Calculate and set today's date as min for new bookings strictly using IST standard
         const todayDt = new Date();
         const utcMs = todayDt.getTime();
         const istDate = new Date(utcMs + (330 * 60000));
@@ -3471,10 +3471,10 @@ function updateDashboardCards() {
         const tomorrowStr = `${t_yyyy}-${t_mm}-${t_dd}`;
 
         const checkInElem = document.getElementById('cust-checkin-date');
-                checkInElem.value = todayStr;
+        checkInElem.value = todayStr;
 
         const checkOutElem = document.getElementById('cust-checkout-date');
-                checkOutElem.value = tomorrowStr;
+        checkOutElem.value = tomorrowStr;
 
         populateRoomDropdown(state.roomsCapacity.length > 0 ? [state.roomsCapacity[0].roomNo] : []);
 
@@ -3729,13 +3729,13 @@ function updateDashboardCards() {
       document.getElementById('cust-total').value = total;
       document.getElementById('cust-due').value = due;
       
-    // NEW DE-LINKED CODE:
-const extraPersonsCount = parseFloat(document.getElementById('cust-extra-persons').value) || 0;
-const extraPersonRate = parseFloat(document.getElementById('cust-extra-rate').value) || 0;
-
-// Calculates extra total based on extra guests, extra rate, and duration days
-const extrapersonTotal = extraPersonsCount * extraPersonRate * extraPersonDays;
-document.getElementById('cust-extra-total').value = Math.round(extrapersonTotal);
+      // Update Billing Summary fields.
+      const extraPersonsCount = parseFloat(document.getElementById('cust-extra-persons').value) || 0;
+      const extraPersonRate = parseFloat(document.getElementById('cust-extra-rate').value) || 0;
+      const extrapersonTotal = extraPersonsCount * extraPersonRate * extraPersonDays;
+      document.getElementById('cust-extra-days').value = extraPersonDays;
+      document.getElementById('cust-extra-total').value = Math.round(extrapersonTotal);
+      document.getElementById('cust-main-total').value = Math.round(roomTotal);
       
       const cabTotalInput = document.getElementById('cust-cab-total');
       if (cabTotalInput) cabTotalInput.value = cabFare;

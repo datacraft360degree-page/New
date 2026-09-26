@@ -3844,7 +3844,12 @@ if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
       const checkInDateOnly = inDate ? new Date(`${inDate}T00:00:00`) : null;
       const checkOutDateOnly = outDate ? new Date(`${outDate}T00:00:00`) : null;
 
+      // Show the Closed Booking confirmation ONLY when creating a NEW booking.
+      // Existing bookings being edited must not show this confirmation again.
+      const isNewBooking = !bookingModalId;
+
       if (
+        isNewBooking &&
         checkInDateOnly &&
         checkOutDateOnly &&
         checkInDateOnly < todayDateOnly &&

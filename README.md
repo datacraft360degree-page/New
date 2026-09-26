@@ -800,6 +800,31 @@
     </div>
   </div>
 
+  <!-- CLOSED BOOKING CONFIRMATION MODAL -->
+  <div id="closed-booking-confirm-modal" class="hidden fixed inset-0 z-[80] bg-slate-900/50 backdrop-blur-md flex items-center justify-center p-4 no-print">
+    <div class="bg-white rounded-3xl shadow-2xl border border-amber-100 max-w-md w-full p-5 space-y-4 text-left">
+      <div class="flex items-start gap-3">
+        <div class="bg-amber-50 text-amber-600 w-11 h-11 rounded-2xl flex items-center justify-center text-lg shadow-sm shrink-0">
+          <i class="fa-solid fa-circle-exclamation"></i>
+        </div>
+        <div>
+          <h3 class="text-sm font-bold text-slate-900">Closed Booking Confirmation</h3>
+          <p class="text-[11px] text-slate-600 mt-2 leading-relaxed">
+            This Booking will be considered as “Closed Booking” so make sure you have filled all the required details because after saving this Only “Extra Food/Drink, Cab Fare &amp; Billing Summary Section will be editable”
+          </p>
+        </div>
+      </div>
+      <div class="flex space-x-2 pt-1">
+        <button type="button" onclick="closeClosedBookingConfirm(false)" class="w-1/2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 rounded-xl text-[11px] transition">
+          Back
+        </button>
+        <button type="button" onclick="closeClosedBookingConfirm(true)" class="w-1/2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl shadow-sm transition text-[11px]">
+          Go ahead
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- COMPACT ADD / EDIT BOOKING MODAL -->
  <div id="booking-modal" class="hidden fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-3 overflow-y-auto no-print">
     <div class="bg-white rounded-3xl shadow-2xl border border-slate-100 max-w-3xl w-full p-5 space-y-3 my-4 max-h-[90vh] overflow-y-auto">
@@ -3745,7 +3770,33 @@ if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
   
     }
 
-    function handleSaveBooking(e) {
+    let closedBookingConfirmResolver = null;
+
+    function closeClosedBookingConfirm(goAhead) {
+      const modal = document.getElementById('closed-booking-confirm-modal');
+      if (modal) modal.classList.add('hidden');
+
+      if (closedBookingConfirmResolver) {
+        const resolver = closedBookingConfirmResolver;
+        closedBookingConfirmResolver = null;
+        resolver(goAhead);
+      }
+    }
+
+    function askClosedBookingConfirmation() {
+      return new Promise((resolve) => {
+        closedBookingConfirmResolver = resolve;
+        const modal = document.getElementById('closed-booking-confirm-modal');
+        if (modal) {
+          modal.classList.remove('hidden');
+        } else {
+          closedBookingConfirmResolver = null;
+          resolve(false);
+        }
+      });
+    }
+
+    async function handleSaveBooking(e) {
       e.preventDefault();
 
       const guestName = formatTitleCase(document.getElementById('cust-name').value.trim());
@@ -3781,6 +3832,29 @@ if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
 
       const checkIn = `${inDate}T${inTime}:00+05:30`;
       const checkOut = `${outDate}T${outTime}:00+05:30`;
+
+      // If both main Check-In and Check-Out dates are earlier than today,
+      // ask for confirmation before continuing with the normal save process.
+      const todayLocal = new Date();
+      const todayDateOnly = new Date(
+        todayLocal.getFullYear(),
+        todayLocal.getMonth(),
+        todayLocal.getDate()
+      );
+      const checkInDateOnly = inDate ? new Date(`${inDate}T00:00:00`) : null;
+      const checkOutDateOnly = outDate ? new Date(`${outDate}T00:00:00`) : null;
+
+      if (
+        checkInDateOnly &&
+        checkOutDateOnly &&
+        checkInDateOnly < todayDateOnly &&
+        checkOutDateOnly < todayDateOnly
+      ) {
+        const goAhead = await askClosedBookingConfirmation();
+        if (!goAhead) {
+          return;
+        }
+      }
 
       const hasExtendedCheckout = document.getElementById('cust-has-extended-checkout')?.checked || false;
       let extendedCheckOut = null;

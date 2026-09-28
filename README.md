@@ -810,7 +810,7 @@
         <div>
           <h3 class="text-sm font-bold text-slate-900">Closed Booking Confirmation</h3>
           <p class="text-[11px] text-slate-600 mt-2 leading-relaxed">
-            This Booking will be considered as “Closed Booking” so make sure you have filled all the required details because after saving this Only “Extra Food/Drink, Cab Fare &amp; Billing Summary Section" will be editable”
+            This Booking will be considered as “Closed Booking” so make sure you have filled all the required details because after saving this Only “Extra Food/Drink, Cab Fare &amp; Billing Summary Section" will be editable.
           </p>
         </div>
       </div>

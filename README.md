@@ -3470,6 +3470,19 @@ function updateDashboardCards() {
         }
 
         calculateModalBilling();
+
+        // A Closed Booking that has already had its full due cleared is permanently read-only.
+        if (b.paymentClearedLocked) {
+          document.getElementById('modal-title').innerText = 'Closed Booking (Payment Cleared - Read-Only)';
+          const lockedForm = document.getElementById('booking-form');
+          if (lockedForm) {
+            lockedForm.querySelectorAll('input, select, button').forEach(el => {
+              el.disabled = true;
+              el.classList.add('bg-slate-100', 'cursor-not-allowed', 'text-slate-500');
+              el.classList.remove('bg-white', 'bg-amber-50');
+            });
+          }
+        }
       } else {
         document.getElementById('modal-title').innerText = 'Add New Booking';
         document.getElementById('modal-booking-id').value = '';
@@ -4048,6 +4061,32 @@ if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
       const clearedDueAmt = parseFloat(document.getElementById('cust-clear-bill').value) || 0;
 
       const totalPaid = initialAdvAmt + clearedDueAmt;
+      const finalDueAmt = Math.max(0, totalAmt - totalPaid);
+
+      // When a Closed Booking's outstanding due is fully cleared for the first time,
+      // show the requested final warning and permanently lock the booking for editing.
+      const existingBookingForPaymentLock = id
+        ? state.bookings.find(b => String(b.id) === String(id))
+        : null;
+      const existingBookingIsClosed = existingBookingForPaymentLock
+        ? Date.now() > getEffectiveCheckoutTime(existingBookingForPaymentLock)
+        : false;
+      const shouldLockAfterClearingDue =
+        !!existingBookingForPaymentLock &&
+        existingBookingIsClosed &&
+        Number(existingBookingForPaymentLock.totalDue || 0) > 0 &&
+        finalDueAmt <= 0 &&
+        clearedDueAmt > 0 &&
+        !existingBookingForPaymentLock.paymentClearedLocked;
+
+      if (shouldLockAfterClearingDue) {
+        alert("All due has been cleared so it will be non editable onwards.");
+      }
+
+      const paymentClearedLocked =
+        !!(existingBookingForPaymentLock && existingBookingForPaymentLock.paymentClearedLocked) ||
+        shouldLockAfterClearingDue;
+
       const countryCodeVal = document.getElementById('cust-country-code').value.trim() || '+91';
 
       const newBooking = {
@@ -4088,8 +4127,9 @@ if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
         custfoodtotal: parseInt(document.getElementById('cust-food-total').value) || 0,
         totalAmount: totalAmt,
         initialAdv: initialAdvAmt,
-        totalDue: Math.max(0, totalAmt - totalPaid),
+        totalDue: finalDueAmt,
         clearedDue: clearedDueAmt,
+        paymentClearedLocked: paymentClearedLocked,
         inactive: false
       };
 

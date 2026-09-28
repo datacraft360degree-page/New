@@ -96,7 +96,7 @@
 </head>
 <body class="text-slate-800 font-sans min-h-screen flex flex-col relative antialiased text-xs" onclick="closeCommentBox()">
 
-<!-- BIRTHDAY HURRAY ANIMATION MODAL (TRIGGERS ON 20TH AUGUST) -->
+<!-- BIRTHDAY HURRAY ANIMATION MODAL (TRIGGERS ON 27th September) -->
   <div id="birthday-hurray-modal" class="hidden fixed inset-0 z-[110] bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-4 no-print overflow-hidden">
 
     <!-- Modal Card (Soft Light Palette) -->
@@ -810,7 +810,7 @@
         <div>
           <h3 class="text-sm font-bold text-slate-900">Closed Booking Confirmation</h3>
           <p class="text-[11px] text-slate-600 mt-2 leading-relaxed">
-            This Booking will be considered as “Closed Booking” so make sure you have filled all the required details because after saving this Only “Extra Food/Drink, Cab Fare &amp; Billing Summary Section will be editable”
+            This Booking will be considered as “Closed Booking” so make sure you have filled all the required details because after saving this Only “Extra Food/Drink, Cab Fare &amp; Billing Summary Section" will be editable”
           </p>
         </div>
       </div>
@@ -1222,7 +1222,7 @@
 
   <script>
 
-// Function to check and display the birthday animation on August 20th
+// Function to check and display the birthday animation on September 27th
 function checkBirthdayTrigger() {
       const now = new Date();
       const currentMonth = now.getMonth() + 1; // Month 9 is September
@@ -1949,42 +1949,46 @@ function checkBirthdayTrigger() {
         const foodList = parseJSONField(b.foodOrders);
         const cabList = parseJSONField(b.cabTrips);
         
-        return {
+      return {
           "Booking ID (System)": b.id || "",
           "Booking ID": b.bookingCode || "",
           "Invoice ID": b.invoiceNo || "",
           "Booking Status": bStatus,
           "Guest Name": b.name || "",
-          "Contact No": b.contactNo || "",
-          "Country Code": b.countryCode || "",
-          "ID Number": b.idNo || "",
-          "Attached ID File Name": b.idProofFileName || "",
           "Address": b.address || "",
           "City": b.city || "",
           "State": b.state || "",
           "Country": b.country || "",
           "Pin/Zip Code": b.zipCode || "",
+          "ID Number": b.idNo || "",
+          "Country Code": b.countryCode || "",
+          "Contact No": b.contactNo || "",
+          "Attached ID File Name": b.idProofFileName || "",
           "Room No(s)": getBookingRooms(b).join(" | "),
-          "Capacity": b.capacity || 1,
-          "Extra Persons": b.extraPersons || 0,
-          "Extra Person Joined": format24hDate(b.extraPersonJoined),
-          "Extra Person Check-Out": format24hDate(b.extraPersonOut),
-          "Extra Person Days": b.extraPersonDays || 0,
           "Agent Info": b.agentInfo || "",
+          "Main Guest Joined": b.capacity || 1,
+          "Add Extra Guest": b.extraPersons || 0,
+          "Extra Guest Check-In": format24hDate(b.extraPersonJoined),
+          "Extra Guest Check-Out": format24hDate(b.extraPersonOut),
           "Check-In": format24hDate(b.checkIn),
           "Check-Out": format24hDate(b.checkOut),
           "Has Extended Check-Out": isTrue(b.hasExtendedCheckout) ? "Yes" : "No",
           "Extended Check-Out": format24hDate(b.extendedCheckOut),
           "Include Meals": (b.includeMeals !== false && b.includeMeals !== 'false') ? "Yes" : "No",
-          "Stay Days": b.noOfDays || 0,
-          "Price / Day": b.perDayPrice || 0,
-          "Extra Person Price / Day": b.ExtraperDayPrice || 0,
           "Food Orders Details": foodList.map(f => `${f.foodDesc} (${format24hDate(f.foodDateTime)}): ${f.plates} pl @ ₹${f.itemPrice} = ₹${f.foodCharge}`).join('\n'),
           "Cab Trips Details": cabList.map(c => `${c.tripName} (${format24hDate(c.dateTime)}): ₹${c.rate} ${c.remark ? `[${c.remark}]` : ''}`).join('\n'),
-          "Total Amount": b.totalAmount || 0,
-          "Initial Advance": b.initialAdv || 0,
-          "Cleared Due": b.clearedDue || 0,
-          "Balance Due": b.totalDue || 0
+          "Extra Guest Price / Day": b.ExtraperDayPrice || 0,
+          "Extra Guest Stay Days": b.extraPersonDays || 0,
+          "Extra Guest Total Price": b.custextratotal || 0,
+          "Total Cab Fare": b.custcabtotal || 0,
+          "Main Guest Price / Day": b.perDayPrice || 0,
+          "Main Guest Stay Days": b.noOfDays || 0,
+          "Main Guest Total Price": b.custmaintotal || 0,
+          "Total Extra Food & Drinks": b.custfoodtotal || 0,
+          "Grand Total": b.totalAmount || 0,
+          "Advanced": b.initialAdv || 0,
+          "Balance Due": b.totalDue || 0,
+          "Cleared Bill": b.clearedDue || 0
         };
       });
 
@@ -4067,21 +4071,25 @@ if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
         extraPersons: extraPersons,
         extraPersonJoined: extraPersonJoined,
         extraPersonOut: extraPersonOut,
-        extraPersonDays: extraPersonDays,
         checkIn: checkIn,
         checkOut: checkOut,
         hasExtendedCheckout: hasExtendedCheckout,
         extendedCheckOut: extendedCheckOut,
         includeMeals: includeMeals,
-        noOfDays: parseInt(document.getElementById('cust-days').value) || 0,
-        perDayPrice: parseFloat(document.getElementById('cust-price').value) || 0,
-        ExtraperDayPrice: parseFloat(document.getElementById('cust-extra-rate').value) || 0,
         foodOrders: foodOrdersList,
         cabTrips: cabTripsList,
+        ExtraperDayPrice: parseFloat(document.getElementById('cust-extra-rate').value) || 0,
+        extraPersonDays: parseInt(document.getElementById('cust-extra-days').value) || 0,
+        custextratotal: parseInt(document.getElementById('cust-extra-total').value) || 0,
+        custcabtotal: parseInt(document.getElementById('cust-cab-total').value) || 0,
+        perDayPrice: parseFloat(document.getElementById('cust-price').value) || 0,
+        noOfDays: parseInt(document.getElementById('cust-days').value) || 0,
+        custmaintotal: parseInt(document.getElementById('cust-main-total').value) || 0,
+        custfoodtotal: parseInt(document.getElementById('cust-food-total').value) || 0,
         totalAmount: totalAmt,
         initialAdv: initialAdvAmt,
-        clearedDue: clearedDueAmt,
         totalDue: Math.max(0, totalAmt - totalPaid),
+        clearedDue: clearedDueAmt,
         inactive: false
       };
 

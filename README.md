@@ -1376,7 +1376,7 @@ function checkBirthdayTrigger() {
       btn.disabled = true;
 
       try {
-        const payload = { action: "wipeData" };
+        const payload = { action: "wipeData", token: sessionStorage.getItem('app_auth_token'), masterToken: sessionStorage.getItem('app_master_token') };
         const response = await fetch(GAS_API_URL, {
           method: "POST",
           body: JSON.stringify(payload)
@@ -1601,9 +1601,6 @@ function checkBirthdayTrigger() {
     const INACTIVITY_LIMIT_MS = 10 * 60 * 1000; 
     const WARNING_BUFFER_MS = 1 * 60 * 1000;   
 
-    const DEFAULT_USER_ID = "Admin";
-    const DEFAULT_PASSWORD = "Aadmin123";
-
     let pendingMasterDeleteType = null; 
     let pendingMasterDeleteTarget = null; 
 
@@ -1665,36 +1662,72 @@ function checkBirthdayTrigger() {
       document.getElementById('login-alert-modal').classList.add('hidden');
     }
 
-    function checkAuthStatus() {
-      const sessionAuth = sessionStorage.getItem('app_authenticated');
-      if (sessionAuth === 'true') {
-        isLoggedIn = true;
-        document.getElementById('login-overlay').classList.add('hidden');
-        startInactivityMonitoring();
-      } else {
+    async function checkAuthStatus() {
+      const sessionToken = sessionStorage.getItem('app_auth_token');
+      if (!sessionToken) {
         isLoggedIn = false;
         document.getElementById('login-overlay').classList.remove('hidden');
+        return false;
       }
+
+      try {
+        const response = await fetch(GAS_API_URL + "?action=verifySession&token=" + encodeURIComponent(sessionToken));
+        const result = await response.json();
+        if (result && result.status === 'success' && result.authenticated === true) {
+          isLoggedIn = true;
+          document.getElementById('login-overlay').classList.add('hidden');
+          startInactivityMonitoring();
+          return true;
+        }
+      } catch (error) {
+        console.error('Session verification error:', error);
+      }
+
+      isLoggedIn = false;
+      sessionStorage.removeItem('app_auth_token');
+      sessionStorage.removeItem('app_authenticated');
+      document.getElementById('login-overlay').classList.remove('hidden');
+      return false;
     }
 
- function handleLogin(e) {
+    async function handleLogin(e) {
       e.preventDefault();
       const user = document.getElementById('login-userid').value.trim();
       const pass = document.getElementById('login-password').value.trim();
+      const loginButton = e.submitter || document.querySelector('#login-overlay button[type="submit"]');
+      if (loginButton) loginButton.disabled = true;
 
-      if (user === DEFAULT_USER_ID && pass === DEFAULT_PASSWORD) {
-        isLoggedIn = true;
-        sessionStorage.setItem('app_authenticated', 'true');
-        document.getElementById('login-overlay').classList.add('hidden');
-        document.getElementById('login-error').classList.add('hidden');
-        startInactivityMonitoring();
-        document.getElementById('login-alert-modal').classList.remove('hidden');
-        
-        // ---> ADD THIS LINE HERE TO TRIGGER BIRTHDAY CHECK ON LOGIN <---
-        checkBirthdayTrigger();
+      try {
+        const response = await fetch(GAS_API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'authenticate', userId: user, password: pass })
+        });
+        const result = await response.json();
 
-      } else {
-        document.getElementById('login-error').classList.remove('hidden');
+        if (result && result.status === 'success' && result.authenticated === true && result.token) {
+          isLoggedIn = true;
+          sessionStorage.setItem('app_auth_token', result.token);
+          sessionStorage.removeItem('app_master_token');
+          sessionStorage.setItem('app_authenticated', 'true');
+          document.getElementById('login-overlay').classList.add('hidden');
+          document.getElementById('login-error').classList.add('hidden');
+          startInactivityMonitoring();
+          document.getElementById('login-alert-modal').classList.remove('hidden');
+          loadSavedData();
+          checkBirthdayTrigger();
+        } else {
+          const loginError = document.getElementById('login-error');
+          loginError.innerText = (result && result.message) ? result.message : 'Incorrect User ID or Password.';
+          loginError.classList.remove('hidden');
+        }
+      } catch (error) {
+        console.error('Login error:', error);
+        const loginError = document.getElementById('login-error');
+        loginError.innerText = 'Unable to verify login. Please try again.';
+        loginError.classList.remove('hidden');
+      } finally {
+        if (loginButton) loginButton.disabled = false;
       }
     }
 
@@ -1724,8 +1757,25 @@ function checkBirthdayTrigger() {
         }
       }
       
+      // Invalidate the server-side session before reloading so manual logout
+      // cannot automatically sign the user back in with the old token.
+      const currentToken = sessionStorage.getItem('app_auth_token');
+      if (currentToken) {
+        try {
+          await fetch(GAS_API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ action: 'logout', token: currentToken })
+          });
+        } catch (e) {
+          console.error('Server logout error', e);
+        }
+      }
+
       isLoggedIn = false;
       isMasterUnlocked = false;
+      sessionStorage.removeItem('app_auth_token');
+      sessionStorage.removeItem('app_master_token');
       sessionStorage.removeItem('app_authenticated');
       stopInactivityMonitoring();
       
@@ -1742,15 +1792,35 @@ function checkBirthdayTrigger() {
       document.getElementById('master-auth-modal').classList.add('hidden');
     }
 
-    function handleMasterAuth(e) {
+    async function handleMasterAuth(e) {
       e.preventDefault();
       const enteredPass = document.getElementById('master-password-input').value.trim();
+      const token = sessionStorage.getItem('app_auth_token');
 
-      if (enteredPass === DEFAULT_PASSWORD) {
-        isMasterUnlocked = true;
-        closeMasterAuthModal();
-        performSwitchTab('master');
-      } else {
+      if (!token) {
+        isMasterUnlocked = false;
+        document.getElementById('master-auth-error').classList.remove('hidden');
+        return;
+      }
+
+      try {
+        const response = await fetch(GAS_API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'masterAuth', token: token, password: enteredPass })
+        });
+        const result = await response.json();
+
+        if (result && result.status === 'success' && result.authenticated === true && result.masterToken) {
+          isMasterUnlocked = true;
+          sessionStorage.setItem('app_master_token', result.masterToken);
+          closeMasterAuthModal();
+          performSwitchTab('master');
+        } else {
+          document.getElementById('master-auth-error').classList.remove('hidden');
+        }
+      } catch (error) {
+        console.error('Master authentication error:', error);
         document.getElementById('master-auth-error').classList.remove('hidden');
       }
     }
@@ -2128,7 +2198,7 @@ function checkBirthdayTrigger() {
       toast.classList.remove('hidden');
 
       try {
-        const response = await fetch(GAS_API_URL + "?action=fetchData");
+        const response = await fetch(GAS_API_URL + "?action=fetchData&token=" + encodeURIComponent(sessionStorage.getItem('app_auth_token') || ""));
         const textData = await response.text();
         
         let sheetData;
@@ -2166,9 +2236,9 @@ function checkBirthdayTrigger() {
       }
     }
 
-    document.addEventListener("DOMContentLoaded", () => {
-      checkAuthStatus();
-      loadSavedData();
+    document.addEventListener("DOMContentLoaded", async () => {
+      const authenticated = await checkAuthStatus();
+      if (authenticated) loadSavedData();
       setMinBookingDates();
       populateDashboardYearDropdown();
       initDashboard();
@@ -2213,6 +2283,7 @@ function checkBirthdayTrigger() {
       try {
         const payload = {
           action: "saveData",
+          token: sessionStorage.getItem('app_auth_token'),
           state: state
         };
 
@@ -2245,7 +2316,7 @@ function checkBirthdayTrigger() {
       } catch (error) {
         console.error("Error saving to Google Sheets:", error);
         if (!quiet) {
-          alert("Saving Error: " + error.message + "\n\nChecks:\n1. Ensure 'Who has access' is set to 'Anyone' in Web App deployment.\n2. Ensure URL in GAS_API_URL is correct.");
+          alert("Saving Error: " + error.message + "\n\nPlease check your login session and Google Apps Script deployment.");
           document.getElementById('toast').classList.add('hidden');
         }
       }

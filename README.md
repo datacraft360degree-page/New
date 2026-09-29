@@ -825,6 +825,25 @@
     </div>
   </div>
 
+  <!-- PAYMENT CLEARED FINAL CONFIRMATION MODAL -->
+  <div id="payment-cleared-confirm-modal" class="hidden fixed inset-0 z-[85] bg-slate-900/50 backdrop-blur-md flex items-center justify-center p-4 no-print">
+    <div class="bg-white rounded-3xl shadow-2xl border border-amber-100 max-w-md w-full p-5 space-y-4 text-left">
+      <div class="flex items-start gap-3">
+        <div class="bg-amber-50 text-amber-600 w-11 h-11 rounded-2xl flex items-center justify-center text-lg shadow-sm shrink-0">
+          <i class="fa-solid fa-circle-exclamation"></i>
+        </div>
+        <div>
+          <h3 class="text-sm font-bold text-slate-900">Due Cleared Confirmation</h3>
+          <p class="text-[11px] text-slate-600 mt-2 leading-relaxed">All due has been cleared so it will be non editable onwards.</p>
+        </div>
+      </div>
+      <div class="flex space-x-2 pt-1">
+        <button type="button" onclick="closePaymentClearedConfirmation(false)" class="w-1/2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 rounded-xl text-[11px] transition">Back</button>
+        <button type="button" onclick="closePaymentClearedConfirmation(true)" class="w-1/2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl shadow-sm transition text-[11px]">Go ahead</button>
+      </div>
+    </div>
+  </div>
+
   <!-- COMPACT ADD / EDIT BOOKING MODAL -->
  <div id="booking-modal" class="hidden fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-3 overflow-y-auto no-print">
     <div class="bg-white rounded-3xl shadow-2xl border border-slate-100 max-w-3xl w-full p-5 space-y-3 my-4 max-h-[90vh] overflow-y-auto">
@@ -3302,7 +3321,9 @@ function updateDashboardCards() {
         if (isPast730Days) {
           addFoodBtn.classList.add('opacity-50', 'cursor-not-allowed');
         } else {
-          addFoodBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+          addFoodBtn.disabled = false;
+          addFoodBtn.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-slate-400', 'text-slate-500');
+          addFoodBtn.classList.add('bg-amber-600', 'hover:bg-amber-700', 'text-white');
         }
       }
       
@@ -3326,8 +3347,8 @@ function updateDashboardCards() {
             btnSave.classList.remove('bg-blue-600', 'hover:bg-blue-700');
          } else {
             btnSave.disabled = false;
-            btnSave.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-slate-400');
-            btnSave.classList.add('bg-blue-600', 'hover:bg-blue-700');
+            btnSave.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-slate-400', 'text-slate-500');
+            btnSave.classList.add('bg-blue-600', 'hover:bg-blue-700', 'text-white');
          }
       }
 
@@ -3788,6 +3809,7 @@ if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
     }
 
     let closedBookingConfirmResolver = null;
+    let paymentClearedConfirmResolver = null;
 
     function closeClosedBookingConfirm(goAhead) {
       const modal = document.getElementById('closed-booking-confirm-modal');
@@ -3804,12 +3826,27 @@ if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
       return new Promise((resolve) => {
         closedBookingConfirmResolver = resolve;
         const modal = document.getElementById('closed-booking-confirm-modal');
-        if (modal) {
-          modal.classList.remove('hidden');
-        } else {
-          closedBookingConfirmResolver = null;
-          resolve(false);
-        }
+        if (modal) modal.classList.remove('hidden');
+        else { closedBookingConfirmResolver = null; resolve(false); }
+      });
+    }
+
+    function closePaymentClearedConfirmation(goAhead) {
+      const modal = document.getElementById('payment-cleared-confirm-modal');
+      if (modal) modal.classList.add('hidden');
+      if (paymentClearedConfirmResolver) {
+        const resolver = paymentClearedConfirmResolver;
+        paymentClearedConfirmResolver = null;
+        resolver(goAhead);
+      }
+    }
+
+    function askPaymentClearedConfirmation() {
+      return new Promise((resolve) => {
+        paymentClearedConfirmResolver = resolve;
+        const modal = document.getElementById('payment-cleared-confirm-modal');
+        if (modal) modal.classList.remove('hidden');
+        else { paymentClearedConfirmResolver = null; resolve(false); }
       });
     }
 
@@ -4064,14 +4101,14 @@ if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
       const finalDueAmt = Math.max(0, totalAmt - totalPaid);
 
       // When a Closed Booking's outstanding due is fully cleared for the first time,
-      // show the requested final warning and permanently lock the booking for editing.
+      // ask for a final confirmation before permanently locking the booking.
       const existingBookingForPaymentLock = id
         ? state.bookings.find(b => String(b.id) === String(id))
         : null;
       const existingBookingIsClosed = existingBookingForPaymentLock
         ? Date.now() > getEffectiveCheckoutTime(existingBookingForPaymentLock)
         : false;
-      const shouldLockAfterClearingDue =
+      const shouldAskPaymentClearConfirmation =
         !!existingBookingForPaymentLock &&
         existingBookingIsClosed &&
         Number(existingBookingForPaymentLock.totalDue || 0) > 0 &&
@@ -4079,8 +4116,17 @@ if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
         clearedDueAmt > 0 &&
         !existingBookingForPaymentLock.paymentClearedLocked;
 
-      if (shouldLockAfterClearingDue) {
-        alert("All due has been cleared so it will be non editable onwards.");
+      let shouldLockAfterClearingDue = false;
+      if (shouldAskPaymentClearConfirmation) {
+        const goAhead = await askPaymentClearedConfirmation();
+        if (!goAhead) {
+          const billingSection = document.getElementById('sec-billing-summary');
+          if (billingSection) billingSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          const clearBillInput = document.getElementById('cust-clear-bill');
+          if (clearBillInput) { clearBillInput.focus(); clearBillInput.select(); }
+          return;
+        }
+        shouldLockAfterClearingDue = true;
       }
 
       const paymentClearedLocked =

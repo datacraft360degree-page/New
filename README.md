@@ -162,28 +162,6 @@
         <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 active:scale-98 text-white font-bold py-2.5 rounded-2xl shadow-sm transition text-xs flex items-center justify-center gap-1.5">
           <i class="fa-solid fa-right-to-bracket"></i> Login
         </button>
-
-        <button type="button" onclick="openFrontendCredentialReset()" class="w-full text-slate-500 hover:text-blue-600 font-semibold py-1.5 rounded-xl transition text-[10px] flex items-center justify-center gap-1.5">
-          <i class="fa-solid fa-key"></i> Reset / Forgot User ID & Password
-        </button>
-
-        <button type="button" onclick="openCredentialResetModal()" class="w-full text-slate-500 hover:text-blue-600 font-semibold py-1.5 rounded-xl transition text-[10px] flex items-center justify-center gap-1.5">
-          <i class="fa-solid fa-key"></i> Reset / Forgot User ID & Password
-        </button>
-      </form>
-    </div>
-  </div>
-
-  <!-- FRONTEND LOGIN CREDENTIAL RESET MODAL -->
-  <div id="frontend-credential-reset-modal" class="hidden fixed inset-0 z-[70] bg-slate-900/50 backdrop-blur-md flex items-center justify-center p-4 no-print">
-    <div class="bg-white rounded-3xl shadow-2xl border border-slate-100 max-w-sm w-full p-5 space-y-4 text-left">
-      <div class="text-center space-y-1"><div class="bg-amber-50 text-amber-600 w-11 h-11 rounded-2xl flex items-center justify-center mx-auto text-lg shadow-sm"><i class="fa-solid fa-key"></i></div><h3 class="text-sm font-bold text-slate-900">Reset / Forgot Credentials</h3><p class="text-[10px] text-slate-500">Reset credentials for this browser.</p></div>
-      <form onsubmit="handleFrontendCredentialReset(event)" class="space-y-3">
-        <input type="text" id="frontend-reset-userid" required placeholder="New User ID" class="w-full bg-slate-100 border border-transparent focus:border-blue-500 rounded-2xl px-3 py-2 focus:outline-none focus:bg-white text-xs transition" />
-        <input type="password" id="frontend-reset-password" required placeholder="New Password" class="w-full bg-slate-100 border border-transparent focus:border-blue-500 rounded-2xl px-3 py-2 focus:outline-none focus:bg-white text-xs transition" />
-        <input type="password" id="frontend-reset-password-confirm" required placeholder="Confirm New Password" class="w-full bg-slate-100 border border-transparent focus:border-blue-500 rounded-2xl px-3 py-2 focus:outline-none focus:bg-white text-xs transition" />
-        <div id="frontend-reset-error" class="hidden bg-rose-50 border border-rose-100 text-rose-600 text-[10px] p-2 rounded-xl text-center font-medium"></div>
-        <div class="flex space-x-2"><button type="button" onclick="closeFrontendCredentialReset()" class="w-1/2 bg-slate-100 text-slate-700 font-semibold py-2 rounded-xl text-[11px]">Cancel</button><button type="submit" class="w-1/2 bg-amber-600 text-white font-bold py-2 rounded-xl text-[11px]">Reset</button></div>
       </form>
     </div>
   </div>
@@ -1398,7 +1376,7 @@ function checkBirthdayTrigger() {
       btn.disabled = true;
 
       try {
-        const payload = { action: "wipeData", token: sessionStorage.getItem('app_auth_token'), masterToken: sessionStorage.getItem('app_master_token') };
+        const payload = { action: "wipeData" };
         const response = await fetch(GAS_API_URL, {
           method: "POST",
           body: JSON.stringify(payload)
@@ -1623,6 +1601,9 @@ function checkBirthdayTrigger() {
     const INACTIVITY_LIMIT_MS = 10 * 60 * 1000; 
     const WARNING_BUFFER_MS = 1 * 60 * 1000;   
 
+    const DEFAULT_USER_ID = "Admin";
+    const DEFAULT_PASSWORD = "Aadmin123";
+
     let pendingMasterDeleteType = null; 
     let pendingMasterDeleteTarget = null; 
 
@@ -1684,176 +1665,36 @@ function checkBirthdayTrigger() {
       document.getElementById('login-alert-modal').classList.add('hidden');
     }
 
-    async function checkAuthStatus() {
-      const sessionToken = sessionStorage.getItem('app_auth_token');
-      if (!sessionToken) {
+    function checkAuthStatus() {
+      const sessionAuth = sessionStorage.getItem('app_authenticated');
+      if (sessionAuth === 'true') {
+        isLoggedIn = true;
+        document.getElementById('login-overlay').classList.add('hidden');
+        startInactivityMonitoring();
+      } else {
         isLoggedIn = false;
         document.getElementById('login-overlay').classList.remove('hidden');
-        return false;
       }
-
-      try {
-        const response = await fetch(GAS_API_URL + "?action=verifySession&token=" + encodeURIComponent(sessionToken));
-        const result = await response.json();
-        if (result && result.status === 'success' && result.authenticated === true) {
-          isLoggedIn = true;
-          document.getElementById('login-overlay').classList.add('hidden');
-          startInactivityMonitoring();
-          return true;
-        }
-      } catch (error) {
-        console.error('Session verification error:', error);
-      }
-
-      isLoggedIn = false;
-      sessionStorage.removeItem('app_auth_token');
-      sessionStorage.removeItem('app_authenticated');
-      document.getElementById('login-overlay').classList.remove('hidden');
-      return false;
     }
 
-    function openFrontendCredentialReset() { document.getElementById('frontend-reset-error').classList.add('hidden'); document.getElementById('frontend-credential-reset-modal').classList.remove('hidden'); }
-    function closeFrontendCredentialReset() { document.getElementById('frontend-credential-reset-modal').classList.add('hidden'); }
-    function handleFrontendCredentialReset(e) {
-      e.preventDefault(); const u=document.getElementById('frontend-reset-userid').value.trim(), p=document.getElementById('frontend-reset-password').value, c=document.getElementById('frontend-reset-password-confirm').value, er=document.getElementById('frontend-reset-error');
-      if (!u || !p || !c) { er.innerText='All fields are required.'; er.classList.remove('hidden'); return; }
-      if (p!==c) { er.innerText='Passwords do not match.'; er.classList.remove('hidden'); return; }
-      localStorage.setItem('frontend_login_user_id',u); localStorage.setItem('frontend_login_password',p);
-      document.getElementById('login-userid').value=u; document.getElementById('login-password').value=p; closeFrontendCredentialReset();
-      const le=document.getElementById('login-error'); le.innerText='Credentials reset successfully on this browser. You can now login.'; le.className='bg-emerald-50 border border-emerald-100 text-emerald-600 text-[10px] p-2 rounded-xl text-center font-medium'; le.classList.remove('hidden');
-    }
-
-    async function handleLogin(e) {
+ function handleLogin(e) {
       e.preventDefault();
       const user = document.getElementById('login-userid').value.trim();
       const pass = document.getElementById('login-password').value.trim();
-      const loginButton = e.submitter || document.querySelector('#login-overlay button[type="submit"]');
-      if (loginButton) loginButton.disabled = true;
 
-      try {
-        const response = await fetch(GAS_API_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({ action: 'authenticate', userId: user, password: pass })
-        });
-        const result = await response.json();
+      if (user === DEFAULT_USER_ID && pass === DEFAULT_PASSWORD) {
+        isLoggedIn = true;
+        sessionStorage.setItem('app_authenticated', 'true');
+        document.getElementById('login-overlay').classList.add('hidden');
+        document.getElementById('login-error').classList.add('hidden');
+        startInactivityMonitoring();
+        document.getElementById('login-alert-modal').classList.remove('hidden');
+        
+        // ---> ADD THIS LINE HERE TO TRIGGER BIRTHDAY CHECK ON LOGIN <---
+        checkBirthdayTrigger();
 
-        if (result && result.status === 'success' && result.authenticated === true && result.token) {
-          isLoggedIn = true;
-          sessionStorage.setItem('app_auth_token', result.token);
-          sessionStorage.removeItem('app_master_token');
-          sessionStorage.setItem('app_authenticated', 'true');
-          document.getElementById('login-overlay').classList.add('hidden');
-          document.getElementById('login-error').classList.add('hidden');
-          startInactivityMonitoring();
-          document.getElementById('login-alert-modal').classList.remove('hidden');
-          loadSavedData();
-          checkBirthdayTrigger();
-        } else {
-          const loginError = document.getElementById('login-error');
-          loginError.innerText = (result && result.message) ? result.message : 'Incorrect User ID or Password.';
-          loginError.classList.remove('hidden');
-        }
-      } catch (error) {
-        console.error('Login error:', error);
-        const loginError = document.getElementById('login-error');
-        loginError.innerText = 'Unable to verify login. Please try again.';
-        loginError.classList.remove('hidden');
-      } finally {
-        if (loginButton) loginButton.disabled = false;
-      }
-    }
-
-    function openCredentialResetModal() {
-      document.getElementById('reset-master-password').value = '';
-      document.getElementById('reset-userid').value = '';
-      document.getElementById('reset-password').value = '';
-      document.getElementById('reset-password-confirm').value = '';
-      const error = document.getElementById('credential-reset-error');
-      error.innerText = '';
-      error.classList.add('hidden');
-      document.getElementById('credential-reset-modal').classList.remove('hidden');
-    }
-
-    function closeCredentialResetModal() {
-      document.getElementById('credential-reset-modal').classList.add('hidden');
-    }
-
-    async function handleCredentialReset(e) {
-      e.preventDefault();
-
-      const masterPassword = document.getElementById('reset-master-password').value;
-      const newUserId = document.getElementById('reset-userid').value.trim();
-      const newPassword = document.getElementById('reset-password').value;
-      const confirmPassword = document.getElementById('reset-password-confirm').value;
-      const resetButton = document.getElementById('credential-reset-submit');
-      const error = document.getElementById('credential-reset-error');
-
-      error.innerText = '';
-      error.classList.add('hidden');
-
-      if (!newUserId || !newPassword || !confirmPassword || !masterPassword) {
-        error.innerText = 'All fields are required.';
-        error.classList.remove('hidden');
-        return;
-      }
-
-      if (newPassword !== confirmPassword) {
-        error.innerText = 'New Password and Confirm New Password do not match.';
-        error.classList.remove('hidden');
-        return;
-      }
-
-      if (newPassword.length < 6) {
-        error.innerText = 'New Password must be at least 6 characters.';
-        error.classList.remove('hidden');
-        return;
-      }
-
-      if (resetButton) {
-        resetButton.disabled = true;
-        resetButton.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Resetting...';
-      }
-
-      try {
-        const response = await fetch(GAS_API_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({
-            action: 'resetCredentials',
-            masterPassword: masterPassword,
-            newUserId: newUserId,
-            newPassword: newPassword
-          })
-        });
-
-        const result = await response.json();
-
-        if (result && result.status === 'success') {
-          closeCredentialResetModal();
-          document.getElementById('login-userid').value = newUserId;
-          document.getElementById('login-password').value = '';
-          const loginError = document.getElementById('login-error');
-          loginError.innerText = 'Credentials reset successfully. Please enter your new password and login.';
-          loginError.className = 'bg-emerald-50 border border-emerald-100 text-emerald-600 text-[10px] p-2 rounded-xl text-center font-medium';
-          loginError.classList.remove('hidden');
-          setTimeout(() => {
-            loginError.className = 'hidden bg-rose-50 border border-rose-100 text-rose-600 text-[10px] p-2 rounded-xl text-center font-medium';
-            loginError.innerText = 'Invalid User ID or Password!';
-          }, 5000);
-        } else {
-          error.innerText = (result && result.message) ? result.message : 'Unable to reset credentials.';
-          error.classList.remove('hidden');
-        }
-      } catch (errorObj) {
-        console.error('Credential reset error:', errorObj);
-        error.innerText = 'Unable to reset credentials. Please try again.';
-        error.classList.remove('hidden');
-      } finally {
-        if (resetButton) {
-          resetButton.disabled = false;
-          resetButton.innerHTML = '<i class="fa-solid fa-rotate"></i> Reset';
-        }
+      } else {
+        document.getElementById('login-error').classList.remove('hidden');
       }
     }
 
@@ -1883,25 +1724,8 @@ function checkBirthdayTrigger() {
         }
       }
       
-      // Invalidate the server-side session before reloading so manual logout
-      // cannot automatically sign the user back in with the old token.
-      const currentToken = sessionStorage.getItem('app_auth_token');
-      if (currentToken) {
-        try {
-          await fetch(GAS_API_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify({ action: 'logout', token: currentToken })
-          });
-        } catch (e) {
-          console.error('Server logout error', e);
-        }
-      }
-
       isLoggedIn = false;
       isMasterUnlocked = false;
-      sessionStorage.removeItem('app_auth_token');
-      sessionStorage.removeItem('app_master_token');
       sessionStorage.removeItem('app_authenticated');
       stopInactivityMonitoring();
       
@@ -1918,35 +1742,15 @@ function checkBirthdayTrigger() {
       document.getElementById('master-auth-modal').classList.add('hidden');
     }
 
-    async function handleMasterAuth(e) {
+    function handleMasterAuth(e) {
       e.preventDefault();
       const enteredPass = document.getElementById('master-password-input').value.trim();
-      const token = sessionStorage.getItem('app_auth_token');
 
-      if (!token) {
-        isMasterUnlocked = false;
-        document.getElementById('master-auth-error').classList.remove('hidden');
-        return;
-      }
-
-      try {
-        const response = await fetch(GAS_API_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({ action: 'masterAuth', token: token, password: enteredPass })
-        });
-        const result = await response.json();
-
-        if (result && result.status === 'success' && result.authenticated === true && result.masterToken) {
-          isMasterUnlocked = true;
-          sessionStorage.setItem('app_master_token', result.masterToken);
-          closeMasterAuthModal();
-          performSwitchTab('master');
-        } else {
-          document.getElementById('master-auth-error').classList.remove('hidden');
-        }
-      } catch (error) {
-        console.error('Master authentication error:', error);
+      if (enteredPass === DEFAULT_PASSWORD) {
+        isMasterUnlocked = true;
+        closeMasterAuthModal();
+        performSwitchTab('master');
+      } else {
         document.getElementById('master-auth-error').classList.remove('hidden');
       }
     }
@@ -2324,7 +2128,7 @@ function checkBirthdayTrigger() {
       toast.classList.remove('hidden');
 
       try {
-        const response = await fetch(GAS_API_URL + "?action=fetchData&token=" + encodeURIComponent(sessionStorage.getItem('app_auth_token') || ""));
+        const response = await fetch(GAS_API_URL + "?action=fetchData");
         const textData = await response.text();
         
         let sheetData;
@@ -2362,9 +2166,9 @@ function checkBirthdayTrigger() {
       }
     }
 
-    document.addEventListener("DOMContentLoaded", async () => {
-      const authenticated = await checkAuthStatus();
-      if (authenticated) loadSavedData();
+    document.addEventListener("DOMContentLoaded", () => {
+      checkAuthStatus();
+      loadSavedData();
       setMinBookingDates();
       populateDashboardYearDropdown();
       initDashboard();
@@ -2409,7 +2213,6 @@ function checkBirthdayTrigger() {
       try {
         const payload = {
           action: "saveData",
-          token: sessionStorage.getItem('app_auth_token'),
           state: state
         };
 
@@ -2442,7 +2245,7 @@ function checkBirthdayTrigger() {
       } catch (error) {
         console.error("Error saving to Google Sheets:", error);
         if (!quiet) {
-          alert("Saving Error: " + error.message + "\n\nPlease check your login session and Google Apps Script deployment.");
+          alert("Saving Error: " + error.message + "\n\nChecks:\n1. Ensure 'Who has access' is set to 'Anyone' in Web App deployment.\n2. Ensure URL in GAS_API_URL is correct.");
           document.getElementById('toast').classList.add('hidden');
         }
       }

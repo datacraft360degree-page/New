@@ -810,7 +810,7 @@
         <div>
           <h3 class="text-sm font-bold text-slate-900">Closed Booking Confirmation</h3>
           <p class="text-[11px] text-slate-600 mt-2 leading-relaxed">
-            This Booking will be considered as “Closed Booking” so make sure you have filled all the required details because after saving this only “Extra Food/Drink, Cab Fare &amp; Billing Summary” sections will be editable.
+            This Booking will be considered as “Closed Booking” so make sure you have filled all the required details because after saving this Only “Extra Food/Drink, Cab Fare &amp; Billing Summary Section" will be editable.
           </p>
         </div>
       </div>
@@ -825,21 +825,27 @@
     </div>
   </div>
 
-  <!-- PAYMENT CLEARED FINAL CONFIRMATION MODAL -->
-  <div id="payment-cleared-confirm-modal" class="hidden fixed inset-0 z-[85] bg-slate-900/50 backdrop-blur-md flex items-center justify-center p-4 no-print">
-    <div class="bg-white rounded-3xl shadow-2xl border border-amber-100 max-w-md w-full p-5 space-y-4 text-left">
+  <!-- ALL DUE CLEARED CONFIRMATION MODAL -->
+  <div id="all-due-cleared-confirm-modal" class="hidden fixed inset-0 z-[90] bg-slate-900/50 backdrop-blur-md flex items-center justify-center p-4 no-print">
+    <div class="bg-white rounded-3xl shadow-2xl border border-emerald-100 max-w-md w-full p-5 space-y-4 text-left">
       <div class="flex items-start gap-3">
-        <div class="bg-amber-50 text-amber-600 w-11 h-11 rounded-2xl flex items-center justify-center text-lg shadow-sm shrink-0">
-          <i class="fa-solid fa-circle-exclamation"></i>
+        <div class="bg-emerald-50 text-emerald-600 w-11 h-11 rounded-2xl flex items-center justify-center text-lg shadow-sm shrink-0">
+          <i class="fa-solid fa-circle-check"></i>
         </div>
         <div>
-          <h3 class="text-sm font-bold text-slate-900">Due Cleared Confirmation</h3>
-          <p class="text-[11px] text-slate-600 mt-2 leading-relaxed">All due has been cleared so it will be non editable onwards.</p>
+          <h3 class="text-sm font-bold text-slate-900">All Due Cleared</h3>
+          <p class="text-[11px] text-slate-600 mt-2 leading-relaxed">
+            All due has been cleared so it will be non editable so on
+          </p>
         </div>
       </div>
       <div class="flex space-x-2 pt-1">
-        <button type="button" onclick="closePaymentClearedConfirmation(false)" class="w-1/2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 rounded-xl text-[11px] transition">Back</button>
-        <button type="button" onclick="closePaymentClearedConfirmation(true)" class="w-1/2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl shadow-sm transition text-[11px]">Go ahead</button>
+        <button type="button" onclick="closeAllDueClearedConfirm(false)" class="w-1/2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 rounded-xl text-[11px] transition">
+          Back
+        </button>
+        <button type="button" onclick="closeAllDueClearedConfirm(true)" class="w-1/2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl shadow-sm transition text-[11px]">
+          Go ahead
+        </button>
       </div>
     </div>
   </div>
@@ -3239,6 +3245,11 @@ function updateDashboardCards() {
             return;
           }
 
+          if (isTrue(b.billingLocked)) {
+            alert("This booking is non-editable because all due has been cleared.");
+            return;
+          }
+
           if (!isRoomInMaster(b.roomNo)) {
             alert("This booking details were deleted from Master Data and cannot be opened or edited.");
             return;
@@ -3321,9 +3332,7 @@ function updateDashboardCards() {
         if (isPast730Days) {
           addFoodBtn.classList.add('opacity-50', 'cursor-not-allowed');
         } else {
-          addFoodBtn.disabled = false;
-          addFoodBtn.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-slate-400', 'text-slate-500');
-          addFoodBtn.classList.add('bg-amber-600', 'hover:bg-amber-700', 'text-white');
+          addFoodBtn.classList.remove('opacity-50', 'cursor-not-allowed');
         }
       }
       
@@ -3347,8 +3356,8 @@ function updateDashboardCards() {
             btnSave.classList.remove('bg-blue-600', 'hover:bg-blue-700');
          } else {
             btnSave.disabled = false;
-            btnSave.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-slate-400', 'text-slate-500');
-            btnSave.classList.add('bg-blue-600', 'hover:bg-blue-700', 'text-white');
+            btnSave.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-slate-400');
+            btnSave.classList.add('bg-blue-600', 'hover:bg-blue-700');
          }
       }
 
@@ -3491,19 +3500,6 @@ function updateDashboardCards() {
         }
 
         calculateModalBilling();
-
-        // A Closed Booking that has already had its full due cleared is permanently read-only.
-        if (b.paymentClearedLocked) {
-          document.getElementById('modal-title').innerText = 'Closed Booking (Payment Cleared - Read-Only)';
-          const lockedForm = document.getElementById('booking-form');
-          if (lockedForm) {
-            lockedForm.querySelectorAll('input, select, button').forEach(el => {
-              el.disabled = true;
-              el.classList.add('bg-slate-100', 'cursor-not-allowed', 'text-slate-500');
-              el.classList.remove('bg-white', 'bg-amber-50');
-            });
-          }
-        }
       } else {
         document.getElementById('modal-title').innerText = 'Add New Booking';
         document.getElementById('modal-booking-id').value = '';
@@ -3809,7 +3805,6 @@ if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
     }
 
     let closedBookingConfirmResolver = null;
-    let paymentClearedConfirmResolver = null;
 
     function closeClosedBookingConfirm(goAhead) {
       const modal = document.getElementById('closed-booking-confirm-modal');
@@ -3826,27 +3821,38 @@ if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
       return new Promise((resolve) => {
         closedBookingConfirmResolver = resolve;
         const modal = document.getElementById('closed-booking-confirm-modal');
-        if (modal) modal.classList.remove('hidden');
-        else { closedBookingConfirmResolver = null; resolve(false); }
+        if (modal) {
+          modal.classList.remove('hidden');
+        } else {
+          closedBookingConfirmResolver = null;
+          resolve(false);
+        }
       });
     }
 
-    function closePaymentClearedConfirmation(goAhead) {
-      const modal = document.getElementById('payment-cleared-confirm-modal');
+    let allDueClearedConfirmResolver = null;
+
+    function closeAllDueClearedConfirm(goAhead) {
+      const modal = document.getElementById('all-due-cleared-confirm-modal');
       if (modal) modal.classList.add('hidden');
-      if (paymentClearedConfirmResolver) {
-        const resolver = paymentClearedConfirmResolver;
-        paymentClearedConfirmResolver = null;
+
+      if (allDueClearedConfirmResolver) {
+        const resolver = allDueClearedConfirmResolver;
+        allDueClearedConfirmResolver = null;
         resolver(goAhead);
       }
     }
 
-    function askPaymentClearedConfirmation() {
+    function askAllDueClearedConfirmation() {
       return new Promise((resolve) => {
-        paymentClearedConfirmResolver = resolve;
-        const modal = document.getElementById('payment-cleared-confirm-modal');
-        if (modal) modal.classList.remove('hidden');
-        else { paymentClearedConfirmResolver = null; resolve(false); }
+        allDueClearedConfirmResolver = resolve;
+        const modal = document.getElementById('all-due-cleared-confirm-modal');
+        if (modal) {
+          modal.classList.remove('hidden');
+        } else {
+          allDueClearedConfirmResolver = null;
+          resolve(false);
+        }
       });
     }
 
@@ -3886,34 +3892,6 @@ if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
 
       const checkIn = `${inDate}T${inTime}:00+05:30`;
       const checkOut = `${outDate}T${outTime}:00+05:30`;
-
-      // If both main Check-In and Check-Out dates are earlier than today,
-      // ask for confirmation before continuing with the normal save process.
-      const todayLocal = new Date();
-      const todayDateOnly = new Date(
-        todayLocal.getFullYear(),
-        todayLocal.getMonth(),
-        todayLocal.getDate()
-      );
-      const checkInDateOnly = inDate ? new Date(`${inDate}T00:00:00`) : null;
-      const checkOutDateOnly = outDate ? new Date(`${outDate}T00:00:00`) : null;
-
-      // Show the Closed Booking confirmation ONLY when creating a NEW booking.
-      // Existing bookings being edited must not show this confirmation again.
-      const isNewBooking = !bookingModalId;
-
-      if (
-        isNewBooking &&
-        checkInDateOnly &&
-        checkOutDateOnly &&
-        checkInDateOnly < todayDateOnly &&
-        checkOutDateOnly < todayDateOnly
-      ) {
-        const goAhead = await askClosedBookingConfirmation();
-        if (!goAhead) {
-          return;
-        }
-      }
 
       const hasExtendedCheckout = document.getElementById('cust-has-extended-checkout')?.checked || false;
       let extendedCheckOut = null;
@@ -4097,42 +4075,43 @@ if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
       const initialAdvAmt = parseFloat(document.getElementById('cust-advance').getAttribute('data-initial-adv')) || parseFloat(document.getElementById('cust-advance').value) || 0;
       const clearedDueAmt = parseFloat(document.getElementById('cust-clear-bill').value) || 0;
 
-      const totalPaid = initialAdvAmt + clearedDueAmt;
-      const finalDueAmt = Math.max(0, totalAmt - totalPaid);
-
-      // When a Closed Booking's outstanding due is fully cleared for the first time,
-      // ask for a final confirmation before permanently locking the booking.
-      const existingBookingForPaymentLock = id
+      const existingBookingForEdit = id
         ? state.bookings.find(b => String(b.id) === String(id))
         : null;
-      const existingBookingIsClosed = existingBookingForPaymentLock
-        ? Date.now() > getEffectiveCheckoutTime(existingBookingForPaymentLock)
-        : false;
-      const shouldAskPaymentClearConfirmation =
-        !!existingBookingForPaymentLock &&
-        existingBookingIsClosed &&
-        Number(existingBookingForPaymentLock.totalDue || 0) > 0 &&
-        finalDueAmt <= 0 &&
-        clearedDueAmt > 0 &&
-        !existingBookingForPaymentLock.paymentClearedLocked;
 
-      let shouldLockAfterClearingDue = false;
-      if (shouldAskPaymentClearConfirmation) {
-        const goAhead = await askPaymentClearedConfirmation();
+      const effectiveOutForStatus = existingBookingForEdit
+        ? getEffectiveCheckoutTime(existingBookingForEdit)
+        : 0;
+      const isClosedExistingBooking =
+        !!existingBookingForEdit &&
+        !isInactiveBooking(existingBookingForEdit) &&
+        Date.now() > effectiveOutForStatus;
+
+      const dueBeforeThisClear = Math.max(0, totalAmt - initialAdvAmt);
+      const clearsAllDue = dueBeforeThisClear > 0 && clearedDueAmt >= dueBeforeThisClear;
+
+      // Only existing Closed bookings trigger this confirmation, and only
+      // after the user has entered enough payment to clear the full due.
+      let lockBillingAfterSave = false;
+      if (isClosedExistingBooking && clearsAllDue && !existingBookingForEdit.billingLocked) {
+        const goAhead = await askAllDueClearedConfirmation();
+
         if (!goAhead) {
-          const billingSection = document.getElementById('sec-billing-summary');
-          if (billingSection) billingSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          const clearBillInput = document.getElementById('cust-clear-bill');
-          if (clearBillInput) { clearBillInput.focus(); clearBillInput.select(); }
+          // Keep the booking modal open and return the user to Billing Summary
+          // so they can edit the payment before saving again.
+          setTimeout(() => {
+            const billingSection = document.getElementById('sec-billing-summary');
+            if (billingSection) billingSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            const clearInput = document.getElementById('cust-clear-bill');
+            if (clearInput) clearInput.focus();
+          }, 50);
           return;
         }
-        shouldLockAfterClearingDue = true;
+
+        lockBillingAfterSave = true;
       }
 
-      const paymentClearedLocked =
-        !!(existingBookingForPaymentLock && existingBookingForPaymentLock.paymentClearedLocked) ||
-        shouldLockAfterClearingDue;
-
+      const totalPaid = initialAdvAmt + clearedDueAmt;
       const countryCodeVal = document.getElementById('cust-country-code').value.trim() || '+91';
 
       const newBooking = {
@@ -4173,9 +4152,9 @@ if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
         custfoodtotal: parseInt(document.getElementById('cust-food-total').value) || 0,
         totalAmount: totalAmt,
         initialAdv: initialAdvAmt,
-        totalDue: finalDueAmt,
+        totalDue: Math.max(0, totalAmt - totalPaid),
         clearedDue: clearedDueAmt,
-        paymentClearedLocked: paymentClearedLocked,
+        billingLocked: !!(existingBookingForEdit?.billingLocked || lockBillingAfterSave),
         inactive: false
       };
 
@@ -4313,9 +4292,10 @@ if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
         
         let actionButtonsHtml = `
           <div class="flex items-center justify-center space-x-1">
+            ${isTrue(b.billingLocked) ? '' : `
             <button onclick="openBookingModal('${b.id}')" class="text-blue-600 hover:text-blue-800 p-1 text-sm" title="Edit Booking Details">
               <i class="fa-solid fa-pen-to-square"></i>
-            </button>              
+            </button>`}
             <button onclick="${printOnClick}" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-full text-[11px] font-bold transition shadow-xs">Print</button>
           </div>
         `;

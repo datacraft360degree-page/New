@@ -567,6 +567,24 @@
 
       </div>
 
+      <!-- ALL BOOKING REMARKS: separate dashboard row with Add Cab Trip-style toggle -->
+      <div class="bg-white rounded-3xl shadow-sm border border-indigo-200/80 p-4 space-y-3">
+        <div class="flex justify-between items-center gap-3 border-b border-slate-100 pb-2">
+          <div>
+            <h3 class="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+              <i class="fa-solid fa-comment-dots text-indigo-600"></i> All Booking Remarks
+            </h3>
+            <p class="text-[10px] text-slate-500 mt-0.5">View saved remarks by booking.</p>
+          </div>
+          <button type="button" id="btn-toggle-all-remarks" onclick="toggleDashboardAllRemarks()" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-700 px-3 py-1.5 rounded-full text-[10px] font-semibold inline-flex items-center gap-1.5 transition whitespace-nowrap">
+            <i class="fa-solid fa-plus text-[9px]"></i> Show all remarks
+          </button>
+        </div>
+        <div id="dash-all-remarks-container" class="hidden space-y-2">
+          <p class="text-[11px] text-slate-400 italic py-2 text-center">No saved remarks found.</p>
+        </div>
+      </div>
+
       <!-- Active years Directory Table Hidden -->
       <div class="hidden bg-white rounded-3xl shadow-sm border border-slate-200/60 p-4">
         <div class="mb-3 flex justify-between items-center">
@@ -825,31 +843,6 @@
     </div>
   </div>
 
-  <!-- ALL DUE CLEARED CONFIRMATION MODAL -->
-  <div id="all-due-cleared-confirm-modal" class="hidden fixed inset-0 z-[90] bg-slate-900/50 backdrop-blur-md flex items-center justify-center p-4 no-print">
-    <div class="bg-white rounded-3xl shadow-2xl border border-emerald-100 max-w-md w-full p-5 space-y-4 text-left">
-      <div class="flex items-start gap-3">
-        <div class="bg-emerald-50 text-emerald-600 w-11 h-11 rounded-2xl flex items-center justify-center text-lg shadow-sm shrink-0">
-          <i class="fa-solid fa-circle-check"></i>
-        </div>
-        <div>
-          <h3 class="text-sm font-bold text-slate-900">All Due Cleared</h3>
-          <p class="text-[11px] text-slate-600 mt-2 leading-relaxed">
-            All due has been cleared so it will be non editable so on
-          </p>
-        </div>
-      </div>
-      <div class="flex space-x-2 pt-1">
-        <button type="button" onclick="closeAllDueClearedConfirm(false)" class="w-1/2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 rounded-xl text-[11px] transition">
-          Back
-        </button>
-        <button type="button" onclick="closeAllDueClearedConfirm(true)" class="w-1/2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl shadow-sm transition text-[11px]">
-          Go ahead
-        </button>
-      </div>
-    </div>
-  </div>
-
   <!-- COMPACT ADD / EDIT BOOKING MODAL -->
  <div id="booking-modal" class="hidden fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-3 overflow-y-auto no-print">
     <div class="bg-white rounded-3xl shadow-2xl border border-slate-100 max-w-3xl w-full p-5 space-y-3 my-4 max-h-[90vh] overflow-y-auto">
@@ -1061,6 +1054,23 @@
           <div id="cab-trips-container" class="space-y-2 max-h-40 overflow-y-auto pr-1 mt-2"></div>
         </div>
 
+        <!-- BOOKING REMARK SECTION: separate row like Add Cab Trip / Add Food Order -->
+        <div id="sec-booking-remark" class="bg-indigo-50/40 p-3 rounded-2xl border border-indigo-200/80 space-y-2.5 transition-all">
+          <div class="flex justify-between items-center">
+            <h4 class="text-[9px] font-bold uppercase tracking-wider text-indigo-700 flex items-center gap-1.5">
+              <i class="fa-solid fa-comment-dots text-indigo-600"></i> Booking Remark
+            </h4>
+            <button type="button" id="btn-toggle-booking-remark" onclick="toggleBookingRemark()" class="bg-lime-100 hover:bg-lime-200 text-green-800 border border-green-200 px-2.5 py-1 rounded-full text-[10px] font-semibold inline-flex items-center gap-1 transition">
+              <i class="fa-solid fa-plus text-[9px]"></i> Add Remark
+            </button>
+          </div>
+          <div id="booking-remark-editor" class="hidden">
+            <label for="cust-booking-remark" class="block text-[10px] font-semibold text-indigo-700 mb-1">Booking Remark <span class="font-normal text-slate-500">(maximum 1000 words)</span></label>
+            <textarea id="cust-booking-remark" rows="3" maxlength="12000" oninput="updateBookingRemarkCount(); keepBookingRemarkOpenIfFilled()" placeholder="Add booking remark..." class="w-full bg-white border border-indigo-200 rounded-xl px-3 py-2 text-[11px] focus:outline-none focus:border-indigo-500 resize-y"></textarea>
+            <p id="cust-booking-remark-count" class="text-[9px] text-slate-500 text-right">0 / 1000 words</p>
+          </div>
+        </div>
+
         <!-- Billing Calculation Box -->
 <div id="sec-billing-summary" class="bg-blue-50/40 p-3 rounded-2xl border border-blue-100 space-y-2.5 transition-all">
   <h4 class="text-[9px] font-bold uppercase tracking-wider text-blue-700 flex items-center gap-1.5">
@@ -1223,6 +1233,7 @@
         </div>
       </div>
 
+      <div id="inv-booking-remark" class="hidden mb-3 p-3 border border-slate-200 rounded-xl text-[10px] whitespace-pre-wrap break-words"></div>
       <div class="pt-4 border-t border-slate-200/80 flex justify-between items-end text-[10px] text-slate-400">
         <div>
           <p class="font-bold text-slate-600">Thank you for staying with us!</p>
@@ -2002,6 +2013,7 @@ function checkBirthdayTrigger() {
           "Include Meals": (b.includeMeals !== false && b.includeMeals !== 'false') ? "Yes" : "No",
           "Food Orders Details": foodList.map(f => `${f.foodDesc} (${format24hDate(f.foodDateTime)}): ${f.plates} pl @ ₹${f.itemPrice} = ₹${f.foodCharge}`).join('\n'),
           "Cab Trips Details": cabList.map(c => `${c.tripName} (${format24hDate(c.dateTime)}): ₹${c.rate} ${c.remark ? `[${c.remark}]` : ''}`).join('\n'),
+	  "Booking Remarks": b.remark || "",
           "Extra Guest Price / Day": b.ExtraperDayPrice || 0,
           "Extra Guest Stay Days": b.extraPersonDays || 0,
           "Extra Guest Total Price": b.custextratotal || 0,
@@ -2650,6 +2662,7 @@ function updateDashboardLiveBookings(liveBookings) {
           <th class="py-1 px-1.5">Room No</th>
           <th class="py-1 px-1.5">Total Amount</th>
           <th class="py-1 px-1.5">Due Amount</th>
+          <th class="py-1 px-1.5">Remark</th>
         </tr>
       </thead>
       <tbody class="divide-y divide-slate-100 font-medium text-slate-700">
@@ -2669,12 +2682,103 @@ function updateDashboardLiveBookings(liveBookings) {
         <td class="py-1 px-1.5 font-bold text-slate-800">${roomsStr}</td>
         <td class="py-1 px-1.5"><span class="bg-amber-100 text-amber-800 font-bold px-1.5 py-0.5 rounded-md text-[9px]">₹ ${Number(b.totalAmount || 0).toLocaleString('en-IN')}</span></td>
         <td class="py-1 px-1.5 text-slate-600">₹ ${Number(b.totalDue || 0).toLocaleString('en-IN')}</td>
+        <td class="py-1 px-1.5 whitespace-pre-wrap break-words">${(b.remark || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</td>
       </tr>
     `;
   });
 
   html += `</tbody></table>`;
   container.innerHTML = html;
+}
+
+// Toggle the dashboard's complete saved-remarks list.
+function toggleDashboardAllRemarks() {
+  const container = document.getElementById('dash-all-remarks-container');
+  const button = document.getElementById('btn-toggle-all-remarks');
+  if (!container || !button) return;
+  const opening = container.classList.contains('hidden');
+  container.classList.toggle('hidden', !opening);
+  button.innerHTML = opening
+    ? '<i class="fa-solid fa-minus text-[9px]"></i> Hide all remarks'
+    : '<i class="fa-solid fa-plus text-[9px]"></i> Show all remarks';
+  if (opening) updateDashboardAllRemarks();
+}
+
+function escapeRemarkHtml(value) {
+  return String(value == null ? '' : value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function getDashboardRemarkBookingStatus(booking) {
+  if (typeof isInactiveBooking === 'function' && isInactiveBooking(booking)) return 'Inactive';
+  const checkIn = booking.checkIn ? new Date(String(booking.checkIn).replace(' ', 'T')).getTime() : NaN;
+  const checkoutRaw = typeof getEffectiveCheckoutTime === 'function'
+    ? getEffectiveCheckoutTime(booking)
+    : (booking.checkOut ? new Date(String(booking.checkOut).replace(' ', 'T')).getTime() : NaN);
+  const now = Date.now();
+  if (!Number.isNaN(checkIn) && !Number.isNaN(checkoutRaw)) {
+    if (now >= checkIn && now <= checkoutRaw) return 'Live';
+    if (now < checkIn) return 'Upcoming';
+    return 'Closed';
+  }
+  return booking.status || booking.bookingStatus || 'Unknown';
+}
+
+function updateDashboardAllRemarks() {
+  const container = document.getElementById('dash-all-remarks-container');
+  if (!container) return;
+  const bookings = (typeof state !== 'undefined' && Array.isArray(state.bookings)) ? state.bookings : [];
+  const statusOrder = { Live: 0, Upcoming: 1, Closed: 2, Inactive: 3 };
+  const remarkBookings = bookings
+    .filter(b => String(b.remark || '').trim())
+    .map((booking, originalIndex) => ({
+      booking,
+      originalIndex,
+      status: getDashboardRemarkBookingStatus(booking)
+    }))
+    .sort((a, b) =>
+      (statusOrder[a.status] ?? 4) - (statusOrder[b.status] ?? 4) ||
+      a.originalIndex - b.originalIndex
+    )
+    .map(item => item.booking);
+
+  if (!remarkBookings.length) {
+    container.innerHTML = '<p class="text-[11px] text-slate-400 italic py-2 text-center">No saved remarks found.</p>';
+    return;
+  }
+
+  const parseStayDate = value => {
+    if (!value) return '-';
+    if (typeof format24hDate === 'function') return format24hDate(value);
+    return String(value);
+  };
+
+  container.innerHTML = remarkBookings.map((b, index) => {
+    const checkIn = parseStayDate(b.checkIn);
+    const checkOutValue = b.hasExtendedCheckout && b.extendedCheckOut ? b.extendedCheckOut : b.checkOut;
+    const checkOut = parseStayDate(checkOutValue);
+    const status = getDashboardRemarkBookingStatus(b);
+    const statusClass = status === 'Live' ? 'bg-amber-100 text-amber-800'
+      : status === 'Upcoming' ? 'bg-blue-100 text-blue-800'
+      : status === 'Closed' ? 'bg-emerald-100 text-emerald-800'
+      : status === 'Inactive' ? 'bg-rose-100 text-rose-800'
+      : 'bg-slate-100 text-slate-700';
+
+    return `
+      <article class="rounded-2xl border border-indigo-100 bg-indigo-50/40 p-3 space-y-1.5">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <h4 class="text-[11px] font-bold text-indigo-800">${String(index + 1).padStart(2, '0')}. Booking ID: ${escapeRemarkHtml(b.bookingCode || b.booking_code || (String(b.id || '').startsWith('BKG-') ? b.id : '') || 'N/A')}</h4>
+          <span class="text-[9px] font-bold px-2 py-0.5 rounded-full ${statusClass}">Booking status: ${escapeRemarkHtml(status)}</span>
+        </div>
+        <p class="text-[10px] text-slate-700"><strong>Guest Name:</strong> ${escapeRemarkHtml(b.name || b.guestName || 'N/A')}</p>
+        <p class="text-[10px] text-slate-700"><strong>Stay window:</strong> ${escapeRemarkHtml(checkIn)} – ${escapeRemarkHtml(checkOut)}</p>
+        <div class="text-[10px] text-slate-700 whitespace-pre-wrap break-words"><strong>Remarks:</strong> ${escapeRemarkHtml(String(b.remark || '').trim())}</div>
+      </article>`;
+  }).join('');
 }
 
 // Main Dashboard Update Function
@@ -2810,6 +2914,10 @@ function updateDashboardCards() {
 
   // --- Box 6: Live Bookings Table Update ---
   updateDashboardLiveBookings(liveBookingsList);
+  const allRemarksContainer = document.getElementById('dash-all-remarks-container');
+  if (allRemarksContainer && !allRemarksContainer.classList.contains('hidden')) {
+    updateDashboardAllRemarks();
+  }
 }
     
     function sendReceiptViaWhatsApp() {
@@ -2939,6 +3047,12 @@ function updateDashboardCards() {
       const fullGuestPhone = b.contactNo ? `${b.countryCode || '+91'} ${b.contactNo}`.trim() : '-';
       document.getElementById('inv-guest-contact').innerText = `Contact: ${fullGuestPhone}`;
       document.getElementById('inv-guest-id').innerText = `ID No: ${b.idNo || 'N/A'}`;
+      const invRemark = document.getElementById('inv-booking-remark');
+      if (invRemark) {
+        invRemark.textContent = b.remark ? 'Remark: ' + b.remark : '';
+        invRemark.classList.toggle('hidden', !b.remark);
+      }
+
 
       const roomsDisplay = getBookingRooms(b).join(', ');
       document.getElementById('inv-room').innerText = `Room No: ${roomsDisplay}`;
@@ -3164,6 +3278,51 @@ function updateDashboardCards() {
       }
     }
 
+    function updateBookingRemarkCount() {
+      const field = document.getElementById('cust-booking-remark');
+      const counter = document.getElementById('cust-booking-remark-count');
+      if (!field || !counter) return;
+      const words = field.value.trim() ? field.value.trim().split(/\s+/).length : 0;
+      counter.innerText = `${words} / 1000 words`;
+      counter.classList.toggle('text-rose-600', words > 1000);
+    }
+
+    function toggleBookingRemark() {
+      const editor = document.getElementById('booking-remark-editor');
+      const field = document.getElementById('cust-booking-remark');
+      if (!editor || !field) return;
+      // Once a remark has been entered, keep its editor visible.
+      if (!field.value.trim()) editor.classList.toggle('hidden');
+      else editor.classList.remove('hidden');
+      const isOpen = !editor.classList.contains('hidden');
+      const button = document.getElementById('btn-toggle-booking-remark');
+      if (button) button.innerHTML = isOpen
+        ? '<i class="fa-solid fa-check text-[9px]"></i> Remark Added'
+        : '<i class="fa-solid fa-plus text-[9px]"></i> Add Remark';
+    }
+
+    function keepBookingRemarkOpenIfFilled() {
+      const field = document.getElementById('cust-booking-remark');
+      const editor = document.getElementById('booking-remark-editor');
+      const button = document.getElementById('btn-toggle-booking-remark');
+      if (field && editor && field.value.trim()) {
+        editor.classList.remove('hidden');
+        if (button) button.innerHTML = '<i class="fa-solid fa-check text-[9px]"></i> Remark Added';
+      }
+    }
+
+    function setBookingRemarkEditorOpen(open) {
+      const editor = document.getElementById('booking-remark-editor');
+      const button = document.getElementById('btn-toggle-booking-remark');
+      const field = document.getElementById('cust-booking-remark');
+      if (!editor || !field) return;
+      const shouldOpen = open || !!field.value.trim();
+      editor.classList.toggle('hidden', !shouldOpen);
+      if (button) button.innerHTML = shouldOpen
+        ? '<i class="fa-solid fa-check text-[9px]"></i> Remark Added'
+        : '<i class="fa-solid fa-plus text-[9px]"></i> Add Remark';
+    }
+
     function addCabTripRow(rate = 0, dateStr = '', timeStr = '', remark = '', disabled = false) {
       const container = document.getElementById('cab-trips-container');
       const tripCount = container.children.length + 1;
@@ -3245,11 +3404,6 @@ function updateDashboardCards() {
             return;
           }
 
-          if (isTrue(b.billingLocked)) {
-            alert("This booking is non-editable because all due has been cleared.");
-            return;
-          }
-
           if (!isRoomInMaster(b.roomNo)) {
             alert("This booking details were deleted from Master Data and cannot be opened or edited.");
             return;
@@ -3285,6 +3439,9 @@ function updateDashboardCards() {
 
       document.getElementById('food-orders-container').innerHTML = '';
       document.getElementById('cab-trips-container').innerHTML = '';
+      document.getElementById('cust-booking-remark').value = '';
+      updateBookingRemarkCount();
+      setBookingRemarkEditorOpen(false);
       populateAgentDropdown();
 
       setSectionEditability('sec-guest-info', !isClosedBooking);
@@ -3396,6 +3553,9 @@ function updateDashboardCards() {
         
         document.getElementById('modal-booking-id').value = b.id;
         document.getElementById('cust-name').value = formatTitleCase(b.name);
+        document.getElementById('cust-booking-remark').value = b.remark || '';
+        updateBookingRemarkCount();
+        setBookingRemarkEditorOpen(!!(b.remark || '').trim());
         document.getElementById('cust-address').value = formatTitleCase(b.address || '');
         document.getElementById('cust-city').value = formatTitleCase(b.city || '');
         document.getElementById('cust-state').value = formatTitleCase(b.state || '');
@@ -3830,32 +3990,6 @@ if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
       });
     }
 
-    let allDueClearedConfirmResolver = null;
-
-    function closeAllDueClearedConfirm(goAhead) {
-      const modal = document.getElementById('all-due-cleared-confirm-modal');
-      if (modal) modal.classList.add('hidden');
-
-      if (allDueClearedConfirmResolver) {
-        const resolver = allDueClearedConfirmResolver;
-        allDueClearedConfirmResolver = null;
-        resolver(goAhead);
-      }
-    }
-
-    function askAllDueClearedConfirmation() {
-      return new Promise((resolve) => {
-        allDueClearedConfirmResolver = resolve;
-        const modal = document.getElementById('all-due-cleared-confirm-modal');
-        if (modal) {
-          modal.classList.remove('hidden');
-        } else {
-          allDueClearedConfirmResolver = null;
-          resolve(false);
-        }
-      });
-    }
-
     async function handleSaveBooking(e) {
       e.preventDefault();
 
@@ -3892,6 +4026,34 @@ if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
 
       const checkIn = `${inDate}T${inTime}:00+05:30`;
       const checkOut = `${outDate}T${outTime}:00+05:30`;
+
+      // If both main Check-In and Check-Out dates are earlier than today,
+      // ask for confirmation before continuing with the normal save process.
+      const todayLocal = new Date();
+      const todayDateOnly = new Date(
+        todayLocal.getFullYear(),
+        todayLocal.getMonth(),
+        todayLocal.getDate()
+      );
+      const checkInDateOnly = inDate ? new Date(`${inDate}T00:00:00`) : null;
+      const checkOutDateOnly = outDate ? new Date(`${outDate}T00:00:00`) : null;
+
+      // Show the Closed Booking confirmation ONLY when creating a NEW booking.
+      // Existing bookings being edited must not show this confirmation again.
+      const isNewBooking = !bookingModalId;
+
+      if (
+        isNewBooking &&
+        checkInDateOnly &&
+        checkOutDateOnly &&
+        checkInDateOnly < todayDateOnly &&
+        checkOutDateOnly < todayDateOnly
+      ) {
+        const goAhead = await askClosedBookingConfirmation();
+        if (!goAhead) {
+          return;
+        }
+      }
 
       const hasExtendedCheckout = document.getElementById('cust-has-extended-checkout')?.checked || false;
       let extendedCheckOut = null;
@@ -3998,8 +4160,15 @@ if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
         return;
       }
       
+      const bookingRemark = document.getElementById('cust-booking-remark').value.trim();
+      const remarkWords = bookingRemark ? bookingRemark.split(/\s+/).length : 0;
+      if (remarkWords > 1000) {
+        alert('Remark cannot exceed 1000 words.');
+        document.getElementById('cust-booking-remark').focus();
+        return;
+      }
       const cabTripsList = [];
-      
+
       document.querySelectorAll('.cab-trip-row').forEach((row, index) => {
         const rate = parseFloat(row.querySelector('.cust-cab-rate').value) || 0;
         const dateVal = row.querySelector('.cust-cab-date').value || '';
@@ -4075,42 +4244,6 @@ if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
       const initialAdvAmt = parseFloat(document.getElementById('cust-advance').getAttribute('data-initial-adv')) || parseFloat(document.getElementById('cust-advance').value) || 0;
       const clearedDueAmt = parseFloat(document.getElementById('cust-clear-bill').value) || 0;
 
-      const existingBookingForEdit = id
-        ? state.bookings.find(b => String(b.id) === String(id))
-        : null;
-
-      const effectiveOutForStatus = existingBookingForEdit
-        ? getEffectiveCheckoutTime(existingBookingForEdit)
-        : 0;
-      const isClosedExistingBooking =
-        !!existingBookingForEdit &&
-        !isInactiveBooking(existingBookingForEdit) &&
-        Date.now() > effectiveOutForStatus;
-
-      const dueBeforeThisClear = Math.max(0, totalAmt - initialAdvAmt);
-      const clearsAllDue = dueBeforeThisClear > 0 && clearedDueAmt >= dueBeforeThisClear;
-
-      // Only existing Closed bookings trigger this confirmation, and only
-      // after the user has entered enough payment to clear the full due.
-      let lockBillingAfterSave = false;
-      if (isClosedExistingBooking && clearsAllDue && !existingBookingForEdit.billingLocked) {
-        const goAhead = await askAllDueClearedConfirmation();
-
-        if (!goAhead) {
-          // Keep the booking modal open and return the user to Billing Summary
-          // so they can edit the payment before saving again.
-          setTimeout(() => {
-            const billingSection = document.getElementById('sec-billing-summary');
-            if (billingSection) billingSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            const clearInput = document.getElementById('cust-clear-bill');
-            if (clearInput) clearInput.focus();
-          }, 50);
-          return;
-        }
-
-        lockBillingAfterSave = true;
-      }
-
       const totalPaid = initialAdvAmt + clearedDueAmt;
       const countryCodeVal = document.getElementById('cust-country-code').value.trim() || '+91';
 
@@ -4142,6 +4275,7 @@ if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
         includeMeals: includeMeals,
         foodOrders: foodOrdersList,
         cabTrips: cabTripsList,
+        remark: (document.getElementById('cust-booking-remark').value || '').trim(),
         ExtraperDayPrice: parseFloat(document.getElementById('cust-extra-rate').value) || 0,
         extraPersonDays: parseInt(document.getElementById('cust-extra-days').value) || 0,
         custextratotal: parseInt(document.getElementById('cust-extra-total').value) || 0,
@@ -4154,7 +4288,6 @@ if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
         initialAdv: initialAdvAmt,
         totalDue: Math.max(0, totalAmt - totalPaid),
         clearedDue: clearedDueAmt,
-        billingLocked: !!(existingBookingForEdit?.billingLocked || lockBillingAfterSave),
         inactive: false
       };
 
@@ -4292,10 +4425,9 @@ if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
         
         let actionButtonsHtml = `
           <div class="flex items-center justify-center space-x-1">
-            ${isTrue(b.billingLocked) ? '' : `
             <button onclick="openBookingModal('${b.id}')" class="text-blue-600 hover:text-blue-800 p-1 text-sm" title="Edit Booking Details">
               <i class="fa-solid fa-pen-to-square"></i>
-            </button>`}
+            </button>              
             <button onclick="${printOnClick}" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-full text-[11px] font-bold transition shadow-xs">Print</button>
           </div>
         `;

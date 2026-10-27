@@ -2610,6 +2610,10 @@ function checkBirthdayTrigger() {
       }
 
       updateDashboardCards();
+      const remarksContainer = document.getElementById('dash-all-remarks-container');
+      if (remarksContainer && !remarksContainer.classList.contains('hidden')) {
+        updateDashboardAllRemarks();
+      }
     }
   // Helper to render conic-gradient pie charts (Live = Amber, Upcoming = Blue, Closed = Emerald, Inactive = Slate)
 function updatePieChart(elementId, liveVal = null, upcomingVal = null, closedVal = null) {
@@ -2732,9 +2736,21 @@ function updateDashboardAllRemarks() {
   const container = document.getElementById('dash-all-remarks-container');
   if (!container) return;
   const bookings = (typeof state !== 'undefined' && Array.isArray(state.bookings)) ? state.bookings : [];
+  const selectedFilter = typeof state !== 'undefined' ? state.dashSelectedYear : 'ALL';
+  const targetYear = selectedFilter && selectedFilter !== 'ALL' ? parseInt(selectedFilter, 10) : null;
   const statusOrder = { Live: 0, Upcoming: 1, Closed: 2, Inactive: 3 };
   const remarkBookings = bookings
-    .filter(b => String(b.remark || '').trim())
+    .filter(b => {
+      if (!String(b.remark || '').trim()) return false;
+      // Match the dashboard pie-chart cards: filter by booking check-in year.
+      if (targetYear) {
+        const checkInMs = b.checkIn ? new Date(String(b.checkIn).replace(' ', 'T')).getTime() : NaN;
+        if (!Number.isNaN(checkInMs) && new Date(checkInMs).getFullYear() !== targetYear) return false;
+        // Records without a usable check-in date are not assigned to a specific year.
+        if (Number.isNaN(checkInMs)) return false;
+      }
+      return true;
+    })
     .map((booking, originalIndex) => ({
       booking,
       originalIndex,

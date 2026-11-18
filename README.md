@@ -94,6 +94,22 @@
       pointer-events: none;
     }
   </style>
+
+<style id="booking-oneui-style">
+#booking-modal{background:rgba(15,23,42,.48);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);padding:12px;}
+#booking-modal>div{border:1px solid rgba(255,255,255,.75);border-radius:30px;background:#f7f8fc;box-shadow:0 24px 70px rgba(15,23,42,.24);padding:20px;max-width:760px;}
+#booking-modal #modal-title{font-size:15px;letter-spacing:-.25px;color:#171923;}
+#booking-modal #modal-title i{background:#e8edff;border-radius:14px;padding:9px;color:#3157c8!important;}
+#booking-modal form{font-size:12px;}
+#booking-modal form>div[id^="sec-"]{background:#fff!important;border:1px solid #e8eaf1!important;border-radius:22px!important;padding:15px!important;box-shadow:0 2px 8px rgba(20,28,50,.035);}
+#booking-modal form h4{font-size:10px;color:#596174;letter-spacing:.08em;}
+#booking-modal input:not([type="checkbox"]):not([type="file"]),#booking-modal select,#booking-modal textarea{border:1px solid #e1e5ee!important;border-radius:14px!important;background:#f8f9fc!important;min-height:38px;padding:8px 11px!important;color:#202536;transition:border-color .18s,box-shadow .18s,background .18s;}
+#booking-modal input:focus,#booking-modal select:focus,#booking-modal textarea:focus{outline:none!important;border-color:#5475df!important;box-shadow:0 0 0 3px rgba(84,117,223,.13)!important;background:#fff!important;}
+#booking-modal button{border-radius:14px;}
+#booking-modal button[type="submit"],#booking-modal .booking-primary{background:#3157c8!important;border-radius:16px!important;box-shadow:0 5px 12px rgba(49,87,200,.2);}
+@media(max-width:640px){#booking-modal{align-items:flex-end;padding:0;}#booking-modal>div{width:100%;max-width:none;max-height:94dvh!important;margin:0!important;border-radius:28px 28px 0 0!important;padding:17px 14px calc(18px + env(safe-area-inset-bottom))!important;}#booking-modal form>div[id^="sec-"]{padding:12px!important;border-radius:19px!important;}}
+</style>
+
 </head>
 <body class="text-slate-800 font-sans min-h-screen flex flex-col relative antialiased text-xs" onclick="closeCommentBox()">
 
@@ -1002,7 +1018,7 @@
               <p id="cust-id-file-status" class="text-[9px] text-slate-400 mt-0.5 italic">No PDF document attached.</p>
             </div>
             <div class="sm:col-span-2"><label class="block font-semibold text-slate-600 mb-0.5">Quotation No &amp; Date</label><input id="cust-quotation-ref" readonly class="w-full bg-slate-100 border border-slate-200 rounded-xl px-2.5 py-1.5"/></div>
-            <div><label class="block font-semibold text-slate-600 mb-0.5">Quotation Total Amount (₹)</label><input id="cust-quotation-total" type="number" readonly class="w-full bg-slate-100 border border-slate-200 rounded-xl px-2.5 py-1.5"/></div>
+            <div><label class="block font-semibold text-slate-600 mb-0.5">Quotation Total Amount (₹)</label><input id="cust-quotation-total" type="text" readonly class="w-full bg-slate-100 border border-slate-200 rounded-xl px-2.5 py-1.5"/></div>
           </div>
         </div>
 <!-- Room & Stay Schedule Box -->
@@ -2226,8 +2242,8 @@ function checkBirthdayTrigger() {
           "Country Code": b.countryCode || "",
           "Contact No": b.contactNo || "",
           "Attached ID File Name": b.idProofFileName || "",
-          "Quotation No & Date": b.quotationNo ? `${b.quotationNo} | ${b.quotationDate || ''}` : "",
-          "Quotation Total Amount": b.quotationTotalAmount || 0,
+          "Quotation No & Date": b.quotationNo === "NA" ? "NA" : (b.quotationNo ? `${b.quotationNo} | ${b.quotationDate || ''}` : ""),
+          "Quotation Total Amount": b.quotationTotalAmount === "NA" ? "NA" : (b.quotationTotalAmount || 0),
           "Room No(s)": getBookingRooms(b).join(" | "),
           "Agent Info": b.agentInfo || "",
           "Main Guest Joined": b.capacity || 1,
@@ -3879,8 +3895,10 @@ function updateDashboardCards() {
       const existing = (state.quotations || []).find(q => q.id === existingId);
       const today = new Date();
       const date = existing ? existing.quotationDate : `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+      const tomorrowDate = new Date(today.getFullYear(), today.getMonth(), today.getDate()+1);
+      const tomorrow = `${tomorrowDate.getFullYear()}-${String(tomorrowDate.getMonth()+1).padStart(2,'0')}-${String(tomorrowDate.getDate()).padStart(2,'0')}`;
       const qNo = existing ? existing.quotationNo : nextQuotationNumber(date);
-      const q = existing || {id:`qt_${Date.now()}`, quotationNo:qNo, quotationDate:date, guestName:'', address:'', phone:'', email:'', checkIn:date, checkOut:'', guests:2, additionalGuests:0, additionalRate:0, roomType:'Deluxe', rooms:1, ratePerDay:1200, cabTrips:[], discount:0};
+      const q = existing || {id:`qt_${Date.now()}`, quotationNo:qNo, quotationDate:date, guestName:'', address:'', phone:'', email:'', checkIn:date, checkOut:tomorrow, guests:2, additionalGuests:0, additionalRate:0, roomType:'Deluxe', rooms:1, ratePerDay:1200, cabTrips:[], discount:0};
       const trips = (q.cabTrips || []);
       const tripRows = trips.length ? trips : [{trip:1,dateTime:'',remarks:'',rate:0}];
       document.getElementById('quotation-modal')?.remove();
@@ -3899,7 +3917,7 @@ function updateDashboardCards() {
          </div><label class="block font-semibold text-slate-600">Greeting<textarea id="q-greeting" class="mt-1 w-full border border-slate-200 rounded-xl px-3 py-2 bg-white" rows="2">${escapeRemarkHtml(q.greeting || 'Greeting from Aanaristays (The Art of slow living), hope you are doing well. We are pleased to offer you our services. The details are attached below.')}</textarea></label></section>
          <section class="bg-white border border-slate-200 rounded-2xl p-3 space-y-3"><h4 class="font-bold text-slate-800 text-xs">Reservation & Room Details</h4><div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <label class="font-semibold text-slate-600">Check-in Date<input id="q-in" type="date" value="${q.checkIn||date}" class="q-edit mt-1 w-full border border-slate-200 rounded-xl px-3 py-2 bg-white" onchange="validateQuotationDates('in')"/></label>
-          <label class="font-semibold text-slate-600">Check-out Date<input id="q-out" type="date" min="${q.checkIn||date}" value="${q.checkOut||''}" class="q-edit mt-1 w-full border border-slate-200 rounded-xl px-3 py-2 bg-white" onchange="validateQuotationDates('out')"/></label>
+          <label class="font-semibold text-slate-600">Check-out Date<input id="q-out" type="date" min="${(()=>{const d=new Date((q.checkIn||date)+'T00:00:00');d.setDate(d.getDate()+1);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;})()}" value="${q.checkOut||tomorrow}" class="q-edit mt-1 w-full border border-slate-200 rounded-xl px-3 py-2 bg-white" onchange="validateQuotationDates('out')"/></label>
           <label class="font-semibold text-slate-600">No. of Days<div id="q-days" class="mt-1 border border-slate-200 rounded-xl px-3 py-2 bg-slate-50">1</div></label>
           <label class="font-semibold text-slate-600">Room Type<select id="q-room-type" class="q-edit mt-1 w-full border border-slate-200 rounded-xl px-3 py-2 bg-white"><option ${(q.roomType||'Deluxe')==='Deluxe'?'selected':''}>Deluxe</option><option ${q.roomType==='Standard'?'selected':''}>Standard</option><option ${q.roomType==='Premium'?'selected':''}>Premium</option><option ${q.roomType==='Family'?'selected':''}>Family</option><option ${q.roomType==='Suite'?'selected':''}>Suite</option></select></label>
           <label class="font-semibold text-slate-600">No. of Guests<input id="q-guests" type="number" min="1" value="${q.guests||2}" class="q-edit mt-1 w-full border border-slate-200 rounded-xl px-3 py-2 bg-white" oninput="calculateQuotationTotal()"/></label>
@@ -3931,8 +3949,13 @@ function updateDashboardCards() {
     }
     function validateQuotationDates(changed){
       const inEl=document.getElementById('q-in'), outEl=document.getElementById('q-out'); if(!inEl||!outEl)return true;
-      if(changed==='in' && inEl.value){outEl.min=inEl.value;if(outEl.value && outEl.value<=inEl.value){outEl.value='';alert('Check-out date must be later than check-in date.');}}
-      if(inEl.value && outEl.value && outEl.value<=inEl.value){if(changed==='out')outEl.value='';alert('Check-out date must be later than check-in date.');calculateQuotationTotal();return false;}
+      if(inEl.value){const d=new Date(inEl.value+'T00:00:00');d.setDate(d.getDate()+1);outEl.min=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+      else outEl.removeAttribute('min');
+      if(inEl.value && outEl.value && outEl.value<=inEl.value){
+        if(changed==='in') { const d=new Date(inEl.value+'T00:00:00');d.setDate(d.getDate()+1);outEl.value=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+        else outEl.value='';
+        alert('Check-out date must be later than check-in date.');
+      }
       calculateQuotationTotal();return true;
     }
     function calculateQuotationTotal(){
@@ -4002,14 +4025,27 @@ function updateDashboardCards() {
           <div class="signature">Authorized Signature</div>
         </div>`;
       const options={margin:0,filename:`${String(q.quotationNo||'Quotation').replace(/[^a-z0-9_-]/gi,'_')}.pdf`,image:{type:'jpeg',quality:0.98},html2canvas:{scale:2,useCORS:true,backgroundColor:'#ffffff'},jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},pagebreak:{mode:['avoid-all','css','legacy']}};
-      const pdfWindow=window.open('about:blank','_blank');
+      const oldPreview=document.getElementById('quotation-preview-modal');if(oldPreview)oldPreview.remove();
+      const preview=document.createElement('div');preview.id='quotation-preview-modal';
+      preview.className='fixed inset-0 z-[130] bg-slate-900/50 backdrop-blur-md flex items-center justify-center p-3 no-print';
+      preview.innerHTML=`<div class="bg-white rounded-3xl shadow-2xl border border-slate-100 w-full max-w-5xl h-[94vh] flex flex-col overflow-hidden">
+        <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100"><div><h3 class="text-sm font-bold text-slate-900">Quotation Preview</h3><p class="text-[10px] text-slate-500">${escapeRemarkHtml(q.quotationNo||'Quotation')} · PDF document</p></div><button type="button" onclick="document.getElementById('quotation-preview-modal').remove()" class="rounded-full w-9 h-9 bg-slate-100 text-slate-600 text-xl">×</button></div>
+        <div class="flex-1 min-h-0 bg-slate-100 p-2"><iframe id="quotation-preview-frame" title="Quotation PDF preview" class="w-full h-full bg-white rounded-xl border border-slate-200"></iframe></div>
+        <div class="flex justify-end gap-2 px-4 py-3 border-t border-slate-100"><button type="button" onclick="document.getElementById('quotation-preview-modal').remove()" class="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 font-semibold text-xs">Close</button><button type="button" id="quotation-download-pdf" class="px-4 py-2 rounded-xl bg-emerald-600 text-white font-semibold text-xs"><i class="fa-solid fa-download mr-1"></i> Save PDF</button><button type="button" id="quotation-print-pdf" class="px-4 py-2 rounded-xl bg-blue-600 text-white font-semibold text-xs"><i class="fa-solid fa-print mr-1"></i> Print</button></div>
+      </div>`;
+      document.body.appendChild(preview);
+      const downloadBtn=document.getElementById('quotation-download-pdf');
+      const printBtn=document.getElementById('quotation-print-pdf');
+      downloadBtn.disabled=true;printBtn.disabled=true;downloadBtn.classList.add('opacity-50');printBtn.classList.add('opacity-50');
       window.html2pdf().set(options).from(pdfRoot).outputPdf('blob').then(blob=>{
-        const url=URL.createObjectURL(blob);
-        if(pdfWindow){pdfWindow.location.href=url;}
-        else {const link=document.createElement('a');link.href=url;link.download=options.filename;link.click();}
-        setTimeout(()=>URL.revokeObjectURL(url),60000);
-      }).catch(err=>{if(pdfWindow)pdfWindow.close();console.error('Quotation PDF error',err);alert('Unable to generate quotation PDF. Please try again.');});
+        const url=URL.createObjectURL(blob);const frame=document.getElementById('quotation-preview-frame');if(frame)frame.src=url;
+        downloadBtn.disabled=false;printBtn.disabled=false;downloadBtn.classList.remove('opacity-50');printBtn.classList.remove('opacity-50');
+        downloadBtn.onclick=()=>{const a=document.createElement('a');a.href=url;a.download=options.filename;a.click();};
+        printBtn.onclick=()=>{const w=frame&&frame.contentWindow;if(w){w.focus();w.print();}};
+        preview.dataset.pdfUrl=url;
+      }).catch(err=>{console.error('Quotation PDF error',err);preview.remove();alert('Unable to generate quotation PDF. Please try again.');});
     }
+
     function renderQuotations(){
       const body=document.getElementById('quotations-tbody');if(!body)return;
       const date=document.getElementById('quotation-search-date')?.value||'', no=(document.getElementById('quotation-search-no')?.value||'').toLowerCase();
@@ -4030,7 +4066,7 @@ function updateDashboardCards() {
       m.innerHTML=`<div class="bg-white rounded-2xl p-5 w-full max-w-md space-y-3 shadow-2xl"><h3 class="font-bold text-sm">Has this client taken a Quotation earlier?</h3><div class="flex gap-2"><button onclick="choosePriorQuotation(false)" class="flex-1 bg-slate-100 rounded-xl p-2 font-bold">No</button><button onclick="choosePriorQuotation(true)" class="flex-1 bg-blue-600 text-white rounded-xl p-2 font-bold">Yes</button></div><div id="prior-quotation-search" class="hidden space-y-2"><input id="prior-q-no" oninput="searchPriorQuotation()" placeholder="Search by Quotation No" class="w-full border rounded-xl p-2"/><input id="prior-q-date" type="date" onchange="searchPriorQuotation()" class="w-full border rounded-xl p-2"/><div id="prior-q-results" class="max-h-48 overflow-y-auto space-y-1"></div></div><button onclick="document.getElementById('booking-quotation-choice').remove()" class="text-slate-500">Cancel</button></div>`;
       document.body.appendChild(m);
     }
-    function choosePriorQuotation(yes){if(!yes){document.getElementById('booking-quotation-choice').remove();openBookingModal();const quotationRef=document.getElementById('cust-quotation-ref');if(quotationRef)quotationRef.value='NA | NA';return;}document.getElementById('prior-quotation-search').classList.remove('hidden');searchPriorQuotation();}
+    function choosePriorQuotation(yes){if(!yes){document.getElementById('booking-quotation-choice').remove();openBookingModal();const quotationRef=document.getElementById('cust-quotation-ref');const quotationAmount=document.getElementById('cust-quotation-total');if(quotationRef)quotationRef.value='NA';if(quotationAmount)quotationAmount.value='NA';return;}document.getElementById('prior-quotation-search').classList.remove('hidden');searchPriorQuotation();}
     function searchPriorQuotation(){const no=(document.getElementById('prior-q-no')?.value||'').toLowerCase(),date=document.getElementById('prior-q-date')?.value||'';const results=(state.quotations||[]).filter(q=>(!no||q.quotationNo.toLowerCase().includes(no))&&(!date||q.quotationDate===date));document.getElementById('prior-q-results').innerHTML=results.map(q=>`<button onclick="selectPriorQuotation('${q.id}')" class="w-full text-left border rounded-xl p-2 hover:bg-blue-50"><b>${escapeRemarkHtml(q.quotationNo)}</b> — ${escapeRemarkHtml(q.quotationDate)} — ${escapeRemarkHtml(q.guestName)} — ₹${Number(q.totalAmount||0).toLocaleString('en-IN')}</button>`).join('')||'<p class="text-slate-400 p-2">No matching quotations.</p>';}
     function selectPriorQuotation(id){pendingBookingQuotation=(state.quotations||[]).find(q=>q.id===id);document.getElementById('booking-quotation-choice').remove();openBookingModal();setTimeout(()=>{if(!pendingBookingQuotation)return;const q=pendingBookingQuotation;document.getElementById('cust-quotation-ref').value=`${q.quotationNo} | ${q.quotationDate}`;document.getElementById('cust-quotation-total').value=q.totalAmount||0;pendingBookingQuotation=null;},80);}
     function exportQuotationData(startDate,endDate){
@@ -4241,7 +4277,7 @@ function updateDashboardCards() {
         document.getElementById('cust-id').value = b.idNo || '';
         document.getElementById('cust-country-code').value = b.countryCode || '+91';
         document.getElementById('cust-contact').value = b.contactNo || '';
-        document.getElementById('cust-quotation-ref').value = b.quotationNo ? `${b.quotationNo} | ${b.quotationDate || ''}` : '';
+        document.getElementById('cust-quotation-ref').value = b.quotationNo === 'NA' ? 'NA' : (b.quotationNo ? `${b.quotationNo} | ${b.quotationDate || ''}` : '');
         document.getElementById('cust-quotation-total').value = b.quotationTotalAmount || '';
 
         if (b.idProofBase64) {
@@ -5039,9 +5075,9 @@ if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
         contactNo: contactNoVal,
         idProofBase64: document.getElementById('cust-id-file-base64').value,
         idProofFileName: document.getElementById('cust-id-file-name').value,
-        quotationNo: document.getElementById('cust-quotation-ref').value.split(' | ')[0] || '',
-        quotationDate: document.getElementById('cust-quotation-ref').value.split(' | ')[1] || '',
-        quotationTotalAmount: parseFloat(document.getElementById('cust-quotation-total').value) || 0,
+        quotationNo: document.getElementById('cust-quotation-ref').value.trim() === 'NA' ? 'NA' : (document.getElementById('cust-quotation-ref').value.split(' | ')[0] || ''),
+        quotationDate: document.getElementById('cust-quotation-ref').value.trim() === 'NA' ? 'NA' : (document.getElementById('cust-quotation-ref').value.split(' | ')[1] || ''),
+        quotationTotalAmount: document.getElementById('cust-quotation-total').value.trim() === 'NA' ? 'NA' : (parseFloat(document.getElementById('cust-quotation-total').value) || 0),
         roomNo: selectedRooms.join('|'),
         agentInfo: document.getElementById('cust-agent').value,
         capacity: parseInt(document.getElementById('cust-capacity').value) || 1,

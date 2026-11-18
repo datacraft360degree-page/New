@@ -1521,6 +1521,23 @@ function checkBirthdayTrigger() {
       const min = String(istDate.getUTCMinutes()).padStart(2, '0');
       return `${dd}/${mm}/${yy} ${hh}:${min}`;
     }
+
+    // Keep date-only quotation values anchored to midnight IST (UTC+05:30).
+    function formatQuotationDateIST(dateValue) {
+      if (!dateValue || dateValue === 'NA') return dateValue || '';
+      const match = String(dateValue).match(/^(\d{4})-(\d{2})-(\d{2})/);
+      if (!match) return String(dateValue);
+      return format24hDate(`${match[1]}-${match[2]}-${match[3]}T00:00:00+05:30`);
+    }
+
+    function quotationCabDateTimeInput(value) {
+      if (!value) return '';
+      const raw = String(value).trim();
+      // datetime-local requires YYYY-MM-DDTHH:mm and no timezone suffix.
+      const iso = raw.match(/^(\d{4}-\d{2}-\d{2})[T ](\d{2}:\d{2})/);
+      if (iso) return `${iso[1]}T${iso[2]}`;
+      return '';
+    }
     
     // Robust parsing for generic JSON array fields (Food Orders, Cab Trips)
     function parseJSONField(fieldData) {
@@ -2242,7 +2259,7 @@ function checkBirthdayTrigger() {
           "Country Code": b.countryCode || "",
           "Contact No": b.contactNo || "",
           "Attached ID File Name": b.idProofFileName || "",
-          "Quotation No & Date": b.quotationNo === "NA" ? "NA" : (b.quotationNo ? `${b.quotationNo} | ${b.quotationDate || ''}` : ""),
+          "Quotation No & Date": b.quotationNo === "NA" ? "NA" : (b.quotationNo ? `${b.quotationNo} | ${formatQuotationDateIST(b.quotationDate || '')}` : ""),
           "Quotation Total Amount": b.quotationTotalAmount === "NA" ? "NA" : (b.quotationTotalAmount || 0),
           "Room No(s)": getBookingRooms(b).join(" | "),
           "Agent Info": b.agentInfo || "",
@@ -3927,7 +3944,7 @@ function updateDashboardCards() {
           <label class="font-semibold text-slate-600">Rate/Day (₹)<input id="q-rate" type="number" min="0" value="${q.ratePerDay ?? 1200}" class="q-edit mt-1 w-full border border-slate-200 rounded-xl px-3 py-2 bg-white" oninput="calculateQuotationTotal()"/></label>
           <div class="font-semibold text-slate-600">Room Total<div id="q-room-total" class="mt-1 border border-slate-200 rounded-xl px-3 py-2 bg-slate-50 font-bold text-slate-900">₹0</div></div>
          </div></section>
-         <section class="bg-white border border-slate-200 rounded-2xl p-3 space-y-3"><div class="flex items-center justify-between"><h4 class="font-bold text-slate-800 text-xs">Cab Fare</h4><button type="button" onclick="addQuotationCabRow()" class="px-3 py-2 rounded-xl bg-slate-100 text-slate-700 font-bold">+ Add Cab Trip</button></div><div id="q-cab-rows" class="space-y-2">${tripRows.map((t,i)=>`<div class="q-cab-row grid grid-cols-1 sm:grid-cols-[0.7fr_1.5fr_1.5fr_1fr_auto] gap-2 items-center"><input type="number" class="q-cab-trip border border-slate-200 rounded-xl p-2 bg-white" value="${t.trip||i+1}" placeholder="Trip"/><input type="text" class="q-cab-date border border-slate-200 rounded-xl p-2 bg-white" value="${escapeRemarkHtml(t.dateTime||'')}" placeholder="Date & Time"/><input type="text" class="q-cab-remark border border-slate-200 rounded-xl p-2 bg-white" value="${escapeRemarkHtml(t.remarks||'')}" placeholder="Remarks"/><input type="number" class="q-cab-rate border border-slate-200 rounded-xl p-2 bg-white" value="${t.rate||0}" placeholder="Rate/Trip" oninput="calculateQuotationTotal()"/><button type="button" onclick="removeQuotationCabRow(this)" class="px-3 py-2 rounded-xl bg-rose-50 text-rose-600 font-bold" title="Delete cab trip"><i class="fa-solid fa-trash"></i> Delete</button></div>`).join('')}</div></section>
+         <section class="bg-white border border-slate-200 rounded-2xl p-3 space-y-3"><div class="flex items-center justify-between"><h4 class="font-bold text-slate-800 text-xs">Cab Fare</h4><button type="button" onclick="addQuotationCabRow()" class="px-3 py-2 rounded-xl bg-slate-100 text-slate-700 font-bold">+ Add Cab Trip</button></div><div id="q-cab-rows" class="space-y-2">${tripRows.map((t,i)=>`<div class="q-cab-row grid grid-cols-1 sm:grid-cols-[0.7fr_1.5fr_1.5fr_1fr_auto] gap-2 items-center"><input type="number" class="q-cab-trip border border-slate-200 rounded-xl p-2 bg-white" value="${t.trip||i+1}" placeholder="Trip"/><input type="datetime-local" class="q-cab-date border border-slate-200 rounded-xl p-2 bg-white" value="${quotationCabDateTimeInput(t.dateTime)}" aria-label="Cab trip date and time"/><input type="text" class="q-cab-remark border border-slate-200 rounded-xl p-2 bg-white" value="${escapeRemarkHtml(t.remarks||'')}" placeholder="Remarks"/><input type="number" class="q-cab-rate border border-slate-200 rounded-xl p-2 bg-white" value="${t.rate||0}" placeholder="Rate/Trip" oninput="calculateQuotationTotal()"/><button type="button" onclick="removeQuotationCabRow(this)" class="px-3 py-2 rounded-xl bg-rose-50 text-rose-600 font-bold" title="Delete cab trip"><i class="fa-solid fa-trash"></i> Delete</button></div>`).join('')}</div></section>
          <section class="bg-slate-50 border border-slate-200 rounded-2xl p-3 space-y-2"><h4 class="font-bold text-slate-800 text-xs">Quotation Summary</h4><div class="grid grid-cols-1 sm:grid-cols-3 gap-3"><div>Total Amount <b class="block text-slate-900">₹<span id="q-subtotal">0</span></b></div><label>Discount (₹)<input id="q-discount" type="number" min="0" value="${q.discount||0}" class="q-edit mt-1 w-full border border-slate-200 rounded-xl px-3 py-2 bg-white text-right" oninput="calculateQuotationTotal()"/></label><div class="sm:text-right">Grand Total <b class="block text-lg text-blue-700">₹<span id="q-grand-total">0</span></b></div></div></section>
          <section class="bg-white border border-slate-200 rounded-2xl p-3"><label class="font-semibold text-slate-600">Terms & Conditions<textarea id="q-terms" rows="3" class="mt-1 w-full border border-slate-200 rounded-xl px-3 py-2 bg-white">${escapeRemarkHtml(q.terms || '1. Rate/Day(₹) includes Breakfast, Lunch, Evening snack & Dinner.\n2. Advance payment is subject to guest count and Grand Total.\n3. Extra food/drink, if required, will be chargeable additionally.')}</textarea></label></section>
         </div>
@@ -3939,7 +3956,7 @@ function updateDashboardCards() {
       const c=document.getElementById('q-cab-rows'); if(!c)return;
       const n=c.querySelectorAll('.q-cab-row').length+1;
       const d=document.createElement('div'); d.className='q-cab-row grid grid-cols-1 sm:grid-cols-[0.7fr_1.5fr_1.5fr_1fr_auto] gap-2 items-center';
-      d.innerHTML=`<input type="number" class="q-cab-trip border border-slate-200 rounded-xl p-2 bg-white" value="${n}" placeholder="Trip"/><input class="q-cab-date border border-slate-200 rounded-xl p-2 bg-white" placeholder="Date & Time"/><input class="q-cab-remark border border-slate-200 rounded-xl p-2 bg-white" placeholder="Remarks"/><input type="number" class="q-cab-rate border border-slate-200 rounded-xl p-2 bg-white" value="0" oninput="calculateQuotationTotal()"/><button type="button" onclick="removeQuotationCabRow(this)" class="px-3 py-2 rounded-xl bg-rose-50 text-rose-600 font-bold"><i class="fa-solid fa-trash"></i> Delete</button>`;
+      d.innerHTML=`<input type="number" class="q-cab-trip border border-slate-200 rounded-xl p-2 bg-white" value="${n}" placeholder="Trip"/><input type="datetime-local" class="q-cab-date border border-slate-200 rounded-xl p-2 bg-white" aria-label="Cab trip date and time"/><input class="q-cab-remark border border-slate-200 rounded-xl p-2 bg-white" placeholder="Remarks"/><input type="number" class="q-cab-rate border border-slate-200 rounded-xl p-2 bg-white" value="0" oninput="calculateQuotationTotal()"/><button type="button" onclick="removeQuotationCabRow(this)" class="px-3 py-2 rounded-xl bg-rose-50 text-rose-600 font-bold"><i class="fa-solid fa-trash"></i> Delete</button>`;
       c.appendChild(d); calculateQuotationTotal();
     }
     function removeQuotationCabRow(button){
@@ -4005,7 +4022,7 @@ function updateDashboardCards() {
           table{width:100%;border-collapse:collapse;table-layout:auto;font-size:8.3px}th,td{border:1px solid #9ca3af;padding:5px 4px;vertical-align:middle}
           th{font-weight:700;text-align:center;background:#f8fafc}td.center{text-align:center}td.num{text-align:right;white-space:nowrap}
           .totals{width:55%;margin:5mm 0 0 auto;font-size:9.5px}.totals td{border:0;padding:3px 5px}.totals .grand td{border-top:1px solid #111827;font-weight:700;font-size:11px;padding-top:6px}
-          .terms{margin-top:7mm;white-space:pre-line;line-height:1.6}.thanks{text-align:center;margin-top:10mm;line-height:1.7}
+          .terms{margin-top:7mm;white-space:pre-line;line-height:1.6}.thanks{text-align:left;margin-top:10mm;line-height:1.7}
           .signature{text-align:right;margin-top:17mm;font-weight:700;padding-right:5mm}
         </style>
         <div class="qpdf">
@@ -4068,7 +4085,7 @@ function updateDashboardCards() {
     }
     function choosePriorQuotation(yes){if(!yes){document.getElementById('booking-quotation-choice').remove();openBookingModal();const quotationRef=document.getElementById('cust-quotation-ref');const quotationAmount=document.getElementById('cust-quotation-total');if(quotationRef)quotationRef.value='NA';if(quotationAmount)quotationAmount.value='NA';return;}document.getElementById('prior-quotation-search').classList.remove('hidden');searchPriorQuotation();}
     function searchPriorQuotation(){const no=(document.getElementById('prior-q-no')?.value||'').toLowerCase(),date=document.getElementById('prior-q-date')?.value||'';const results=(state.quotations||[]).filter(q=>(!no||q.quotationNo.toLowerCase().includes(no))&&(!date||q.quotationDate===date));document.getElementById('prior-q-results').innerHTML=results.map(q=>`<button onclick="selectPriorQuotation('${q.id}')" class="w-full text-left border rounded-xl p-2 hover:bg-blue-50"><b>${escapeRemarkHtml(q.quotationNo)}</b> — ${escapeRemarkHtml(q.quotationDate)} — ${escapeRemarkHtml(q.guestName)} — ₹${Number(q.totalAmount||0).toLocaleString('en-IN')}</button>`).join('')||'<p class="text-slate-400 p-2">No matching quotations.</p>';}
-    function selectPriorQuotation(id){pendingBookingQuotation=(state.quotations||[]).find(q=>q.id===id);document.getElementById('booking-quotation-choice').remove();openBookingModal();setTimeout(()=>{if(!pendingBookingQuotation)return;const q=pendingBookingQuotation;document.getElementById('cust-quotation-ref').value=`${q.quotationNo} | ${q.quotationDate}`;document.getElementById('cust-quotation-total').value=q.totalAmount||0;pendingBookingQuotation=null;},80);}
+    function selectPriorQuotation(id){pendingBookingQuotation=(state.quotations||[]).find(q=>q.id===id);document.getElementById('booking-quotation-choice').remove();openBookingModal();setTimeout(()=>{if(!pendingBookingQuotation)return;const q=pendingBookingQuotation;document.getElementById('cust-quotation-ref').value=`${q.quotationNo} | ${formatQuotationDateIST(q.quotationDate)}`;document.getElementById('cust-quotation-total').value=q.totalAmount||0;pendingBookingQuotation=null;},80);}
     function exportQuotationData(startDate,endDate){
       const data=(state.quotations||[]).filter(q=>{const d=q.quotationDate||'';return (!startDate||d>=startDate)&&(!endDate||d<=endDate);});
       if(!data.length){alert('No quotation records found for selected period.');return;}
@@ -4078,7 +4095,7 @@ function updateDashboardCards() {
         const trips=Array.isArray(q.cabTrips)&&q.cabTrips.length?q.cabTrips:[null];
         const cabFare=(q.cabTrips||[]).reduce((sum,t)=>sum+Number(t.rate||0),0);
         trips.forEach((t,i)=>quotationRows.push({
-          'Quotation ID':q.id,'Quotation No':q.quotationNo,'Quotation Date':q.quotationDate,'Guest Name':q.guestName,'Address':q.address,'Phone':q.phone,'Email':q.email,
+          'Quotation ID':q.id,'Quotation No':q.quotationNo,'Quotation Date':formatQuotationDateIST(q.quotationDate),'Guest Name':q.guestName,'Address':q.address,'Phone':q.phone,'Email':q.email,
           'Greeting':q.greeting,'Check-In':q.checkIn,'Check-Out':q.checkOut,'Guests':q.guests,'Additional Guests':q.additionalGuests,'Additional Rate/Day':q.additionalRate,
           'Room Type':q.roomType,'No of Room':q.rooms,'Rate/Day':q.ratePerDay,'Cab Fare':cabFare,'Discount':q.discount,
           'Quotation Total Amount':q.totalAmount,'Terms & Conditions':q.terms,
@@ -4277,7 +4294,7 @@ function updateDashboardCards() {
         document.getElementById('cust-id').value = b.idNo || '';
         document.getElementById('cust-country-code').value = b.countryCode || '+91';
         document.getElementById('cust-contact').value = b.contactNo || '';
-        document.getElementById('cust-quotation-ref').value = b.quotationNo === 'NA' ? 'NA' : (b.quotationNo ? `${b.quotationNo} | ${b.quotationDate || ''}` : '');
+        document.getElementById('cust-quotation-ref').value = b.quotationNo === 'NA' ? 'NA' : (b.quotationNo ? `${b.quotationNo} | ${formatQuotationDateIST(b.quotationDate || '')}` : '');
         document.getElementById('cust-quotation-total').value = b.quotationTotalAmount || '';
 
         if (b.idProofBase64) {

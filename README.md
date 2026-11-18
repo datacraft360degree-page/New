@@ -1522,12 +1522,21 @@ function checkBirthdayTrigger() {
       return `${dd}/${mm}/${yy} ${hh}:${min}`;
     }
 
-    // Keep date-only quotation values anchored to midnight IST (UTC+05:30).
+    // Quotation dates are date-only values; display them in IST calendar format without a time.
     function formatQuotationDateIST(dateValue) {
       if (!dateValue || dateValue === 'NA') return dateValue || '';
       const match = String(dateValue).match(/^(\d{4})-(\d{2})-(\d{2})/);
       if (!match) return String(dateValue);
-      return format24hDate(`${match[1]}-${match[2]}-${match[3]}T00:00:00+05:30`);
+      return `${match[3]}/${match[2]}/${match[1].slice(-2)}`;
+    }
+
+    // Cab trip date/time display: dd/mm/yy HH:mm (24-hour clock), retaining the selected wall time.
+    function formatQuotationCabDateTime(value) {
+      if (!value) return '';
+      const raw = String(value).trim();
+      const localMatch = raw.match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})/);
+      if (localMatch) return `${localMatch[3]}/${localMatch[2]}/${localMatch[1].slice(-2)} ${localMatch[4]}:${localMatch[5]}`;
+      return format24hDate(raw);
     }
 
     function quotationCabDateTimeInput(value) {
@@ -4008,7 +4017,7 @@ function updateDashboardCards() {
       const grandTotal=Number(q.totalAmount)||Math.max(0,roomTotal+cabTotal-(Number(q.discount)||0));
       const money=n=>'₹ '+Number(n||0).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
       const dateFmt=v=>{if(!v)return '';const d=new Date(v+'T00:00:00');return isNaN(d)?v:d.toLocaleDateString('en-GB').replaceAll('/','-');};
-      const cabRows=(q.cabTrips||[]).map((t,i)=>`<tr><td class="center">${escapeRemarkHtml(t.trip||i+1)}</td><td>${escapeRemarkHtml(t.dateTime||'')}</td><td>${escapeRemarkHtml(t.remarks||'')}</td><td class="num">${money(t.rate)}</td><td class="num">${money(t.rate)}</td></tr>`).join('');
+      const cabRows=(q.cabTrips||[]).map((t,i)=>`<tr><td class="center">${escapeRemarkHtml(t.trip||i+1)}</td><td>${escapeRemarkHtml(formatQuotationCabDateTime(t.dateTime||''))}</td><td>${escapeRemarkHtml(t.remarks||'')}</td><td class="num">${money(t.rate)}</td><td class="num">${money(t.rate)}</td></tr>`).join('');
       const pdfRoot=document.createElement('div');
       pdfRoot.style.cssText='width:190mm;background:#fff;color:#111827;font-family:Arial,sans-serif;padding:0;margin:0;';
       pdfRoot.innerHTML=`
@@ -4035,7 +4044,7 @@ function updateDashboardCards() {
           <div class="greeting">Dear Sir/Madam,<br>${escapeRemarkHtml(q.greeting||'')}</div>
           <table class="main-table"><thead><tr><th colspan="10" style="text-align:left">Reservation Info</th></tr><tr><th>Check in Date</th><th>Checkout Date</th><th>Stay Days</th><th>No of Guest</th><th>Additional/Minor Guest</th><th>Additional/Minor Rate/Day (₹)</th><th>Room Type</th><th>No of Room</th><th>Rate/Day (₹)</th><th>Total Amount</th></tr></thead>
           <tbody><tr><td class="center">${dateFmt(q.checkIn)}</td><td class="center">${dateFmt(q.checkOut)}</td><td class="center">${days.toFixed(2)}</td><td class="center">${Number(q.guests)||0}</td><td class="center">${Number(q.additionalGuests)||0}</td><td class="num">${money(q.additionalRate)}</td><td>${escapeRemarkHtml(q.roomType||'')}</td><td class="center">${Number(q.rooms)||0}</td><td class="num">${money(q.ratePerDay)}</td><td class="num">${money(roomTotal)}</td></tr>
-          ${cabRows?`<tr><th colspan="10" style="text-align:left">Cab Fare</th></tr><tr><th>Trip</th><th colspan="2">Date &amp; Time</th><th colspan="4">Remarks</th><th>Rate/Trip (₹)</th><th colspan="2">Total Amount</th></tr>${(q.cabTrips||[]).map((t,i)=>`<tr><td class="center">${escapeRemarkHtml(t.trip||i+1)}</td><td colspan="2">${escapeRemarkHtml(t.dateTime||'')}</td><td colspan="4">${escapeRemarkHtml(t.remarks||'')}</td><td class="num">${money(t.rate)}</td><td colspan="2" class="num">${money(t.rate)}</td></tr>`).join('')}`:''}
+          ${cabRows?`<tr><th colspan="10" style="text-align:left">Cab Fare</th></tr><tr><th>Trip</th><th colspan="2">Date &amp; Time</th><th colspan="4">Remarks</th><th>Rate/Trip (₹)</th><th colspan="2">Total Amount</th></tr>${(q.cabTrips||[]).map((t,i)=>`<tr><td class="center">${escapeRemarkHtml(t.trip||i+1)}</td><td colspan="2">${escapeRemarkHtml(formatQuotationCabDateTime(t.dateTime||''))}</td><td colspan="4">${escapeRemarkHtml(t.remarks||'')}</td><td class="num">${money(t.rate)}</td><td colspan="2" class="num">${money(t.rate)}</td></tr>`).join('')}`:''}
           <tr><td colspan="8" style="text-align:right;font-weight:700">Total Amount</td><td colspan="2" class="num">${money(roomTotal+cabTotal)}</td></tr><tr><td colspan="8" style="text-align:right;font-weight:700">Discount</td><td colspan="2" class="num">${money(q.discount)}</td></tr><tr><td colspan="8" style="text-align:right;font-weight:700">Grand Total</td><td colspan="2" class="num" style="font-weight:700">${money(grandTotal)}</td></tr></tbody></table>
           <div class="terms"><b>Terms &amp; Condition:</b><br>${escapeRemarkHtml(q.terms||'')}</div>
           <div class="thanks">Thank you for staying with us!<br>For inquiries, please contact hotel management.</div>
@@ -4099,7 +4108,7 @@ function updateDashboardCards() {
           'Greeting':q.greeting,'Check-In':q.checkIn,'Check-Out':q.checkOut,'Guests':q.guests,'Additional Guests':q.additionalGuests,'Additional Rate/Day':q.additionalRate,
           'Room Type':q.roomType,'No of Room':q.rooms,'Rate/Day':q.ratePerDay,'Cab Fare':cabFare,'Discount':q.discount,
           'Quotation Total Amount':q.totalAmount,'Terms & Conditions':q.terms,
-          'Trip':t?(t.trip||i+1):'','Date & Time':t?(t.dateTime||''):'',
+          'Trip':t?(t.trip||i+1):'','Date & Time':t?formatQuotationCabDateTime(t.dateTime||''):'',
           'Cab Remarks':t?(t.remarks||''):'','Rate/Trip (₹)':t?Number(t.rate)||0:'',
           'Cab Trip Total (₹)':t?Number(t.rate)||0:''
         }));

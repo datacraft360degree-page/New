@@ -764,9 +764,16 @@
           <p class="text-[10px] text-slate-500 mt-1">Create, find and manage customer quotations.</p></div>
           <button onclick="openQuotationModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-2 rounded-full text-[11px] font-semibold"><i class="fa-solid fa-plus"></i> Create Quotation</button>
         </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 py-3">
-          <input type="date" id="quotation-search-date" onchange="renderQuotations()" class="border border-slate-200 rounded-xl px-3 py-2 text-[11px]" aria-label="Search by quotation date"/>
-          <input type="text" id="quotation-search-no" oninput="renderQuotations()" placeholder="Search Quotation No..." class="border border-slate-200 rounded-xl px-3 py-2 text-[11px]"/>
+        <div class="flex flex-wrap items-center justify-end gap-2 py-2">
+          <div class="flex items-center bg-slate-100 border border-slate-200 rounded-2xl px-2 py-1 space-x-1.5">
+            <label for="quotation-search-date" class="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-1 pl-1"><i class="fa-solid fa-calendar-day text-blue-600"></i> Search Date:</label>
+            <input type="date" id="quotation-search-date" onchange="renderQuotations()" class="bg-white text-[11px] border border-slate-200 rounded-xl px-2 py-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-blue-600 cursor-pointer" aria-label="Search by quotation date"/>
+          </div>
+          <div class="flex items-center bg-slate-100 border border-slate-200 rounded-2xl px-2 py-1 space-x-1.5">
+            <label for="quotation-search-no" class="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-1 pl-1"><i class="fa-solid fa-magnifying-glass text-blue-600"></i> Quotation No:</label>
+            <input type="text" id="quotation-search-no" oninput="renderQuotations()" placeholder="Search..." class="bg-white text-[11px] border border-slate-200 rounded-xl px-2 py-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-blue-600 w-36"/>
+          </div>
+          <button type="button" onclick="clearQuotationSearch()" class="text-slate-400 hover:text-slate-600 px-1 text-[10px]" title="Reset quotation filters"><i class="fa-solid fa-rotate-left"></i> Reset</button>
         </div>
         <div class="overflow-x-auto"><table class="w-full text-left text-[10px]">
           <thead class="bg-slate-50 text-slate-500"><tr><th class="p-2">Quotation No</th><th class="p-2">Date</th><th class="p-2">Guest</th><th class="p-2 text-right">Total</th><th class="p-2">Action</th></tr></thead>
@@ -3926,7 +3933,7 @@ function updateDashboardCards() {
       const qNo = existing ? existing.quotationNo : nextQuotationNumber(date);
       const q = existing || {id:`qt_${Date.now()}`, quotationNo:qNo, quotationDate:date, guestName:'', address:'', phone:'', email:'', checkIn:date, checkOut:tomorrow, guests:2, additionalGuests:0, additionalRate:0, roomType:'Deluxe', rooms:1, ratePerDay:1200, cabTrips:[], discount:0};
       const trips = (q.cabTrips || []);
-      const tripRows = trips.length ? trips : [{trip:1,dateTime:'',remarks:'',rate:0}];
+      const tripRows = trips;
       document.getElementById('quotation-modal')?.remove();
       const modal = document.createElement('div'); modal.id='quotation-modal';
       modal.className='fixed inset-0 z-[120] bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-3 overflow-y-auto no-print';
@@ -4032,7 +4039,7 @@ function updateDashboardCards() {
           .section-title{font-weight:700;font-size:10px;margin:4mm 0 2mm}
           table{width:100%;border-collapse:collapse;table-layout:auto;font-size:8.3px}th,td{border:1px solid #9ca3af;padding:5px 4px;vertical-align:middle}
           th{font-weight:700;text-align:center;background:#f8fafc}td.center{text-align:center}td.num{text-align:right;white-space:nowrap}
-          .totals{width:55%;margin:5mm 0 0 auto;font-size:9.5px}.totals td{border:0;padding:3px 5px}.totals .grand td{border-top:1px solid #111827;font-weight:700;font-size:11px;padding-top:6px}
+          .totals{width:55%;margin:5mm 0 0 auto;font-size:9.5px}.totals td{border:0;padding:3px 5px}.totals .grand td{border-top:1px solid #111827;font-weight:700;font-size:11px;padding-top:6px}.cab-data-row td{text-align:center!important}
           .terms{margin-top:7mm;white-space:pre-line;line-height:1.6}.thanks{text-align:left;margin-top:10mm;line-height:1.7}
           .signature{text-align:right;margin-top:17mm;font-weight:700;padding-right:5mm}
         </style>
@@ -4045,35 +4052,39 @@ function updateDashboardCards() {
           <div class="guest"><p>Guest Name: ${escapeRemarkHtml(q.guestName||'')}</p><p>Address: ${escapeRemarkHtml(q.address||'')}</p><p>Phone No: ${escapeRemarkHtml(q.phone||'')}</p><p>email id: ${escapeRemarkHtml(q.email||'')}</p></div>
           <div class="greeting">Dear Sir/Madam,<br>${escapeRemarkHtml(q.greeting||'')}</div>
           <table class="main-table"><thead><tr><th colspan="10" style="text-align:left">Reservation Info</th></tr><tr><th>Check in Date</th><th>Checkout Date</th><th>Stay Days</th><th>No of Guest</th><th>Additional/Minor Guest</th><th>Additional/Minor Rate/Day (₹)</th><th>Room Type</th><th>No of Room</th><th>Rate/Day (₹)</th><th>Total Amount</th></tr></thead>
-          <tbody><tr><td class="center">${dateFmt(q.checkIn)}</td><td class="center">${dateFmt(q.checkOut)}</td><td class="center">${days.toFixed(2)}</td><td class="center">${Number(q.guests)||0}</td><td class="center">${Number(q.additionalGuests)||0}</td><td class="num">${money(q.additionalRate)}</td><td>${escapeRemarkHtml(q.roomType||'')}</td><td class="center">${Number(q.rooms)||0}</td><td class="num">${money(q.ratePerDay)}</td><td class="num">${money(roomTotal)}</td></tr>
-          ${cabRows?`<tr><th colspan="10" style="text-align:left">Cab Fare</th></tr><tr><th>Trip</th><th colspan="2">Date &amp; Time</th><th colspan="4">Remarks</th><th>Rate/Trip (₹)</th><th colspan="2">Total Amount</th></tr>${(q.cabTrips||[]).map((t,i)=>`<tr><td class="center">${escapeRemarkHtml(t.trip||i+1)}</td><td colspan="2">${escapeRemarkHtml(formatQuotationCabDateTime(t.dateTime||''))}</td><td colspan="4">${escapeRemarkHtml(t.remarks||'')}</td><td class="num">${money(t.rate)}</td><td colspan="2" class="num">${money(t.rate)}</td></tr>`).join('')}`:''}
-          <tr><td colspan="8" style="text-align:right;font-weight:700">Total Amount</td><td colspan="2" class="num">${money(roomTotal+cabTotal)}</td></tr><tr><td colspan="8" style="text-align:right;font-weight:700">Discount</td><td colspan="2" class="num">${money(q.discount)}</td></tr><tr><td colspan="8" style="text-align:right;font-weight:700">Grand Total</td><td colspan="2" class="num" style="font-weight:700">${money(grandTotal)}</td></tr></tbody></table>
+          <tbody><tr><td class="center">${dateFmt(q.checkIn)}</td><td class="center">${dateFmt(q.checkOut)}</td><td class="center">${days.toFixed(2)}</td><td class="center">${Number(q.guests)||0}</td><td class="center">${Number(q.additionalGuests)||0}</td><td class="center">${money(q.additionalRate)}</td><td class="center">${escapeRemarkHtml(q.roomType||'')}</td><td class="center">${Number(q.rooms)||0}</td><td class="num">${money(q.ratePerDay)}</td><td class="num">${money(roomTotal)}</td></tr>
+          ${cabRows?`<tr><th colspan="10" style="text-align:left">Cab Fare</th></tr><tr><th>Trip</th><th colspan="2">Date &amp; Time</th><th colspan="4">Remarks</th><th>Rate/Trip (₹)</th><th colspan="2">Total Amount</th></tr>${(q.cabTrips||[]).map((t,i)=>`<tr class="cab-data-row"><td>${escapeRemarkHtml(t.trip||i+1)}</td><td colspan="2">${escapeRemarkHtml(formatQuotationCabDateTime(t.dateTime||''))}</td><td colspan="4">${escapeRemarkHtml(t.remarks||'')}</td><td>${money(t.rate)}</td><td colspan="2">${money(t.rate)}</td></tr>`).join('')}`:''}
+          <tr><td colspan="8" style="text-align:right;font-weight:700">Total Amount</td><td colspan="2" class="num">${money(roomTotal+cabTotal)}</td></tr>${Number(q.discount)>0?`<tr><td colspan="8" style="text-align:right;font-weight:700">Discount</td><td colspan="2" class="num">${money(q.discount)}</td></tr>`:''}<tr><td colspan="8" style="text-align:right;font-weight:700">Grand Total</td><td colspan="2" class="num" style="font-weight:700">${money(grandTotal)}</td></tr></tbody></table>
           <div class="terms"><b>Terms &amp; Condition:</b><br>${escapeRemarkHtml(q.terms||'')}</div>
           <div class="thanks">Thank you for staying with us!<br>For inquiries, please contact hotel management.</div>
           <div class="signature">Authorized Signature</div>
         </div>`;
-      const options={margin:0,filename:`${String(q.quotationNo||'Quotation').replace(/[^a-z0-9_-]/gi,'_')}.pdf`,image:{type:'jpeg',quality:0.98},html2canvas:{scale:2,useCORS:true,backgroundColor:'#ffffff'},jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},pagebreak:{mode:['avoid-all','css','legacy']}};
+      const filename=`${String(q.quotationNo||'Quotation').replace(/[^a-z0-9_-]/gi,'_')}.pdf`;
       const oldPreview=document.getElementById('quotation-preview-modal');if(oldPreview)oldPreview.remove();
       const preview=document.createElement('div');preview.id='quotation-preview-modal';
       preview.className='fixed inset-0 z-[130] bg-slate-900/50 backdrop-blur-md flex items-center justify-center p-3 no-print';
       preview.innerHTML=`<div class="bg-white rounded-3xl shadow-2xl border border-slate-100 w-full max-w-5xl h-[94vh] flex flex-col overflow-hidden">
-        <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100"><div><h3 class="text-sm font-bold text-slate-900">Quotation Preview</h3><p class="text-[10px] text-slate-500">${escapeRemarkHtml(q.quotationNo||'Quotation')} · PDF document</p></div><button type="button" onclick="document.getElementById('quotation-preview-modal').remove()" class="rounded-full w-9 h-9 bg-slate-100 text-slate-600 text-xl">×</button></div>
-        <div class="flex-1 min-h-0 bg-slate-100 p-2"><iframe id="quotation-preview-frame" title="Quotation PDF preview" class="w-full h-full bg-white rounded-xl border border-slate-200"></iframe></div>
-        <div class="flex justify-end gap-2 px-4 py-3 border-t border-slate-100"><button type="button" onclick="document.getElementById('quotation-preview-modal').remove()" class="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 font-semibold text-xs">Close</button><button type="button" id="quotation-download-pdf" class="px-4 py-2 rounded-xl bg-emerald-600 text-white font-semibold text-xs"><i class="fa-solid fa-download mr-1"></i> Save PDF</button><button type="button" id="quotation-print-pdf" class="px-4 py-2 rounded-xl bg-blue-600 text-white font-semibold text-xs"><i class="fa-solid fa-print mr-1"></i> Print</button></div>
+        <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100"><div><h3 class="text-sm font-bold text-slate-900">Quotation Preview</h3><p class="text-[10px] text-slate-500">${escapeRemarkHtml(q.quotationNo||'Quotation')} · Print-ready document</p></div><button type="button" onclick="document.getElementById('quotation-preview-modal').remove()" class="rounded-full w-9 h-9 bg-slate-100 text-slate-600 text-xl">×</button></div>
+        <div class="flex-1 min-h-0 bg-slate-100 p-2"><iframe id="quotation-preview-frame" title="Quotation print preview" class="w-full h-full bg-white rounded-xl border border-slate-200"></iframe></div>
+        <div class="flex justify-end gap-2 px-4 py-3 border-t border-slate-100"><button type="button" onclick="document.getElementById('quotation-preview-modal').remove()" class="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 font-semibold text-xs">Close</button><button type="button" id="quotation-download-pdf" class="px-4 py-2 rounded-xl bg-emerald-600 text-white font-semibold text-xs" title="Open the browser print dialog and choose Save as PDF"><i class="fa-solid fa-download mr-1"></i> Save PDF</button><button type="button" id="quotation-print-pdf" class="px-4 py-2 rounded-xl bg-blue-600 text-white font-semibold text-xs"><i class="fa-solid fa-print mr-1"></i> Print</button></div>
       </div>`;
       document.body.appendChild(preview);
-      const downloadBtn=document.getElementById('quotation-download-pdf');
-      const printBtn=document.getElementById('quotation-print-pdf');
-      downloadBtn.disabled=true;printBtn.disabled=true;downloadBtn.classList.add('opacity-50');printBtn.classList.add('opacity-50');
-      window.html2pdf().set(options).from(pdfRoot).outputPdf('blob').then(blob=>{
-        const url=URL.createObjectURL(blob);const frame=document.getElementById('quotation-preview-frame');if(frame)frame.src=url;
-        downloadBtn.disabled=false;printBtn.disabled=false;downloadBtn.classList.remove('opacity-50');printBtn.classList.remove('opacity-50');
-        downloadBtn.onclick=()=>{const a=document.createElement('a');a.href=url;a.download=options.filename;a.click();};
-        printBtn.onclick=()=>{const w=frame&&frame.contentWindow;if(w){w.focus();w.print();}};
-        preview.dataset.pdfUrl=url;
-      }).catch(err=>{console.error('Quotation PDF error',err);preview.remove();alert('Unable to generate quotation PDF. Please try again.');});
+      const frame=document.getElementById('quotation-preview-frame');
+      const printQuotation=()=>{try{const w=frame&&frame.contentWindow;if(!w){alert('Unable to open print preview. Please try again.');return;}w.focus();w.print();}catch(err){console.error('Quotation print error',err);alert('Unable to open print dialog. Please allow printing and try again.');}};
+      const htmlDocument=`<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeRemarkHtml(filename)}</title><style>html,body{margin:0;padding:0;background:#fff}body{width:190mm;margin:0 auto}@page{size:A4;margin:0}@media print{html,body{width:190mm;margin:0;padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}.qpdf{break-inside:avoid}}</style></head><body>${pdfRoot.innerHTML}</body></html>`;
+      frame.srcdoc=htmlDocument;
+      document.getElementById('quotation-download-pdf').onclick=printQuotation;
+      document.getElementById('quotation-print-pdf').onclick=printQuotation;
+      preview.dataset.pdfFilename=filename;
     }
 
+    function clearQuotationSearch(){
+      const dateInput=document.getElementById('quotation-search-date');
+      const noInput=document.getElementById('quotation-search-no');
+      if(dateInput)dateInput.value='';
+      if(noInput)noInput.value='';
+      renderQuotations();
+    }
     function renderQuotations(){
       const body=document.getElementById('quotations-tbody');if(!body)return;
       const date=document.getElementById('quotation-search-date')?.value||'', no=(document.getElementById('quotation-search-no')?.value||'').toLowerCase();

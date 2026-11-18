@@ -723,6 +723,10 @@
               </select>
             </div>
 
+            <div class="flex items-center bg-slate-100 border border-slate-200 rounded-2xl px-2 py-1 space-x-1.5">
+              <label for="booking-year-filter" class="text-[10px] font-bold text-slate-500 uppercase pl-1"><i class="fa-solid fa-filter text-blue-600"></i> Year:</label>
+              <select id="booking-year-filter" onchange="searchBookingByYear()" class="bg-white text-[11px] border border-slate-200 rounded-xl px-2 py-0.5 font-bold text-blue-600"></select>
+            </div>
             <button onclick="startAddBookingFlow()" class="bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-1.5 rounded-full text-[11px] font-semibold flex items-center gap-1.5 transition shadow-sm whitespace-nowrap">
               <i class="fa-solid fa-plus text-[10px]"></i> Add Booking
             </button>
@@ -765,6 +769,10 @@
           <button onclick="openQuotationModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-3.5 py-2 rounded-full text-[11px] font-semibold"><i class="fa-solid fa-plus"></i> Create Quotation</button>
         </div>
         <div class="flex flex-wrap items-center justify-end gap-2 py-2">
+          <div class="flex items-center bg-slate-100 border border-slate-200 rounded-2xl px-2 py-1 space-x-1.5">
+            <label for="quotation-year-filter" class="text-[10px] font-bold text-slate-500 uppercase pl-1"><i class="fa-solid fa-filter text-blue-600"></i> Year:</label>
+            <select id="quotation-year-filter" onchange="renderQuotations()" class="bg-white text-[11px] border border-slate-200 rounded-xl px-2 py-0.5 font-bold text-blue-600"></select>
+          </div>
           <div class="flex items-center bg-slate-100 border border-slate-200 rounded-2xl px-2 py-1 space-x-1.5">
             <label for="quotation-search-date" class="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-1 pl-1"><i class="fa-solid fa-calendar-day text-blue-600"></i> Search Date:</label>
             <input type="date" id="quotation-search-date" onchange="renderQuotations()" class="bg-white text-[11px] border border-slate-200 rounded-xl px-2 py-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-blue-600 cursor-pointer" aria-label="Search by quotation date"/>
@@ -2338,11 +2346,16 @@ function checkBirthdayTrigger() {
       renderBookingsTable(document.getElementById('booking-date-search')?.value || '', document.getElementById('booking-agent-search')?.value || '');
     }
 
+    function searchBookingByYear() {
+      renderBookingsTable(document.getElementById('booking-date-search')?.value || '', document.getElementById('booking-agent-search')?.value || '');
+    }
+
     function clearDateSearchBooking() {
       const input = document.getElementById('booking-date-search');
       const agent = document.getElementById('booking-agent-search');
       if (input) input.value = '';
       if (agent) agent.value = '';
+      const year=document.getElementById('booking-year-filter');if(year)year.value=String(defaultAppYear);
       renderBookingsTable();
     }
 
@@ -2514,6 +2527,7 @@ function checkBirthdayTrigger() {
       populateDashboardYearDropdown();
       initDashboard();
       populateCalendarYearDropdown();
+      populateDirectoryYearFilters();
       
       document.addEventListener('click', function(e) {
         const container = document.getElementById('room-dropdown-container');
@@ -2727,6 +2741,20 @@ function checkBirthdayTrigger() {
 
     function closeAlertModal() {
       document.getElementById('alert-modal').classList.add('hidden');
+    }
+
+    function populateDirectoryYearFilters() {
+      ['booking-year-filter','quotation-year-filter'].forEach(id => {
+        const sel=document.getElementById(id); if(!sel)return;
+        const prior=sel.value;
+        sel.innerHTML='<option value="ALL">All Years (Consolidated)</option>';
+        for(let y=2026;y<=2085;y++){
+          const opt=document.createElement('option');opt.value=String(y);
+          opt.textContent=y===defaultAppYear?`${y} (Current Year)`:`Year ${y}`;sel.appendChild(opt);
+        }
+        sel.value=prior || String(defaultAppYear);
+        if(![...sel.options].some(o=>o.value===sel.value))sel.value=String(defaultAppYear);
+      });
     }
 
     function populateCalendarYearDropdown() {
@@ -4083,12 +4111,14 @@ function updateDashboardCards() {
       const noInput=document.getElementById('quotation-search-no');
       if(dateInput)dateInput.value='';
       if(noInput)noInput.value='';
+      const yearSelect=document.getElementById('quotation-year-filter');if(yearSelect)yearSelect.value=String(defaultAppYear);
       renderQuotations();
     }
     function renderQuotations(){
       const body=document.getElementById('quotations-tbody');if(!body)return;
       const date=document.getElementById('quotation-search-date')?.value||'', no=(document.getElementById('quotation-search-no')?.value||'').toLowerCase();
-      const rows=(state.quotations||[]).filter(q=>(!date||q.quotationDate===date)&&(!no||String(q.quotationNo).toLowerCase().includes(no)));
+      const year=document.getElementById('quotation-year-filter')?.value||String(defaultAppYear);
+      const rows=(state.quotations||[]).filter(q=>(year==='ALL'||Number(String(q.quotationDate||'').slice(0,4))===Number(year))&&(!date||q.quotationDate===date)&&(!no||String(q.quotationNo).toLowerCase().includes(no)));
       body.innerHTML=rows.length?rows.map(q=>`<tr class="border-b border-slate-100"><td class="p-2 font-bold">${escapeRemarkHtml(q.quotationNo)}</td><td class="p-2">${escapeRemarkHtml(q.quotationDate)}</td><td class="p-2">${escapeRemarkHtml(q.guestName)}</td><td class="p-2 text-right">₹${Number(q.totalAmount||0).toLocaleString('en-IN')}</td><td class="p-2"><button onclick="openQuotationModal('${q.id}')" class="text-blue-600 font-bold mr-2">Edit</button><button onclick="viewQuotationPDFById('${q.id}')" class="text-emerald-600 font-bold mr-2">View PDF</button><button onclick="deleteQuotation('${q.id}')" class="text-rose-600">Delete</button></td></tr>`).join(''):'<tr><td colspan="5" class="p-3 text-center text-slate-400">No quotations found.</td></tr>';
     }
     function deleteQuotation(id){if(!confirm('Delete this quotation?'))return;state.quotations=state.quotations.filter(q=>q.id!==id);renderQuotations();updateQuotationDashboard();saveChanges(false,false);}
@@ -4101,12 +4131,24 @@ function updateDashboardCards() {
     let pendingBookingQuotation = null;
     function startAddBookingFlow(){
       document.getElementById('booking-quotation-choice')?.remove();
-      const m=document.createElement('div');m.id='booking-quotation-choice';m.className='fixed inset-0 z-[115] bg-slate-900/50 flex items-center justify-center p-4 no-print';
-      m.innerHTML=`<div class="bg-white rounded-2xl p-5 w-full max-w-md space-y-3 shadow-2xl"><h3 class="font-bold text-sm">Has this client taken a Quotation earlier?</h3><div class="flex gap-2"><button onclick="choosePriorQuotation(false)" class="flex-1 bg-slate-100 rounded-xl p-2 font-bold">No</button><button onclick="choosePriorQuotation(true)" class="flex-1 bg-blue-600 text-white rounded-xl p-2 font-bold">Yes</button></div><div id="prior-quotation-search" class="hidden space-y-2"><input id="prior-q-no" oninput="searchPriorQuotation()" placeholder="Search by Quotation No" class="w-full border rounded-xl p-2"/><input id="prior-q-date" type="date" onchange="searchPriorQuotation()" class="w-full border rounded-xl p-2"/><div id="prior-q-results" class="max-h-48 overflow-y-auto space-y-1"></div></div><button onclick="document.getElementById('booking-quotation-choice').remove()" class="text-slate-500">Cancel</button></div>`;
+      const m=document.createElement('div');m.id='booking-quotation-choice';m.className='fixed inset-0 z-[115] bg-slate-950/45 backdrop-blur-sm flex items-center justify-center p-3 no-print';
+      m.innerHTML=`<div class="bg-[#f7f8fc] rounded-[28px] w-full max-w-3xl max-h-[88vh] overflow-hidden shadow-2xl border border-white/70 flex flex-col">
+        <div class="flex items-center justify-between px-5 py-4 bg-white border-b border-slate-100"><div><p class="text-[10px] font-bold uppercase tracking-wider text-blue-600">Booking setup</p><h3 class="font-bold text-base text-slate-900">Has this client taken a quotation earlier?</h3></div><button type="button" aria-label="Close" onclick="document.getElementById('booking-quotation-choice').remove()" class="w-10 h-10 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 text-2xl leading-none">×</button></div>
+        <div class="p-4 sm:p-5 overflow-y-auto"><div class="flex gap-3 mb-4"><button onclick="choosePriorQuotation(false)" class="flex-1 bg-white border border-slate-200 hover:border-blue-300 rounded-2xl p-3 font-bold text-sm text-slate-700 shadow-sm">No, new quotation</button><button onclick="choosePriorQuotation(true)" class="flex-1 bg-blue-600 hover:bg-blue-700 rounded-2xl p-3 font-bold text-sm text-white shadow-sm">Yes, select quotation</button></div>
+          <div id="prior-quotation-search" class="hidden grid grid-cols-1 sm:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] gap-4">
+            <div class="bg-white rounded-2xl p-3 border border-slate-200 shadow-sm space-y-3"><div class="text-xs font-bold text-slate-800">Find quotation</div>
+              <div class="space-y-1"><label for="prior-q-no" class="text-[10px] font-bold text-slate-500">QUOTATION NO.</label><input id="prior-q-no" oninput="searchPriorQuotation()" placeholder="Search quotation no." class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-blue-200"/></div>
+              <div class="space-y-1"><label for="prior-q-date" class="text-[10px] font-bold text-slate-500">QUOTATION DATE</label><input id="prior-q-date" type="date" onchange="searchPriorQuotation()" class="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-blue-200"/></div>
+              <button type="button" onclick="clearPriorQuotationSearch()" class="text-[11px] font-semibold text-blue-600 hover:text-blue-800"><i class="fa-solid fa-rotate-left mr-1"></i>Reset</button>
+            </div>
+            <div class="bg-white rounded-2xl p-3 border border-slate-200 shadow-sm min-h-[220px] flex flex-col"><div class="text-xs font-bold text-slate-800 mb-2">Available quotations</div><div id="prior-q-results" class="flex-1 min-h-0 max-h-[48vh] overflow-y-auto overscroll-contain space-y-2 pr-1"></div></div>
+          </div>
+        </div></div>`;
       document.body.appendChild(m);
     }
+    function clearPriorQuotationSearch(){const n=document.getElementById('prior-q-no'),d=document.getElementById('prior-q-date');if(n)n.value='';if(d)d.value='';searchPriorQuotation();}
     function choosePriorQuotation(yes){if(!yes){document.getElementById('booking-quotation-choice').remove();openBookingModal();const quotationRef=document.getElementById('cust-quotation-ref');const quotationAmount=document.getElementById('cust-quotation-total');if(quotationRef)quotationRef.value='NA';if(quotationAmount)quotationAmount.value='NA';return;}document.getElementById('prior-quotation-search').classList.remove('hidden');searchPriorQuotation();}
-    function searchPriorQuotation(){const no=(document.getElementById('prior-q-no')?.value||'').toLowerCase(),date=document.getElementById('prior-q-date')?.value||'';const results=(state.quotations||[]).filter(q=>(!no||q.quotationNo.toLowerCase().includes(no))&&(!date||q.quotationDate===date));document.getElementById('prior-q-results').innerHTML=results.map(q=>`<button onclick="selectPriorQuotation('${q.id}')" class="w-full text-left border rounded-xl p-2 hover:bg-blue-50"><b>${escapeRemarkHtml(q.quotationNo)}</b> — ${escapeRemarkHtml(q.quotationDate)} — ${escapeRemarkHtml(q.guestName)} — ₹${Number(q.totalAmount||0).toLocaleString('en-IN')}</button>`).join('')||'<p class="text-slate-400 p-2">No matching quotations.</p>';}
+    function searchPriorQuotation(){const no=(document.getElementById('prior-q-no')?.value||'').toLowerCase(),date=document.getElementById('prior-q-date')?.value||'';const results=(state.quotations||[]).filter(q=>(!no||String(q.quotationNo||'').toLowerCase().includes(no))&&(!date||q.quotationDate===date)).sort((a,b)=>String(b.quotationDate||'').localeCompare(String(a.quotationDate||'')));const box=document.getElementById('prior-q-results');if(!box)return;box.innerHTML=results.map(q=>`<button onclick="selectPriorQuotation('${q.id}')" class="w-full text-left border border-slate-200 rounded-xl p-3 hover:border-blue-300 hover:bg-blue-50/70 transition"><div class="flex items-center justify-between gap-2"><b class="text-xs text-slate-900">${escapeRemarkHtml(q.quotationNo)}</b><span class="text-[10px] text-slate-500">${escapeRemarkHtml(q.quotationDate)}</span></div><div class="text-[11px] text-slate-600 mt-1">${escapeRemarkHtml(q.guestName)} · ₹${Number(q.totalAmount||0).toLocaleString('en-IN')}</div></button>`).join('')||'<p class="text-slate-400 text-xs p-3 text-center">No matching quotations.</p>'; }
     function selectPriorQuotation(id){pendingBookingQuotation=(state.quotations||[]).find(q=>q.id===id);document.getElementById('booking-quotation-choice').remove();openBookingModal();setTimeout(()=>{if(!pendingBookingQuotation)return;const q=pendingBookingQuotation;document.getElementById('cust-quotation-ref').value=`${q.quotationNo} | ${formatQuotationDateIST(q.quotationDate)}`;document.getElementById('cust-quotation-total').value=q.totalAmount||0;pendingBookingQuotation=null;},80);}
     function exportQuotationData(startDate,endDate){
       const data=(state.quotations||[]).filter(q=>{const d=q.quotationDate||'';return (!startDate||d>=startDate)&&(!endDate||d<=endDate);});
@@ -5199,6 +5241,11 @@ if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
       if (agentFilter) {
         listToRender = listToRender.filter(b => String(b.agentInfo || '').trim() === agentFilter);
       }
+      const yearFilter=document.getElementById('booking-year-filter')?.value || String(defaultAppYear);
+      if(yearFilter!=='ALL') listToRender=listToRender.filter(b=>{
+        const raw=String(b.checkIn||'').replace(' ','T').split('T')[0];
+        return raw && Number(raw.slice(0,4))===Number(yearFilter);
+      });
 
       const now = new Date().getTime();
 

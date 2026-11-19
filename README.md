@@ -1717,8 +1717,11 @@ function checkBirthdayTrigger() {
     function openOfflineDB(){return new Promise((resolve,reject)=>{if(!('indexedDB' in window)){reject(new Error('IndexedDB unavailable'));return;}const req=indexedDB.open(OFFLINE_DB_NAME,1);req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains(OFFLINE_STORE))req.result.createObjectStore(OFFLINE_STORE);};req.onsuccess=()=>{offlineDb=req.result;resolve(offlineDb);};req.onerror=()=>reject(req.error||new Error('IndexedDB open failed'));});}
     async function writeOfflineSnapshot(markPending=true){
       const snapshot=JSON.stringify(state);
+      // Keep a synchronous localStorage recovery copy as well as the primary IndexedDB copy.
+      // This gives the browser an immediate last-resort snapshot during abrupt shutdowns.
+      try{localStorage.setItem(OFFLINE_KEY,snapshot);}catch(storageError){console.warn('Local recovery mirror unavailable (quota/private mode)',storageError);}
       try{const db=offlineDb||await openOfflineDB();await new Promise((resolve,reject)=>{const tx=db.transaction(OFFLINE_STORE,'readwrite');tx.objectStore(OFFLINE_STORE).put(snapshot,OFFLINE_KEY);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);});}
-      catch(e){try{localStorage.setItem(OFFLINE_KEY,snapshot);}catch(storageError){console.error('Offline storage failed',storageError);throw new Error('Browser storage is full or unavailable. Please download a backup.');}}
+      catch(e){if(!localStorage.getItem(OFFLINE_KEY))throw new Error('Browser storage is full or unavailable. Offline data could not be saved.');console.warn('IndexedDB unavailable; using localStorage recovery copy',e);}
       if(markPending)localStorage.setItem(OFFLINE_PENDING_KEY,'true');
       updateSyncIndicator('offline','Saved on this device');
       return true;
@@ -1759,7 +1762,7 @@ function checkBirthdayTrigger() {
       }catch(error){console.error('Cloud synchronisation failed',error);updateSyncIndicator('error','Sync failed · offline data retained');if(showMessages){document.getElementById('offline-sync-modal-message').textContent=returnOffline?'The cloud backup could not be refreshed. Your existing local data is still available in Offline mode.':(!navigator.onLine?'Your internet is not connected, connect to internet for going online mode':'Could not connect to Google Sheets. Please check your internet connection and try again. The portal has stayed in Offline mode and your local changes are retained.');const heading=document.querySelector('#offline-sync-modal h3');if(heading)heading.textContent=returnOffline?'Cloud Sync Not Completed':'Online Mode Not Enabled';document.getElementById('offline-sync-progress').classList.add('hidden');const btn=document.getElementById('offline-sync-continue');btn.textContent='Continue Offline';btn.classList.remove('hidden');}return false;}
       finally{isSyncing=false;}
     }
-    function initialiseOfflineMode(){const saved=localStorage.getItem(OFFLINE_MODE_KEY);offlineMode=saved===null?true:saved==='true';updateModeSwitchUI();updateSyncIndicator('offline','Preparing offline storage');}
+    function initialiseOfflineMode(){offlineMode=true;localStorage.setItem(OFFLINE_MODE_KEY,'true');updateModeSwitchUI();updateSyncIndicator('offline','Preparing offline storage');try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().then(granted=>console.info('Persistent browser storage:',granted?'granted':'not granted')).catch(()=>{});}catch(e){}}
     // This browser-only lease prevents duplicate tabs/windows sharing this browser profile.
     // A true cross-device/cross-browser account lock must also be implemented in the Google Apps Script backend.
     function acquireSingleTabLock(){
@@ -2600,13 +2603,10 @@ function checkBirthdayTrigger() {
       const toast=document.getElementById('toast'),msg=document.getElementById('toast-message');
       const cached=await readOfflineSnapshot();
       if(cached){state=cached;state.quotations=Array.isArray(state.quotations)?state.quotations:[];state.quotationYearlyCounters=state.quotationYearlyCounters||{};refreshAllUI();updateSyncIndicator('offline','Offline data loaded');}
-      else{showOfflineSyncModal('No local backup was found (for example, browser data may have been cleared). Connecting online to restore the latest Google Sheets data.',false);}
-      if(navigator.onLine){
-        if(!cached)showOfflineSyncModal('Restoring your portal data from Google Sheets before you start.',false);
-        await syncWithCloud(true);
-        if(!cached){const m=document.getElementById('offline-sync-modal-message');if(m&&document.getElementById('offline-sync-modal')&&!document.getElementById('offline-sync-modal').classList.contains('hidden')){m.textContent='Google Sheets sync is complete. Your latest data is saved on this device, and the portal is ready for Offline mode.';document.getElementById('offline-sync-progress').classList.add('hidden');document.getElementById('offline-sync-continue').classList.remove('hidden');}}
-      }else if(!cached){updateSyncIndicator('error','No saved data on this device');if(msg){msg.innerText='Offline mode is available, but no saved portal data was found on this device. Connect to the internet once to restore your Google Sheets data.';toast.classList.remove('hidden');}}
-      checkSheetRowLimits();if(toast)setTimeout(()=>toast.classList.add('hidden'),1500);
+      else{updateSyncIndicator('offline','Offline mode · no local data yet');if(msg){msg.innerText='No saved data was found on this device. The portal is staying Offline. To restore Google Sheets data, connect to the internet and manually switch to Online mode.';toast.classList.remove('hidden');}}
+      // Never contact Google Sheets during startup. Cloud access begins only after the user
+      // manually moves the switch to ONLINE.
+      checkSheetRowLimits();if(toast)setTimeout(()=>toast.classList.add('hidden'),5000);
     }
 
     function setMinBookingDates() {
@@ -2645,10 +2645,14 @@ function checkBirthdayTrigger() {
       checkUpcomingCheckoutsWithDue();
       setInterval(checkUpcomingCheckoutsWithDue, 60000);
       setInterval(triggerPeriodicAutoSave, 300000);
-      setInterval(()=>{if(isLoggedIn)writeOfflineSnapshot().catch(console.error);},6*60*60*1000);
-      setInterval(()=>{const last=Number(localStorage.getItem(LAST_SYNC_KEY)||0);if(isLoggedIn&&navigator.onLine&&Date.now()-last>=24*60*60*1000)syncWithCloud(false);},60000);
-      window.addEventListener('online',()=>{if(isLoggedIn){const last=Number(localStorage.getItem(LAST_SYNC_KEY)||0);if(Date.now()-last>=24*60*60*1000)syncWithCloud(false);}});
+      // Frequent local-only checkpoints protect against crashes, power loss and forced OS restarts.
+      setInterval(()=>{if(isLoggedIn)writeOfflineSnapshot().catch(console.error);},15000);
+      // Network restoration never initiates a cloud sync; the user must switch ONLINE manually.
+      window.addEventListener('online',()=>{if(isLoggedIn){updateSyncIndicator('offline','Internet available · still Offline');}});
       window.addEventListener('offline',()=>{offlineMode=true;localStorage.setItem(OFFLINE_MODE_KEY,'true');updateModeSwitchUI();updateSyncIndicator('error','Internet unavailable · local save active');writeOfflineSnapshot().catch(console.error);});
+      window.addEventListener('pagehide',()=>{try{localStorage.setItem(OFFLINE_KEY,JSON.stringify(state));localStorage.setItem(OFFLINE_PENDING_KEY,'true');}catch(e){console.warn('Final synchronous recovery snapshot failed',e);} });
+      document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&isLoggedIn)writeOfflineSnapshot().catch(console.error);});
+      window.addEventListener('beforeunload',()=>{try{localStorage.setItem(OFFLINE_KEY,JSON.stringify(state));localStorage.setItem(OFFLINE_PENDING_KEY,'true');}catch(e){console.warn('Unload recovery snapshot failed',e);} });
     });
 
     function refreshDynamicUI() {

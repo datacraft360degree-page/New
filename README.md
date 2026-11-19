@@ -105,6 +105,12 @@
     .mode-switch input:checked + .mode-switch-track{background:#22c55e}
     .mode-switch input:checked + .mode-switch-track:before{transform:translateX(18px)}
     .mode-switch input:focus-visible + .mode-switch-track{outline:3px solid rgba(59,130,246,.28);outline-offset:2px}
+    .portal-header-top nav{max-width:100%;overflow-x:auto;scrollbar-width:none}
+    .portal-header-top nav::-webkit-scrollbar{display:none}
+    .portal-header-actions{gap:6px!important}
+    .portal-header-actions>div{gap:6px!important}
+    .portal-header-actions button{padding:5px 9px!important;font-size:10px!important}
+    @media(max-width:640px){.portal-header-top nav{width:100%;justify-content:center;flex-wrap:wrap}.portal-header-actions{padding-top:7px!important}}
     /* Compact quotation totals on the dashboard. */
     .quotation-summary-compact{padding:10px!important;gap:8px!important}
     .quotation-summary-compact .quotation-summary-table{max-height:142px;overflow:auto}
@@ -392,6 +398,7 @@
   <!-- Header Navigation -->
   <header class="bg-white/80 backdrop-blur-md border-b border-slate-200/60 text-slate-900 sticky top-0 z-40 no-print">
     <div class="max-w-7xl mx-auto px-4 py-2.5 flex flex-col md:flex-row justify-between items-center gap-2.5">
+      <div class="portal-header-top flex flex-col sm:flex-row items-center justify-between gap-2 w-full">
       <div class="flex items-center space-x-2.5">
         <div class="bg-blue-600 p-2 rounded-2xl text-white shadow-sm">
           <i class="fa-solid fa-hotel text-sm"></i>
@@ -411,8 +418,11 @@
         </button>
         <button onclick="switchTab('calendar')" id="btn-calendar" class="tab-btn px-3 py-1 rounded-full transition-all text-slate-600 hover:text-slate-900">Calendar</button>
       </nav>
+      </div>
 
-      <!-- Offline-first controls and backup -->
+      <!-- Compact second row: mode indicator and all portal action buttons -->
+      <div class="portal-header-actions flex flex-wrap items-center justify-center gap-2 w-full border-t border-slate-100 pt-2">
+      <!-- Offline-first controls -->
       <div class="flex flex-wrap items-center justify-center gap-1.5 text-[10px]">
         <div class="mode-switch-wrap" role="group" aria-label="Storage mode">
           <span id="mode-label-offline" class="mode-switch-label active">OFFLINE</span>
@@ -478,6 +488,7 @@
         <button onclick="logoutUser()" title="Logout" class="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 px-3 py-1.5 rounded-full text-[11px] font-semibold flex items-center gap-1 transition">
           <i class="fa-solid fa-right-from-bracket text-[10px]"></i> Logout
         </button>
+      </div>
       </div>
     </div>
   </header>
@@ -1719,7 +1730,13 @@ function checkBirthdayTrigger() {
     }
     function updateSyncIndicator(mode,label){const el=document.getElementById('sync-status');if(!el)return;const map={offline:['fa-hard-drive','text-slate-500'],syncing:['fa-rotate fa-spin','text-blue-600'],online:['fa-cloud-check','text-emerald-600'],error:['fa-triangle-exclamation','text-rose-600']};const [ic,cl]=map[mode]||map.offline;el.className='inline-flex items-center gap-1 font-semibold '+cl;el.innerHTML=`<i class="fa-solid ${ic}"></i> ${label}`;}
     function updateModeSwitchUI(){const toggle=document.getElementById('offline-mode-toggle');if(toggle)toggle.checked=!offlineMode;document.getElementById('mode-label-offline')?.classList.toggle('active',offlineMode);document.getElementById('mode-label-online')?.classList.toggle('active',!offlineMode);}
-    function setOfflineMode(isOffline){offlineMode=!!isOffline;localStorage.setItem(OFFLINE_MODE_KEY,offlineMode?'true':'false');updateModeSwitchUI();if(offlineMode){writeOfflineSnapshot().catch(e=>alert(e.message));updateSyncIndicator('offline','Offline mode');showOfflineSyncModal('Offline mode is now active. Your changes will be saved on this device and will not be sent to Google Sheets until you switch to Online mode.',true,'Offline Mode Enabled','Continue Offline');}else{syncWithCloud(true,false).then(ok=>{if(!ok){offlineMode=true;localStorage.setItem(OFFLINE_MODE_KEY,'true');updateModeSwitchUI();updateSyncIndicator('offline','Offline mode · local data retained');}});}}
+    function setOfflineMode(isOffline){
+      const wantsOnline=!isOffline;
+      if(wantsOnline&&!navigator.onLine){offlineMode=true;localStorage.setItem(OFFLINE_MODE_KEY,'true');updateModeSwitchUI();updateSyncIndicator('error','Internet unavailable · Offline mode');showOfflineSyncModal('Your internet is not connected, connect to internet for going online mode',true,'Internet Not Connected','Continue Offline');return;}
+      offlineMode=!wantsOnline;localStorage.setItem(OFFLINE_MODE_KEY,offlineMode?'true':'false');updateModeSwitchUI();
+      if(offlineMode){writeOfflineSnapshot().catch(e=>alert(e.message));updateSyncIndicator('offline','Offline mode');showOfflineSyncModal('Offline mode is now active. Your changes will be saved on this device and will not be sent to Google Sheets until you switch to Online mode.',true,'Offline Mode Enabled','Continue Offline');}
+      else{syncWithCloud(true,false).then(ok=>{if(!ok){offlineMode=true;localStorage.setItem(OFFLINE_MODE_KEY,'true');updateModeSwitchUI();updateSyncIndicator('offline','Offline mode · local data retained');}});}
+    }
     function closeOfflineSyncModal(){document.getElementById('offline-sync-modal')?.classList.add('hidden');}
     function showOfflineSyncModal(message,complete=false,title='Online synchronisation',buttonLabel='Continue'){const m=document.getElementById('offline-sync-modal');if(!m)return;const heading=m.querySelector('h3');if(heading)heading.textContent=title;const modalIcon=m.querySelector('.mx-auto i');if(modalIcon){modalIcon.className='fa-solid '+(title.toLowerCase().includes('offline')?'fa-hard-drive':'fa-cloud-arrow-up');}document.getElementById('offline-sync-modal-message').textContent=message;document.getElementById('offline-sync-progress').classList.toggle('hidden',complete);const button=document.getElementById('offline-sync-continue');button.classList.toggle('hidden',!complete);button.textContent=buttonLabel;m.classList.remove('hidden');}
     async function manualBackupDownload(){try{await writeOfflineSnapshot();const blob=new Blob([JSON.stringify({createdAt:new Date().toISOString(),state},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='Business_Portal_Backup_'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);alert('Backup downloaded successfully. Keep this file in a safe location.');}catch(e){alert('Backup failed: '+e.message);}}
@@ -1739,7 +1756,7 @@ function checkBirthdayTrigger() {
         if(returnOffline){offlineMode=true;localStorage.setItem(OFFLINE_MODE_KEY,'true');updateModeSwitchUI();}
         if(showMessages){document.getElementById('offline-sync-modal-message').textContent=returnOffline?'Google Sheets sync is complete. Your latest data is saved on this device, and the portal has returned to Offline mode.':'Online mode is now active. Changes will sync with Google Sheets while you work.';const heading=document.querySelector('#offline-sync-modal h3');if(heading)heading.textContent=returnOffline?'Cloud Backup Updated':'Online Mode Enabled';document.getElementById('offline-sync-progress').classList.add('hidden');const btn=document.getElementById('offline-sync-continue');btn.textContent=returnOffline?'Continue Offline':'Continue Online';btn.classList.remove('hidden');}
         return true;
-      }catch(error){console.error('Cloud synchronisation failed',error);updateSyncIndicator('error','Sync failed · offline data retained');if(showMessages){document.getElementById('offline-sync-modal-message').textContent=returnOffline?'The cloud backup could not be refreshed. Your existing local data is still available in Offline mode.':'Online mode could not be enabled because Google Sheets did not respond. The portal has stayed in Offline mode and your local changes are retained.';const heading=document.querySelector('#offline-sync-modal h3');if(heading)heading.textContent=returnOffline?'Cloud Sync Not Completed':'Online Mode Not Enabled';document.getElementById('offline-sync-progress').classList.add('hidden');const btn=document.getElementById('offline-sync-continue');btn.textContent='Continue Offline';btn.classList.remove('hidden');}return false;}
+      }catch(error){console.error('Cloud synchronisation failed',error);updateSyncIndicator('error','Sync failed · offline data retained');if(showMessages){document.getElementById('offline-sync-modal-message').textContent=returnOffline?'The cloud backup could not be refreshed. Your existing local data is still available in Offline mode.':(!navigator.onLine?'Your internet is not connected, connect to internet for going online mode':'Could not connect to Google Sheets. Please check your internet connection and try again. The portal has stayed in Offline mode and your local changes are retained.');const heading=document.querySelector('#offline-sync-modal h3');if(heading)heading.textContent=returnOffline?'Cloud Sync Not Completed':'Online Mode Not Enabled';document.getElementById('offline-sync-progress').classList.add('hidden');const btn=document.getElementById('offline-sync-continue');btn.textContent='Continue Offline';btn.classList.remove('hidden');}return false;}
       finally{isSyncing=false;}
     }
     function initialiseOfflineMode(){const saved=localStorage.getItem(OFFLINE_MODE_KEY);offlineMode=saved===null?true:saved==='true';updateModeSwitchUI();updateSyncIndicator('offline','Preparing offline storage');}
@@ -2588,7 +2605,7 @@ function checkBirthdayTrigger() {
         if(!cached)showOfflineSyncModal('Restoring your portal data from Google Sheets before you start.',false);
         await syncWithCloud(true);
         if(!cached){const m=document.getElementById('offline-sync-modal-message');if(m&&document.getElementById('offline-sync-modal')&&!document.getElementById('offline-sync-modal').classList.contains('hidden')){m.textContent='Google Sheets sync is complete. Your latest data is saved on this device, and the portal is ready for Offline mode.';document.getElementById('offline-sync-progress').classList.add('hidden');document.getElementById('offline-sync-continue').classList.remove('hidden');}}
-      }else if(!cached){showOfflineSyncModal('No local data is available and the internet is offline. Connect to the internet to restore your Google Sheets backup.',true);}
+      }else if(!cached){updateSyncIndicator('error','No saved data on this device');if(msg){msg.innerText='Offline mode is available, but no saved portal data was found on this device. Connect to the internet once to restore your Google Sheets data.';toast.classList.remove('hidden');}}
       checkSheetRowLimits();if(toast)setTimeout(()=>toast.classList.add('hidden'),1500);
     }
 
@@ -2631,7 +2648,7 @@ function checkBirthdayTrigger() {
       setInterval(()=>{if(isLoggedIn)writeOfflineSnapshot().catch(console.error);},6*60*60*1000);
       setInterval(()=>{const last=Number(localStorage.getItem(LAST_SYNC_KEY)||0);if(isLoggedIn&&navigator.onLine&&Date.now()-last>=24*60*60*1000)syncWithCloud(false);},60000);
       window.addEventListener('online',()=>{if(isLoggedIn){const last=Number(localStorage.getItem(LAST_SYNC_KEY)||0);if(Date.now()-last>=24*60*60*1000)syncWithCloud(false);}});
-      window.addEventListener('offline',()=>updateSyncIndicator('error','Internet unavailable · local save active'));
+      window.addEventListener('offline',()=>{offlineMode=true;localStorage.setItem(OFFLINE_MODE_KEY,'true');updateModeSwitchUI();updateSyncIndicator('error','Internet unavailable · local save active');writeOfflineSnapshot().catch(console.error);});
     });
 
     function refreshDynamicUI() {

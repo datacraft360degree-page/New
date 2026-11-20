@@ -148,6 +148,19 @@
   #tab-dashboard th,
   #tab-dashboard .border-b .dashboard-box-heading { color:#000 !important; font-weight:800 !important; }
   #tab-dashboard .border-b > div > p { letter-spacing:.045em; }
+
+
+    /* Consistent left alignment for navigation and action controls across all tabs. */
+    .portal-tab-row{justify-content:flex-start!important;text-align:left!important}
+    .portal-header-actions{justify-content:flex-start!important;text-align:left!important}
+    .portal-header-actions>div{justify-content:flex-start!important;text-align:left!important}
+    .portal-tab-row .tab-btn{margin-left:0!important}
+    .tab-content .justify-end{justify-content:flex-start!important}
+    .tab-content .flex:has(> button),
+    .tab-content .flex:has(> a),
+    .tab-content .flex:has(> div > button){justify-content:flex-start!important;text-align:left!important}
+    #quotation-preview-modal .justify-end{justify-content:flex-start!important}
+    @media(max-width:640px){.portal-header-actions{justify-content:flex-start!important}.portal-header-actions>div{justify-content:flex-start!important}}
 </style>
 </head>
 <body class="text-slate-800 font-sans min-h-screen flex flex-col relative antialiased text-xs" onclick="closeCommentBox()">
@@ -4312,17 +4325,16 @@ function updateDashboardCards() {
       preview.innerHTML=`<div class="bg-white rounded-3xl shadow-2xl border border-slate-100 w-full max-w-5xl h-[94vh] flex flex-col overflow-hidden">
         <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100"><div><h3 class="text-sm font-bold text-slate-900">Quotation Preview</h3><p class="text-[10px] text-slate-500">${escapeRemarkHtml(q.quotationNo||'Quotation')} · Print-ready document</p></div><button type="button" onclick="document.getElementById('quotation-preview-modal').remove()" class="rounded-full w-9 h-9 bg-slate-100 text-slate-600 text-xl">×</button></div>
         <div class="flex-1 min-h-0 bg-slate-100 p-2"><iframe id="quotation-preview-frame" title="Quotation print preview" class="w-full h-full bg-white rounded-xl border border-slate-200"></iframe></div>
-        <div class="flex flex-wrap justify-end gap-2 px-4 py-3 border-t border-slate-100"><button type="button" onclick="document.getElementById('quotation-preview-modal').remove()" class="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 font-semibold text-xs">Close</button><button type="button" id="quotation-open-full-view" class="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 font-semibold text-xs"><i class="fa-solid fa-up-right-from-square mr-1"></i> Open View</button><button type="button" id="quotation-download-pdf" class="px-4 py-2 rounded-xl bg-emerald-600 text-white font-semibold text-xs" title="Open the browser print dialog and choose Save as PDF"><i class="fa-solid fa-download mr-1"></i> Save PDF</button><button type="button" id="quotation-print-pdf" class="px-4 py-2 rounded-xl bg-blue-600 text-white font-semibold text-xs"><i class="fa-solid fa-print mr-1"></i> Print</button></div>
+        <div class="flex flex-wrap justify-end gap-2 px-4 py-3 border-t border-slate-100"><button type="button" onclick="document.getElementById('quotation-preview-modal').remove()" class="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 font-semibold text-xs">Close</button><button type="button" id="quotation-download-pdf" class="px-4 py-2 rounded-xl bg-emerald-600 text-white font-semibold text-xs" title="Save the quotation as a PDF using the browser print dialog"><i class="fa-solid fa-download mr-1"></i> Save PDF</button><button type="button" id="quotation-print-pdf" class="px-4 py-2 rounded-xl bg-blue-600 text-white font-semibold text-xs"><i class="fa-solid fa-print mr-1"></i> Print</button></div>
       </div>`;
       document.body.appendChild(preview);
       const frame=document.getElementById('quotation-preview-frame');
       const htmlDocument=`<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeRemarkHtml(filename)}</title><style>html,body{margin:0;padding:0;background:#fff}body{width:190mm;margin:0 auto}@media screen and (max-width:700px){body{width:100%;overflow-x:auto}}@page{size:A4;margin:0}@media print{html,body{width:190mm;margin:0;padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}.qpdf{break-inside:avoid}}</style></head><body>${pdfRoot.innerHTML}</body></html>`;
       const previewUrl=URL.createObjectURL(new Blob([htmlDocument],{type:'text/html;charset=utf-8'}));
       frame.src=previewUrl;
-      const printQuotation=()=>{try{const w=frame&&frame.contentWindow;if(w){w.focus();w.print();}else window.open(previewUrl,'_blank');}catch(err){console.warn('Embedded print fallback',err);window.open(previewUrl,'_blank');}};
-      document.getElementById('quotation-open-full-view').onclick=()=>{const opened=window.open(previewUrl,'_blank');if(!opened)alert('Please allow pop-ups to open the quotation in a separate tab.');};
-      document.getElementById('quotation-download-pdf').onclick=printQuotation;
-      document.getElementById('quotation-print-pdf').onclick=printQuotation;
+      const printQuotation=(saveAsPdf=false)=>{try{const w=frame&&frame.contentWindow;if(w){try{w.document.title=filename.replace(/\.pdf$/i,'');}catch(e){}w.focus();w.print();}else{frame.src=previewUrl;setTimeout(()=>{try{frame.contentWindow.focus();frame.contentWindow.print();}catch(e){console.warn('Quotation print unavailable',e);}},250);}}catch(err){console.warn('Quotation print unavailable',err);alert('Unable to open the print dialog. Please try again.');}};
+      document.getElementById('quotation-download-pdf').onclick=()=>printQuotation(true);
+      document.getElementById('quotation-print-pdf').onclick=()=>printQuotation(false);
       preview.querySelectorAll('button[onclick*="quotation-preview-modal"]').forEach(btn=>btn.addEventListener('click',()=>URL.revokeObjectURL(previewUrl)));
       preview.dataset.pdfFilename=filename;
     }

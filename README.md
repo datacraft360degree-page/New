@@ -105,12 +105,15 @@
     .mode-switch input:checked + .mode-switch-track{background:#22c55e}
     .mode-switch input:checked + .mode-switch-track:before{transform:translateX(18px)}
     .mode-switch input:focus-visible + .mode-switch-track{outline:3px solid rgba(59,130,246,.28);outline-offset:2px}
-    .portal-header-top nav{max-width:100%;overflow-x:auto;scrollbar-width:none}
-    .portal-header-top nav::-webkit-scrollbar{display:none}
-    .portal-header-actions{gap:6px!important}
+    .portal-header-top{display:flex;flex-direction:column;align-items:stretch;gap:7px!important}
+    .portal-title-row{min-height:27px}
+    .portal-tab-row{max-width:100%;overflow-x:auto;scrollbar-width:none;justify-content:flex-start;white-space:nowrap}
+    .portal-tab-row::-webkit-scrollbar{display:none}
+    .portal-tab-row .tab-btn{flex:0 0 auto;white-space:nowrap}
+    .portal-header-actions{gap:6px!important;padding-top:7px!important}
     .portal-header-actions>div{gap:6px!important}
     .portal-header-actions button{padding:5px 9px!important;font-size:10px!important}
-    @media(max-width:640px){.portal-header-top nav{width:100%;justify-content:center;flex-wrap:wrap}.portal-header-actions{padding-top:7px!important}}
+    @media(max-width:640px){.portal-tab-row{justify-content:flex-start}.portal-header-actions{justify-content:center}}
     /* Compact quotation totals on the dashboard. */
     .quotation-summary-compact{padding:10px!important;gap:8px!important}
     .quotation-summary-compact .quotation-summary-table{max-height:142px;overflow:auto}
@@ -397,9 +400,9 @@
 
   <!-- Header Navigation -->
   <header class="bg-white/80 backdrop-blur-md border-b border-slate-200/60 text-slate-900 sticky top-0 z-40 no-print">
-    <div class="max-w-7xl mx-auto px-4 py-2.5 flex flex-col md:flex-row justify-between items-center gap-2.5">
-      <div class="portal-header-top flex flex-col sm:flex-row items-center justify-between gap-2 w-full">
-      <div class="flex items-center space-x-2.5">
+    <div class="max-w-7xl mx-auto px-4 py-2.5 flex flex-col items-stretch gap-2.5">
+      <div class="portal-header-top flex flex-col items-stretch gap-2 w-full">
+      <div class="portal-title-row flex items-center justify-start w-full space-x-2.5">
         <div class="bg-blue-600 p-2 rounded-2xl text-white shadow-sm">
           <i class="fa-solid fa-hotel text-sm"></i>
         </div>
@@ -409,7 +412,7 @@
       </div>
       
       <!-- One UI Pill Navigation -->
-      <nav class="flex space-x-1 bg-slate-100 p-1 rounded-full text-[11px] font-medium">
+      <nav class="portal-tab-row flex flex-nowrap items-center justify-start sm:justify-center gap-1 bg-slate-100 p-1 rounded-full text-[11px] font-medium w-full overflow-x-auto">
         <button onclick="switchTab('dashboard')" id="btn-dashboard" class="tab-btn px-3 py-1 rounded-full transition-all active-tab bg-white text-blue-600 shadow-sm font-bold">Dashboard</button>
         <button onclick="switchTab('booking')" id="btn-booking" class="tab-btn px-3 py-1 rounded-full transition-all text-slate-600 hover:text-slate-900">Booking Details</button>
         <button onclick="switchTab('quotation')" id="btn-quotation" class="tab-btn px-3 py-1 rounded-full transition-all text-slate-600 hover:text-slate-900">Quotation</button>
@@ -1712,6 +1715,56 @@ function checkBirthdayTrigger() {
     const SERVER_SESSION_KEY='business-portal-server-session';
     const SERVER_SESSION_HEARTBEAT_MS=15000;
     let offlineMode=true, offlineDb=null, isSyncing=false, activeTabId='tab_'+Math.random().toString(36).slice(2);
+    const SHEET_ROW_LIMIT=1000000, SHEET_ROW_RESERVE=50, SHEET_ROW_WARNING=100;
+    let serverRowLimits=null;
+    try{serverRowLimits=JSON.parse(localStorage.getItem('portal-sheet-row-limits')||'null');}catch(e){serverRowLimits=null;}
+    function quotationSheetRows(list){
+      return (list||[]).reduce((sum,q)=>sum+Math.max(1,Array.isArray(q.cabTrips)?q.cabTrips.length:0),0);
+    }
+    function applyServerRowLimits(limits,showWarnings=true){
+      if(!limits||typeof limits!=='object')return;
+      serverRowLimits=limits;
+      try{localStorage.setItem('portal-sheet-row-limits',JSON.stringify(limits));}catch(e){}
+      if(!showWarnings)return;
+      ['bookings','quotations'].forEach(type=>{
+        const info=limits[type];if(!info)return;
+        const remaining=Math.max(0,Number(info.remainingRows)||0);
+        if(remaining<=SHEET_ROW_WARNING){
+          const key='portal-row-warning-'+type;
+          const warningBand=remaining<=SHEET_ROW_RESERVE?'critical':String(Math.floor(remaining/10));
+          if(sessionStorage.getItem(key)!==warningBand){
+            sessionStorage.setItem(key,warningBand);
+            const sheetName=type==='bookings'?'Booking Details':'Quotation';
+            const msg=document.getElementById('toast-message'),toast=document.getElementById('toast');
+            if(msg&&toast){
+              msg.textContent=remaining<=SHEET_ROW_RESERVE
+                ? sheetName+' sheet has reached the safety limit. New records are blocked; the final 50 rows are reserved.'
+                : sheetName+' sheet is nearing its 10 lakh row limit. Only '+remaining.toLocaleString('en-IN')+' rows remain; new records will be blocked when 50 rows remain.';
+              toast.classList.remove('hidden');setTimeout(()=>toast.classList.add('hidden'),6500);
+            }
+          }
+        }
+      });
+    }
+    function canIncreaseSheetRows(type,additionalRows){
+      const add=Math.max(0,Number(additionalRows)||0);
+      if(!add)return true;
+      const info=serverRowLimits&&serverRowLimits[type];
+      if(!info)return true; // Server performs the authoritative check when online.
+      const serverUsed=Math.max(0,Number(info.usedRows)||0);
+      const localUsed=type==='bookings'?(Array.isArray(state.bookings)?state.bookings.length:0):quotationSheetRows(state.quotations);
+      const used=Math.max(serverUsed,localUsed);
+      const projected=used+add;
+      const allowedMax=SHEET_ROW_LIMIT-SHEET_ROW_RESERVE;
+      if(projected>allowedMax){
+        const name=type==='bookings'?'Booking Details':'Quotation';
+        const remaining=Math.max(0,SHEET_ROW_LIMIT-used);
+        alert('SAVE BLOCKED — '+name+' sheet is at its row safety limit. Only '+remaining.toLocaleString('en-IN')+' rows remain, and the final 50 rows are reserved. Please create/link a new sheet before adding more records.');
+        return false;
+      }
+      return true;
+    }
+
     let serverSessionHeartbeat=null, serverSessionLost=false;
 
     function getServerSessionId(){return sessionStorage.getItem(SERVER_SESSION_KEY)||'';}
@@ -1730,28 +1783,24 @@ function checkBirthdayTrigger() {
       wrap.classList.remove('hidden');
     }
     function hideTransferProgress(){document.getElementById('sync-transfer')?.classList.add('hidden');}
-    function postToGoogleServerWithProgress(payload){
-      return new Promise((resolve,reject)=>{
-        const xhr=new XMLHttpRequest(),body=JSON.stringify(payload);
-        xhr.open('POST',GAS_API_URL,true);xhr.setRequestHeader('Content-Type','text/plain;charset=utf-8');
-        xhr.upload.onprogress=e=>{if(e.lengthComputable)updateTransferProgress('upload',e.loaded/e.total*100);};
-        xhr.onload=()=>{let result;try{result=JSON.parse(xhr.responseText||'{}');}catch(e){reject(new Error('Invalid response received from Google Server'));return;}
-          if(xhr.status<200||xhr.status>=300){reject(new Error(result.message||('HTTP '+xhr.status)));return;}resolve(result);};
-        xhr.onerror=()=>reject(new Error('Network error while uploading to Google Server'));
-        xhr.onabort=()=>reject(new Error('Upload was interrupted'));
-        updateTransferProgress('upload',0);xhr.send(body);
-      });
+    async function postToGoogleServerWithProgress(payload){
+      updateTransferProgress('upload',0);
+      try{
+        // Fetch follows the Google Apps Script redirect chain more reliably than XHR
+        // in mobile browsers. Keep the progress badge and complete it after response.
+        const result=await postToGoogleServer(payload);
+        updateTransferProgress('upload',100);
+        return result;
+      }catch(error){throw error;}
     }
-    function getGoogleServerDataWithProgress(url){
-      return new Promise((resolve,reject)=>{
-        const xhr=new XMLHttpRequest();xhr.open('GET',url,true);
-        xhr.onprogress=e=>{const total=e.lengthComputable?e.total:Number(xhr.getResponseHeader('Content-Length'));if(total>0)updateTransferProgress('download',e.loaded/total*100);};
-        xhr.onload=()=>{if(xhr.status<200||xhr.status>=300){reject(new Error('Google Server download failed (HTTP '+xhr.status+')'));return;}
-          try{resolve(JSON.parse(xhr.responseText||'{}'));}catch(e){reject(new Error('Invalid Google Server response'));}};
-        xhr.onerror=()=>reject(new Error('Network error while downloading from Google Server'));
-        xhr.onabort=()=>reject(new Error('Download was interrupted'));
-        updateTransferProgress('download',0);xhr.send();
-      });
+    async function getGoogleServerDataWithProgress(url){
+      updateTransferProgress('download',0);
+      const response=await fetch(url,{method:'GET',cache:'no-store'});
+      const raw=await response.text();
+      if(!response.ok)throw new Error('Google Server download failed (HTTP '+response.status+')');
+      let result;try{result=JSON.parse(raw||'{}');}catch(e){throw new Error('Invalid Google Server response');}
+      updateTransferProgress('download',100);
+      return result;
     }
     async function claimGoogleServerSession(){
       if(!navigator.onLine)return {status:'offline'};
@@ -1805,37 +1854,52 @@ function checkBirthdayTrigger() {
     function updateModeSwitchUI(){const toggle=document.getElementById('offline-mode-toggle');if(toggle)toggle.checked=!offlineMode;document.getElementById('mode-label-offline')?.classList.toggle('active',offlineMode);document.getElementById('mode-label-online')?.classList.toggle('active',!offlineMode);}
     async function setOfflineMode(isOffline){
       const wantsOnline=!isOffline;
-      if(wantsOnline&&!navigator.onLine){offlineMode=true;localStorage.setItem(OFFLINE_MODE_KEY,'true');updateModeSwitchUI();showOfflineSyncModal('There is no internet connection. The portal will remain in Offline mode and save on this device.',true,'Online Mode Unavailable','Continue Offline');return;}
-      if(wantsOnline&&!getServerSessionId()){
-        try{const session=await claimGoogleServerSession();if(session.status!=='success')throw new Error(session.message||'Another device is already using this portal.');}
-        catch(e){offlineMode=true;localStorage.setItem(OFFLINE_MODE_KEY,'true');updateModeSwitchUI();showOfflineSyncModal(e.message,true,'Online Mode Not Enabled','Continue Offline');return;}
+      if(!wantsOnline){
+        offlineMode=true;localStorage.setItem(OFFLINE_MODE_KEY,'true');updateModeSwitchUI();
+        try{await writeOfflineSnapshot(false);updateSyncIndicator('offline','Offline mode · saved on this device');}
+        catch(error){updateSyncIndicator('error','Offline save issue');console.error('Offline save failed',error);}
+        closeOfflineSyncModal();
+        return true;
       }
-      offlineMode=!wantsOnline;localStorage.setItem(OFFLINE_MODE_KEY,offlineMode?'true':'false');updateModeSwitchUI();
-      if(offlineMode){await writeOfflineSnapshot(false);updateSyncIndicator('offline','Offline mode');showOfflineSyncModal('Offline mode is active. Changes are saved on this device only and are not sent to Google Server.',true,'Offline Mode Enabled','Continue Offline');}
-      else{const ok=await syncWithCloud(true,false);if(!ok){offlineMode=true;localStorage.setItem(OFFLINE_MODE_KEY,'true');updateModeSwitchUI();updateSyncIndicator('offline','Offline mode · local data retained');}}
+      if(!navigator.onLine){
+        offlineMode=true;localStorage.setItem(OFFLINE_MODE_KEY,'true');updateModeSwitchUI();
+        updateSyncIndicator('error','Internet unavailable · still Offline');
+        const msg=document.getElementById('toast-message');if(msg){msg.textContent='No internet connection. The portal remains in Offline mode.';document.getElementById('toast').classList.remove('hidden');setTimeout(()=>document.getElementById('toast').classList.add('hidden'),3000);}
+        closeOfflineSyncModal();return false;
+      }
+      // The cloud sync routine claims/validates the session once, avoiding
+      // intermittent duplicate session claims during a mode switch.
+      offlineMode=false;localStorage.setItem(OFFLINE_MODE_KEY,'false');updateModeSwitchUI();
+      updateSyncIndicator('syncing','Connecting to Google Server');
+      const ok=await syncWithCloud(false,false);
+      if(!ok){offlineMode=true;localStorage.setItem(OFFLINE_MODE_KEY,'true');updateModeSwitchUI();updateSyncIndicator('offline','Offline mode · local data retained');
+        const msg=document.getElementById('toast-message');if(msg){msg.textContent='Could not switch Online. Your data is safe and the portal remains Offline.';document.getElementById('toast').classList.remove('hidden');setTimeout(()=>document.getElementById('toast').classList.add('hidden'),3500);}
+      }
+      closeOfflineSyncModal();return ok;
     }
     function closeOfflineSyncModal(){document.getElementById('offline-sync-modal')?.classList.add('hidden');}
     function showOfflineSyncModal(message,complete=false,title='Online synchronisation',buttonLabel='Continue'){const m=document.getElementById('offline-sync-modal');if(!m)return;const heading=m.querySelector('h3');if(heading)heading.textContent=title;const modalIcon=m.querySelector('.mx-auto i');if(modalIcon){modalIcon.className='fa-solid '+(title.toLowerCase().includes('offline')?'fa-hard-drive':'fa-cloud-arrow-up');}document.getElementById('offline-sync-modal-message').textContent=message;document.getElementById('offline-sync-progress').classList.toggle('hidden',complete);const button=document.getElementById('offline-sync-continue');button.classList.toggle('hidden',!complete);button.textContent=buttonLabel;m.classList.remove('hidden');}
     async function manualBackupDownload(){try{await writeOfflineSnapshot(false);const blob=new Blob([JSON.stringify({createdAt:new Date().toISOString(),state},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='Business_Portal_Backup_'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);alert('Backup downloaded successfully. Keep this file in a safe location.');}catch(e){alert('Backup failed: '+e.message);}}
     async function syncWithCloud(showMessages=false,returnOffline=true){
-      if(isSyncing)return false;if(!navigator.onLine){updateSyncIndicator('error','No internet connection');if(showMessages)showOfflineSyncModal('No internet connection. Your local data remains safe in Offline mode.',true,'Online Mode Unavailable','Continue Offline');return false;}
-      isSyncing=true;updateSyncIndicator('syncing','Synchronising');if(showMessages)showOfflineSyncModal(returnOffline?'Checking Google Server and refreshing your local backup.':'Connecting to Google Server and enabling live sync. Please keep this portal open.',false,returnOffline?'Checking Cloud Backup':'Switching to Online Mode',returnOffline?'Continue Offline':'Continue Online');
+      if(isSyncing)return false;if(!navigator.onLine){updateSyncIndicator('error','No internet connection');if(showMessages)console.warn('No internet connection; local data remains safe in Offline mode.');return false;}
+      isSyncing=true;updateSyncIndicator('syncing','Synchronising');
       try{
         if(!getServerSessionId()){const session=await claimGoogleServerSession();if(session.status!=='success')throw new Error(session.message||'Another device is already using this portal.');}
         const hasPending=localStorage.getItem(OFFLINE_PENDING_KEY)==='true';
         const remote=await getGoogleServerDataWithProgress(GAS_API_URL+'?action=fetchData&sessionId='+encodeURIComponent(getServerSessionId()));
         if(remote.status==='error')throw new Error(remote.message||'Unable to fetch data');
+        if(remote.rowLimits){applyServerRowLimits(remote.rowLimits,true);delete remote.rowLimits;}
         if(hasPending&&remote&&remote.bookings){
           const local=state;const mergeById=(cloudRows,localRows)=>{const map=new Map((cloudRows||[]).map(x=>[String(x.id),x]));(localRows||[]).forEach(x=>map.set(String(x.id),x));return [...map.values()];};
           const mergeByKey=(cloudRows,localRows,key)=>{const map=new Map((cloudRows||[]).map(x=>[String(x[key]),x]));(localRows||[]).forEach(x=>map.set(String(x[key]),x));return [...map.values()];};
           state={...remote,...local,bookings:mergeById(remote.bookings,local.bookings),quotations:mergeById(remote.quotations,local.quotations),roomsCapacity:mergeByKey(remote.roomsCapacity,local.roomsCapacity,'roomNo'),masterAgents:mergeByKey(remote.masterAgents,local.masterAgents,'agentName'),yearlyCounters:{...(remote.yearlyCounters||{}),...(local.yearlyCounters||{})},quotationYearlyCounters:{...(remote.quotationYearlyCounters||{}),...(local.quotationYearlyCounters||{})}};
-          const result=await postToGoogleServerWithProgress({action:'saveData',state,sessionId:getServerSessionId()});if(result.status!=='success')throw new Error(result.message||'Cloud save failed');refreshAllUI();
+          const result=await postToGoogleServerWithProgress({action:'saveData',state,sessionId:getServerSessionId()});if(result.status!=='success')throw new Error(result.message||'Cloud save failed');if(result.rowLimits)applyServerRowLimits(result.rowLimits,true);refreshAllUI();
         }else if(remote&&Array.isArray(remote.bookings)){state=remote;state.quotations=Array.isArray(state.quotations)?state.quotations:[];state.quotationYearlyCounters=state.quotationYearlyCounters||{};refreshAllUI();}
         await writeOfflineSnapshot(false);localStorage.removeItem(OFFLINE_PENDING_KEY);localStorage.setItem(LAST_SYNC_KEY,String(Date.now()));hideTransferProgress();updateSyncIndicator('online',returnOffline?'Synced':'Live sync active');
         if(returnOffline){offlineMode=true;localStorage.setItem(OFFLINE_MODE_KEY,'true');updateModeSwitchUI();}
-        if(showMessages){document.getElementById('offline-sync-modal-message').textContent=returnOffline?'Google Server sync is complete. Your latest data is saved on this device.':'Online mode is active. Changes will sync with Google Server while you work.';const heading=document.querySelector('#offline-sync-modal h3');if(heading)heading.textContent=returnOffline?'Cloud Backup Updated':'Online Mode Enabled';document.getElementById('offline-sync-progress').classList.add('hidden');const btn=document.getElementById('offline-sync-continue');btn.textContent=returnOffline?'Continue Offline':'Continue Online';btn.classList.remove('hidden');}
+        closeOfflineSyncModal();
         return true;
-      }catch(error){hideTransferProgress();console.error('Cloud synchronisation failed',error);updateSyncIndicator('error','Sync failed · offline data retained');if(showMessages){document.getElementById('offline-sync-modal-message').textContent='Could not connect to Google Server: '+error.message+'. Your local data has been retained and the portal remains Offline.';const heading=document.querySelector('#offline-sync-modal h3');if(heading)heading.textContent=returnOffline?'Cloud Sync Not Completed':'Online Mode Not Enabled';document.getElementById('offline-sync-progress').classList.add('hidden');const btn=document.getElementById('offline-sync-continue');btn.textContent='Continue Offline';btn.classList.remove('hidden');}return false;}
+      }catch(error){hideTransferProgress();console.error('Cloud synchronisation failed',error);updateSyncIndicator('error','Sync failed · offline data retained');closeOfflineSyncModal();return false;}
       finally{isSyncing=false;}
     }
     function initialiseOfflineMode(){offlineMode=true;localStorage.setItem(OFFLINE_MODE_KEY,'true');updateModeSwitchUI();updateSyncIndicator('offline','Preparing offline storage');try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().then(granted=>console.info('Persistent browser storage:',granted?'granted':'not granted')).catch(()=>{});}catch(e){}}
@@ -2678,6 +2742,7 @@ function checkBirthdayTrigger() {
 
     document.addEventListener("DOMContentLoaded", () => {
       checkAuthStatus();
+      closeOfflineSyncModal();
       initialiseOfflineMode();
       loadSavedData();
       setMinBookingDates();
@@ -2731,7 +2796,9 @@ function checkBirthdayTrigger() {
         }
         if(!getServerSessionId()){const session=await claimGoogleServerSession();if(session.status!=='success')throw new Error(session.message||'Portal session is not active.');}
         const result=await postToGoogleServerWithProgress({action:'saveData',state,sessionId:getServerSessionId()});hideTransferProgress();
+        if(result.status==='row_limit'){if(result.rowLimits)applyServerRowLimits(result.rowLimits,true);throw new Error(result.message||'Google Sheet row limit reached');}
         if(result.status==='success'){
+          if(result.rowLimits)applyServerRowLimits(result.rowLimits,true);
           localStorage.removeItem(OFFLINE_PENDING_KEY);localStorage.setItem(LAST_SYNC_KEY,String(Date.now()));updateSyncIndicator('online','Live synced');
           if(!quiet){const msg=document.getElementById('toast-message');msg.innerText=isAutoSave?'Changes auto-saved and synced with Google Server!':'Data saved to this device and Google Server!';document.getElementById('toast').classList.remove('hidden');setTimeout(()=>document.getElementById('toast').classList.add('hidden'),2500);}
           return true;
@@ -4183,6 +4250,10 @@ function updateDashboardCards() {
       const cabTrips=[...document.querySelectorAll('.q-cab-row')].map(r=>({trip:r.querySelector('.q-cab-trip').value,dateTime:r.querySelector('.q-cab-date').value,remarks:r.querySelector('.q-cab-remark').value,rate:Number(r.querySelector('.q-cab-rate').value)||0}));
       const q={id,quotationNo:document.getElementById('q-number').innerText,quotationDate:date,guestName:guestName,address:document.getElementById('q-address').value,phone:document.getElementById('q-phone').value,email:document.getElementById('q-email').value,greeting:document.getElementById('q-greeting').value,checkIn:document.getElementById('q-in').value,checkOut:document.getElementById('q-out').value,guests:Number(document.getElementById('q-guests').value)||1,additionalGuests:Number(document.getElementById('q-extra').value)||0,additionalRate:Number(document.getElementById('q-extra-rate').value)||0,roomType:document.getElementById('q-room-type').value,rooms:Number(document.getElementById('q-rooms').value)||1,ratePerDay:Number(document.getElementById('q-rate').value)||0,cabTrips,discount:Number(document.getElementById('q-discount').value)||0,totalAmount:Number(document.getElementById('q-grand-total').innerText.replace(/,/g,''))||0,terms:document.getElementById('q-terms').value};
       const ix=(state.quotations||[]).findIndex(x=>x.id===id);
+      const oldQuotationRows=ix>=0?Math.max(1,Array.isArray(state.quotations[ix].cabTrips)?state.quotations[ix].cabTrips.length:0):0;
+      const newQuotationRows=Math.max(1,cabTrips.length);
+      const additionalQuotationRows=Math.max(0,newQuotationRows-oldQuotationRows);
+      if(!canIncreaseSheetRows('quotations',additionalQuotationRows))return;
       if(ix>=0) state.quotations[ix]=q; else state.quotations.push(q);
       state.quotationYearlyCounters=state.quotationYearlyCounters||{};
       const numberMatch=String(q.quotationNo||'').match(/^QT-(\\d{4})-(\\d+)$/);
@@ -5351,6 +5422,7 @@ if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
         inactive: false
       };
 
+      if (!id && !canIncreaseSheetRows('bookings', 1)) return;
       if (id) {
         const idx = state.bookings.findIndex(b => String(b.id) === String(id));
         if (idx !== -1) state.bookings[idx] = newBooking;

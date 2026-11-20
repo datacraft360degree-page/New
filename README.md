@@ -318,7 +318,31 @@
         <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 active:scale-98 text-white font-bold py-2.5 rounded-2xl shadow-sm transition text-xs flex items-center justify-center gap-1.5">
           <i class="fa-solid fa-right-to-bracket"></i> Login
         </button>
+        <button type="button" onclick="openAdminSessionReleaseModal()" class="w-full bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 font-semibold py-2 rounded-2xl transition text-[11px] flex items-center justify-center gap-1.5">
+          <i class="fa-solid fa-user-shield"></i> Administrator · Release Active Login
+        </button>
       </form>
+    </div>
+  </div>
+
+  <!-- ADMINISTRATOR ACTIVE-SESSION RELEASE MODAL -->
+  <div id="admin-session-release-modal" class="hidden fixed inset-0 z-[80] bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4 no-print">
+    <div class="bg-white rounded-3xl shadow-2xl border border-amber-100 max-w-sm w-full p-5 space-y-3 text-left">
+      <div class="flex items-center gap-3 border-b border-slate-100 pb-3">
+        <div class="bg-amber-50 text-amber-700 w-10 h-10 rounded-2xl flex items-center justify-center"><i class="fa-solid fa-user-shield"></i></div>
+        <div><h3 class="text-sm font-bold text-slate-900">Administrator Session Recovery</h3><p class="text-[10px] text-slate-500">Release a login left active on an offline or unavailable device</p></div>
+      </div>
+      <p class="text-[11px] text-slate-600">Enter the administrator recovery password. This will immediately invalidate the current active session so you can log in here.</p>
+      <div>
+        <label for="admin-release-password" class="block text-[10px] font-semibold text-slate-700 mb-1">Administrator Recovery Password</label>
+        <input id="admin-release-password" type="password" autocomplete="current-password" placeholder="Enter recovery password" class="w-full bg-slate-100 border border-slate-200 focus:border-amber-500 rounded-xl px-3 py-2 text-xs focus:outline-none" />
+      </div>
+      <div id="admin-release-error" class="hidden bg-rose-50 border border-rose-100 text-rose-600 text-[10px] p-2 rounded-xl text-center"></div>
+      <div class="flex gap-2">
+        <button type="button" onclick="closeAdminSessionReleaseModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2 rounded-xl text-[11px]">Cancel</button>
+        <button id="admin-release-confirm-btn" type="button" onclick="adminReleaseActiveSession()" class="flex-1 bg-amber-600 hover:bg-amber-700 text-white font-bold py-2 rounded-xl text-[11px]">Release Active Login</button>
+      </div>
+      <p class="text-[9px] text-slate-400">Use only when the previous device has been lost, closed unexpectedly, or cannot reconnect.</p>
     </div>
   </div>
 
@@ -1924,8 +1948,10 @@ function checkBirthdayTrigger() {
         try{
           const result=await postToGoogleServer({action:'heartbeatSession',sessionId:getServerSessionId()});
           if(result.status!=='success'){
-            const reclaimed=await claimGoogleServerSession();
-            if(reclaimed.status==='conflict'){serverSessionLost=true;stopServerSessionHeartbeat();isLoggedIn=false;sessionStorage.removeItem('app_authenticated');releaseSingleTabLock();alert(reclaimed.message||'Another device is using this portal. Please log in again.');location.reload();}
+            serverSessionLost=true;stopServerSessionHeartbeat();setServerSessionId('');isLoggedIn=false;
+            sessionStorage.removeItem('app_authenticated');releaseSingleTabLock();
+            alert('Your portal session was released or replaced by an administrator. Please log in again. Your locally saved offline data remains on this device.');
+            location.reload();
           }
         }catch(e){console.warn('Temporary Google Server heartbeat failure; will retry',e);updateSyncIndicator('error','Server unavailable · local data safe');}
       },SERVER_SESSION_HEARTBEAT_MS);
@@ -2373,6 +2399,34 @@ function checkBirthdayTrigger() {
         document.getElementById('login-overlay').classList.add('hidden');document.getElementById('login-error').classList.add('hidden');
         startInactivityMonitoring();document.getElementById('login-alert-modal').classList.remove('hidden');checkBirthdayTrigger();
       } else {document.getElementById('login-error').classList.remove('hidden');}
+    }
+
+    function openAdminSessionReleaseModal(){
+      const modal=document.getElementById('admin-session-release-modal');
+      const password=document.getElementById('admin-release-password');
+      const error=document.getElementById('admin-release-error');
+      if(password)password.value='';if(error){error.textContent='';error.classList.add('hidden');}
+      if(modal)modal.classList.remove('hidden');
+    }
+    function closeAdminSessionReleaseModal(){
+      document.getElementById('admin-session-release-modal')?.classList.add('hidden');
+      const password=document.getElementById('admin-release-password');if(password)password.value='';
+    }
+    async function adminReleaseActiveSession(){
+      const password=document.getElementById('admin-release-password')?.value||'';
+      const error=document.getElementById('admin-release-error');
+      const button=document.getElementById('admin-release-confirm-btn');
+      if(!password){if(error){error.textContent='Enter the administrator recovery password.';error.classList.remove('hidden');}return;}
+      if(!navigator.onLine){if(error){error.textContent='Internet connection is required to release the server session. Reconnect and try again.';error.classList.remove('hidden');}return;}
+      if(button){button.disabled=true;button.textContent='Releasing…';}
+      try{
+        const result=await postToGoogleServer({action:'adminReleaseSession',adminUser:DEFAULT_USER_ID,adminPassword:password});
+        if(result.status!=='success')throw new Error(result.message||'Administrator release was rejected.');
+        setServerSessionId('');
+        closeAdminSessionReleaseModal();
+        alert(result.message||'The previous active login has been released. You can now log in on this device.');
+      }catch(e){if(error){error.textContent=e.message||'Could not release the active login.';error.classList.remove('hidden');}}
+      finally{if(button){button.disabled=false;button.textContent='Release Active Login';}}
     }
 
     function logoutUser(isAuto = false) {

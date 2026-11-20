@@ -2012,8 +2012,43 @@ function checkBirthdayTrigger() {
 
     let serverSessionHeartbeat=null, serverSessionLost=false;
 
-    function getServerSessionId(){return sessionStorage.getItem(SERVER_SESSION_KEY)||'';}
-    function setServerSessionId(value){if(value)sessionStorage.setItem(SERVER_SESSION_KEY,value);else sessionStorage.removeItem(SERVER_SESSION_KEY);}
+    function getServerSessionId(){return localStorage.getItem(SERVER_SESSION_KEY)||'';}
+    function setServerSessionId(value){if(value)localStorage.setItem(SERVER_SESSION_KEY,value);else localStorage.removeItem(SERVER_SESSION_KEY);}
+    const OFFLINE_TRUST_KEY='business-portal-offline-trusted-device-v1';
+    // Offline password verification: store a salted PBKDF2 verifier, never the
+    // raw password. The verifier is usable only with this browser's device ID.
+    const OFFLINE_PASSWORD_ITERATIONS=210000;
+    function bytesToBase64(bytes){let binary='';bytes.forEach(b=>binary+=String.fromCharCode(b));return btoa(binary);}
+    function base64ToBytes(value){return Uint8Array.from(atob(value),c=>c.charCodeAt(0));}
+    async function deriveOfflinePasswordVerifier(password,saltBase64){
+      if(!window.crypto||!crypto.subtle)throw new Error('Secure browser cryptography is unavailable. Open the portal over HTTPS to enable offline login.');
+      const salt=saltBase64?base64ToBytes(saltBase64):crypto.getRandomValues(new Uint8Array(16));
+      const material=await crypto.subtle.importKey('raw',new TextEncoder().encode(String(password)),'PBKDF2',false,['deriveBits']);
+      const bits=await crypto.subtle.deriveBits({name:'PBKDF2',salt:salt,iterations:OFFLINE_PASSWORD_ITERATIONS,hash:'SHA-256'},material,256);
+      return {salt:bytesToBase64(salt),hash:bytesToBase64(new Uint8Array(bits)),iterations:OFFLINE_PASSWORD_ITERATIONS};
+    }
+    function constantTimeStringEqual(a,b){if(typeof a!=='string'||typeof b!=='string'||a.length!==b.length)return false;let diff=0;for(let i=0;i<a.length;i++)diff|=a.charCodeAt(i)^b.charCodeAt(i);return diff===0;}
+    async function saveOfflineTrustedDevice(userId,password){
+      const verifier=await deriveOfflinePasswordVerifier(password,'');
+      const grant={version:2,userId:String(userId||''),deviceId:getPortalDeviceId(),passwordVerifier:verifier,createdAt:new Date().toISOString()};
+      localStorage.setItem(OFFLINE_TRUST_KEY,JSON.stringify(grant));
+      localStorage.setItem('portal_user_id',grant.userId);
+      localStorage.setItem('app_authenticated','true');
+      return grant;
+    }
+    function getOfflineTrustedDevice(){
+      try{const grant=JSON.parse(localStorage.getItem(OFFLINE_TRUST_KEY)||'null');
+        if(!grant||grant.version!==2||!grant.userId||!grant.deviceId||grant.deviceId!==getPortalDeviceId()||!grant.passwordVerifier||!grant.passwordVerifier.salt||!grant.passwordVerifier.hash)return null;
+        return grant;
+      }catch(e){return null;}
+    }
+    async function verifyOfflineTrustedPassword(grant,password){
+      if(!grant||!grant.passwordVerifier)return false;
+      const verifier=await deriveOfflinePasswordVerifier(password,grant.passwordVerifier.salt);
+      return constantTimeStringEqual(verifier.hash,grant.passwordVerifier.hash);
+    }
+    function clearOfflineTrustedDevice(){localStorage.removeItem(OFFLINE_TRUST_KEY);localStorage.removeItem('app_authenticated');localStorage.removeItem('portal_user_id');}
+
     async function postToGoogleServer(payload){
       const response=await fetch(GAS_API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({...payload,portalKey:PORTAL_KEY})});
       const raw=await response.text();let result;try{result=JSON.parse(raw);}catch(e){throw new Error('Invalid response received from Google Server');}
@@ -2585,29 +2620,37 @@ function checkBirthdayTrigger() {
     }
 
     async function checkAuthStatus() {
-      currentUserId = sessionStorage.getItem('portal_user_id') || '';
-      const sessionAuth = sessionStorage.getItem('app_authenticated');
-      if (sessionAuth === 'true') {
-        if(!acquireSingleTabLock()){sessionStorage.removeItem('app_authenticated');isLoggedIn=false;document.getElementById('login-overlay').classList.remove('hidden');return;}
+      const trusted=getOfflineTrustedDevice();
+      currentUserId=(trusted&&trusted.userId)||localStorage.getItem('portal_user_id')||sessionStorage.getItem('portal_user_id')||'';
+      const sessionAuth=trusted&&localStorage.getItem('app_authenticated')==='true';
+      if(sessionAuth){
+        if(!navigator.onLine){
+          // Require the user to re-enter both User ID and password in offline mode.
+          // The entered password is checked against the salted local verifier.
+          isLoggedIn=false;document.getElementById('login-overlay').classList.remove('hidden');
+          return;
+        }
+        if(!acquireSingleTabLock()){isLoggedIn=false;document.getElementById('login-overlay').classList.remove('hidden');return;}
         if(navigator.onLine){
-          // A remembered browser login is resumable only when it still has its own
-          // server session ID. Never create a new server session without a fresh
-          // one-time authentication ticket.
+          // The browser-installation session ID is persisted locally. Reclaiming
+          // it proves continuity to the server; no password is requested again.
           if(!getServerSessionId()){
-            releaseSingleTabLock();sessionStorage.removeItem('app_authenticated');
-            isLoggedIn=false;document.getElementById('login-overlay').classList.remove('hidden');
-            return;
+            clearOfflineTrustedDevice();releaseSingleTabLock();isLoggedIn=false;
+            document.getElementById('login-overlay').classList.remove('hidden');return;
           }
-          const session=await claimGoogleServerSession();
-          if(session.status!=='success' && session.status!=='unavailable'){
-            releaseSingleTabLock();sessionStorage.removeItem('app_authenticated');setServerSessionId('');
-            isLoggedIn=false;document.getElementById('login-overlay').classList.remove('hidden');
-            document.getElementById('login-error').innerText=session.message||'Your previous login has expired. Please log in again.';
+          const session=await claimGoogleServerSession(currentUserId);
+          if(session.status!=='success'&&session.status!=='unavailable'){
+            clearOfflineTrustedDevice();releaseSingleTabLock();setServerSessionId('');isLoggedIn=false;
+            document.getElementById('login-overlay').classList.remove('hidden');
+            document.getElementById('login-error').innerText=session.message||'This device is no longer authorised. Please sign in again.';
             document.getElementById('login-error').classList.remove('hidden');return;
           }
         }
-        isLoggedIn = true;document.getElementById('login-overlay').classList.add('hidden');startInactivityMonitoring();startNetworkModeMonitor();initialiseOnlineAfterLogin();
-      } else {isLoggedIn = false;document.getElementById('login-overlay').classList.remove('hidden');}
+        // Offline: only this browser profile with its enrolled device ID and
+        // local trusted grant can resume. Other browsers/devices have no grant.
+        isLoggedIn=true;document.getElementById('login-overlay').classList.add('hidden');
+        startInactivityMonitoring();startNetworkModeMonitor();initialiseOnlineAfterLogin();
+      }else{isLoggedIn=false;document.getElementById('login-overlay').classList.remove('hidden');}
     }
 
     async function handleLogin(e) {
@@ -2620,9 +2663,18 @@ function checkBirthdayTrigger() {
       if (!user || !pass) return;
       errorEl.classList.add('hidden');
       if (!navigator.onLine) {
-        errorEl.innerText = 'Internet connection is required for secure login. Your previously opened offline session can still be resumed.';
-        errorEl.classList.remove('hidden');
-        return;
+        const trusted=getOfflineTrustedDevice();
+        if(trusted&&trusted.userId.toLowerCase()===user.toLowerCase()){
+          try{
+            if(!(await verifyOfflineTrustedPassword(trusted,pass)))throw new Error('Incorrect User ID or Password for this offline browser/device.');
+            if(!acquireSingleTabLock())return;
+            currentUserId=trusted.userId;localStorage.setItem('app_authenticated','true');localStorage.setItem('portal_user_id',currentUserId);
+            isLoggedIn=true;document.getElementById('login-overlay').classList.add('hidden');errorEl.classList.add('hidden');
+            document.getElementById('login-password').value='';startInactivityMonitoring();startNetworkModeMonitor();initialiseOnlineAfterLogin();return;
+          }catch(offlineAuthError){errorEl.innerText=offlineAuthError.message||'Offline login verification failed.';errorEl.classList.remove('hidden');return;}
+        }
+        errorEl.innerText='Offline login is available only after a successful online login on this same browser and device. Please connect to the internet for first-time login or device enrolment.';
+        errorEl.classList.remove('hidden');return;
       }
       if (spinner) spinner.classList.remove('hidden');
       if (submitBtn) { submitBtn.disabled = true; submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Verifying...'; }
@@ -2640,7 +2692,7 @@ function checkBirthdayTrigger() {
           throw new Error(session.message || 'Could not establish a secure portal session. Please try again.');
         }
         isLoggedIn = true;
-        sessionStorage.setItem('app_authenticated', 'true');
+        await saveOfflineTrustedDevice(currentUserId,pass);
         document.getElementById('login-overlay').classList.add('hidden');
         document.getElementById('login-error').classList.add('hidden');
         document.getElementById('login-password').value = '';
@@ -2701,7 +2753,7 @@ function checkBirthdayTrigger() {
       window.__safePortalLogout=true;
       try{const releaseResult=await releaseGoogleServerSession();if(releaseResult&&releaseResult.status==='offline'){console.warn(releaseResult.message);}}
       catch(releaseError){document.getElementById('saving-lock-modal').classList.add('hidden');alert('Logout could not complete because the server could not verify this browser/device reservation. Please retry when connected. '+(releaseError.message||''));return;}
-      isLoggedIn=false;releaseSingleTabLock();isMasterUnlocked=false;sessionStorage.removeItem('app_authenticated');sessionStorage.removeItem('portal_user_id');currentUserId='';stopServerSessionHeartbeat();stopInactivityMonitoring();window.location.reload();
+      isLoggedIn=false;releaseSingleTabLock();isMasterUnlocked=false;clearOfflineTrustedDevice();sessionStorage.removeItem('app_authenticated');sessionStorage.removeItem('portal_user_id');currentUserId='';stopServerSessionHeartbeat();stopInactivityMonitoring();window.location.reload();
     }
 
     function openMasterAuthModal() {

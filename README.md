@@ -426,7 +426,7 @@
       <div class="flex flex-wrap items-center justify-center gap-1.5 text-[10px]">
         <div class="mode-switch-wrap" role="group" aria-label="Storage mode">
           <span id="mode-label-offline" class="mode-switch-label active">OFFLINE</span>
-          <label class="mode-switch" title="Move the switch right for Online mode and Google Sheets live sync">
+          <label class="mode-switch" title="Move the switch right for Online mode and Google Server live sync">
             <input id="offline-mode-toggle" type="checkbox" aria-label="Switch between Offline and Online mode" onchange="setOfflineMode(!this.checked)">
             <span class="mode-switch-track" aria-hidden="true"></span>
           </label>
@@ -443,7 +443,7 @@
         </button>
         <!-- Save Button -->
         <button onclick="saveChanges()" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-3 py-1.5 rounded-full text-[11px] font-semibold flex items-center gap-1 transition">
-          <i class="fa-brands fa-google text-[10px]"></i> Save
+          <i class="fa-solid fa-floppy-disk text-[10px]"></i> GSave
         </button>
         
         <div id="wipe-layer-1-modal" class="hidden fixed inset-0 z-[60] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 no-print">
@@ -453,7 +453,7 @@
             </div>
             <div>
               <h3 class="text-base font-black text-slate-900">Initiate Data Wipe?</h3>
-              <p class="text-xs text-slate-600 mt-2">You are about to delete ALL data from the Google Sheet. This affects bookings, rooms, and agents.</p>
+              <p class="text-xs text-slate-600 mt-2">You are about to delete all bookings and quotations. Online mode also deletes them from Google Server; Offline mode deletes this device copy only.</p>
             </div>
             <div class="flex space-x-3 pt-2">
               <button type="button" onclick="closeWipeModals()" class="w-1/2 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold py-2.5 rounded-xl text-xs transition">Cancel</button>
@@ -497,7 +497,7 @@
     <div class="bg-white rounded-3xl shadow-2xl border border-blue-100 max-w-sm w-full p-5 text-center space-y-3">
       <div class="mx-auto w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl"><i class="fa-solid fa-cloud-arrow-up"></i></div>
       <h3 class="font-black text-sm text-slate-900">Online synchronisation required</h3>
-      <p id="offline-sync-modal-message" class="text-[11px] text-slate-600">Connecting to Google Sheets to synchronise your latest data before continuing.</p>
+      <p id="offline-sync-modal-message" class="text-[11px] text-slate-600">Connecting to Google Server to synchronise your latest data before continuing.</p>
       <div id="offline-sync-progress" class="hidden text-[11px] font-bold text-blue-700"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Synchronising…</div>
       <button id="offline-sync-continue" type="button" onclick="closeOfflineSyncModal()" class="hidden w-full bg-blue-600 text-white font-bold py-2.5 rounded-xl">Continue in Offline Mode</button>
     </div>
@@ -1630,10 +1630,10 @@ function checkBirthdayTrigger() {
       const currentRowCount = state.bookings.length; 
       
       if (currentRowCount >= (MAX_SHEET_ROWS - 20)) {
-        alert("CRITICAL NOTIFICATION: Google Sheet has reached its row limit (less than 20 rows left). Saving has been stopped. Please generate a new sheet and link it to continue.");
+        alert("CRITICAL NOTIFICATION: Google Server has reached its row limit (less than 20 rows left). Saving has been stopped. Please generate a new sheet and link it to continue.");
         return false;
       } else if (currentRowCount >= (MAX_SHEET_ROWS - 100)) {
-        alert("WARNING: Google Sheet is approaching its 10 million row limit (less than 100 rows left). Please prepare a new sheet soon.");
+        alert("WARNING: Google Server is approaching its 10 million row limit (less than 100 rows left). Please prepare a new sheet soon.");
       }
       return true;
     }
@@ -1660,51 +1660,47 @@ function checkBirthdayTrigger() {
 
     async function executeGoogleSheetWipe() {
       const btn = document.getElementById('btn-final-wipe');
+      const originalLabel = btn.innerText;
       btn.innerText = "WIPING DATA...";
       btn.disabled = true;
-
       try {
-        const payload = { action: "wipeData" };
-        const response = await fetch(GAS_API_URL, {
-          method: "POST",
-          body: JSON.stringify(payload)
-        });
-
-        // Try reading error text first safely to avoid JSON parse errors
-        const textResult = await response.text();
-        try {
-            JSON.parse(textResult);
-        } catch(e) {
-            console.error("Wipe format warning:", textResult);
+        // Offline wipe is deliberately local-only. It must not become a queued
+        // cloud deletion when the device reconnects.
+        if (!offlineMode && navigator.onLine) {
+          const result = await postToGoogleServer({ action: "wipeData", sessionId: getServerSessionId() });
+          if (!result || result.status !== 'success') throw new Error(result?.message || 'Google Server wipe failed');
         }
-
-        // Reset local state
         state.bookings = [];
-        state.yearlyCounters = {}; // Clears the sequence counter to start fresh IDs from 01
+        state.quotations = [];
+        state.yearlyCounters = {};
+        state.quotationYearlyCounters = {};
         state.roomsCapacity = [
-          { roomNo: 1, capacity: 4 },
-          { roomNo: 2, capacity: 2 },
-          { roomNo: 3, capacity: 4 },
-          { roomNo: 4, capacity: 4 },
+          { roomNo: 1, capacity: 4 }, { roomNo: 2, capacity: 2 },
+          { roomNo: 3, capacity: 4 }, { roomNo: 4, capacity: 4 },
           { roomNo: 5, capacity: 4 }
         ];
         state.masterAgents = [{ agentName: "Self", phone: "Direct", roomNo: "All Rooms" }];
-        
+        // Save the intentionally empty state without marking it as pending cloud
+        // sync. An offline wipe must never erase the cloud on a later reconnect.
+        await writeOfflineSnapshot(false);
+        localStorage.removeItem(OFFLINE_PENDING_KEY);
         refreshAllUI();
         closeWipeModals();
-        alert("Database has been completely wiped.");
+        alert(offlineMode || !navigator.onLine
+          ? "All bookings and quotations have been erased from this device only. Google Server data was not changed."
+          : "All bookings and quotations have been erased from this device and Google Server.");
       } catch (error) {
         console.error("Wipe error:", error);
-        alert("Failed to wipe database. Please check your connection.");
+        alert("Data wipe was not completed: " + error.message + ". Your existing data has been retained where possible.");
       } finally {
-        btn.innerText = "ERASE ALL DATA";
+        btn.innerText = originalLabel || "ERASE ALL DATA";
         btn.disabled = false;
       }
     }
 
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbz6rME_OuYHucGBPCfCrV7EYjuE5YF0eqSeuqBjm42-HPXUYJzUSBu0mov9jCdM7zx5Ng/exec";
 
-    // Offline-first data layer. IndexedDB is preferred; localStorage is a fallback.
+    // Offline-first data layer. IndexedDB is the primary local store.
     const OFFLINE_DB_NAME='business-portal-offline-v1';
     const OFFLINE_STORE='snapshots';
     const OFFLINE_KEY='portal-state';
@@ -1712,18 +1708,56 @@ function checkBirthdayTrigger() {
     const OFFLINE_MODE_KEY='portal-offline-mode';
     const LAST_SYNC_KEY='portal-last-cloud-sync';
     const TAB_LOCK_KEY='business-portal-active-tab-lock';
+    const SERVER_SESSION_KEY='business-portal-server-session';
+    const SERVER_SESSION_HEARTBEAT_MS=15000;
     let offlineMode=true, offlineDb=null, isSyncing=false, activeTabId='tab_'+Math.random().toString(36).slice(2);
+    let serverSessionHeartbeat=null, serverSessionLost=false;
 
+    function getServerSessionId(){return sessionStorage.getItem(SERVER_SESSION_KEY)||'';}
+    function setServerSessionId(value){if(value)sessionStorage.setItem(SERVER_SESSION_KEY,value);else sessionStorage.removeItem(SERVER_SESSION_KEY);}
+    async function postToGoogleServer(payload){
+      const response=await fetch(GAS_API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)});
+      const raw=await response.text();let result;try{result=JSON.parse(raw);}catch(e){throw new Error('Invalid response received from Google Server');}
+      if(!response.ok)throw new Error(result.message||('HTTP '+response.status));
+      return result;
+    }
+    async function claimGoogleServerSession(){
+      if(!navigator.onLine)return {status:'offline'};
+      const sessionId=getServerSessionId()||('sess_'+Date.now()+'_'+Math.random().toString(36).slice(2));
+      try{
+        const result=await postToGoogleServer({action:'claimSession',sessionId:sessionId,userId:DEFAULT_USER_ID,clientLabel:(navigator.userAgent||'Browser').slice(0,120)});
+        if(result.status==='success'){setServerSessionId(sessionId);serverSessionLost=false;startServerSessionHeartbeat();return result;}
+        return result;
+      }catch(error){return {status:'unavailable',message:'Google Server session service is unavailable. You can continue in Offline mode; cross-device login protection will resume when the server is reachable.'};}
+    }
+    async function releaseGoogleServerSession(){
+      const sessionId=getServerSessionId();
+      stopServerSessionHeartbeat();
+      if(sessionId&&navigator.onLine){try{await postToGoogleServer({action:'releaseSession',sessionId});}catch(e){console.warn('Could not release server session cleanly',e);}}
+      setServerSessionId('');
+    }
+    function startServerSessionHeartbeat(){
+      stopServerSessionHeartbeat();
+      serverSessionHeartbeat=setInterval(async()=>{
+        if(!isLoggedIn||!navigator.onLine||!getServerSessionId())return;
+        try{
+          const result=await postToGoogleServer({action:'heartbeatSession',sessionId:getServerSessionId()});
+          if(result.status!=='success'){
+            const reclaimed=await claimGoogleServerSession();
+            if(reclaimed.status==='conflict'){serverSessionLost=true;stopServerSessionHeartbeat();isLoggedIn=false;sessionStorage.removeItem('app_authenticated');releaseSingleTabLock();alert(reclaimed.message||'Another device is using this portal. Please log in again.');location.reload();}
+          }
+        }catch(e){console.warn('Temporary Google Server heartbeat failure; will retry',e);updateSyncIndicator('error','Server unavailable · local data safe');}
+      },SERVER_SESSION_HEARTBEAT_MS);
+    }
+    function stopServerSessionHeartbeat(){if(serverSessionHeartbeat){clearInterval(serverSessionHeartbeat);serverSessionHeartbeat=null;}}
     function openOfflineDB(){return new Promise((resolve,reject)=>{if(!('indexedDB' in window)){reject(new Error('IndexedDB unavailable'));return;}const req=indexedDB.open(OFFLINE_DB_NAME,1);req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains(OFFLINE_STORE))req.result.createObjectStore(OFFLINE_STORE);};req.onsuccess=()=>{offlineDb=req.result;resolve(offlineDb);};req.onerror=()=>reject(req.error||new Error('IndexedDB open failed'));});}
     async function writeOfflineSnapshot(markPending=true){
       const snapshot=JSON.stringify(state);
-      // Keep a synchronous localStorage recovery copy as well as the primary IndexedDB copy.
-      // This gives the browser an immediate last-resort snapshot during abrupt shutdowns.
-      try{localStorage.setItem(OFFLINE_KEY,snapshot);}catch(storageError){console.warn('Local recovery mirror unavailable (quota/private mode)',storageError);}
+      try{localStorage.setItem(OFFLINE_KEY,snapshot);}catch(storageError){console.warn('Local recovery mirror unavailable',storageError);}
       try{const db=offlineDb||await openOfflineDB();await new Promise((resolve,reject)=>{const tx=db.transaction(OFFLINE_STORE,'readwrite');tx.objectStore(OFFLINE_STORE).put(snapshot,OFFLINE_KEY);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);});}
       catch(e){if(!localStorage.getItem(OFFLINE_KEY))throw new Error('Browser storage is full or unavailable. Offline data could not be saved.');console.warn('IndexedDB unavailable; using localStorage recovery copy',e);}
       if(markPending)localStorage.setItem(OFFLINE_PENDING_KEY,'true');
-      updateSyncIndicator('offline','Saved on this device');
+      updateSyncIndicator(offlineMode?'offline':'syncing',offlineMode?'Saved on this device':'Local copy saved · syncing');
       return true;
     }
     async function readOfflineSnapshot(){
@@ -1731,46 +1765,56 @@ function checkBirthdayTrigger() {
       catch(e){console.warn('IndexedDB read fallback',e);}
       try{const raw=localStorage.getItem(OFFLINE_KEY);return raw?JSON.parse(raw):null;}catch(e){return null;}
     }
+    async function clearOfflineSnapshot(){
+      try{const db=offlineDb||await openOfflineDB();await new Promise((resolve,reject)=>{const tx=db.transaction(OFFLINE_STORE,'readwrite');tx.objectStore(OFFLINE_STORE).delete(OFFLINE_KEY);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);});}catch(e){console.warn('IndexedDB clear issue',e);}
+      localStorage.removeItem(OFFLINE_KEY);localStorage.removeItem(OFFLINE_PENDING_KEY);
+    }
     function updateSyncIndicator(mode,label){const el=document.getElementById('sync-status');if(!el)return;const map={offline:['fa-hard-drive','text-slate-500'],syncing:['fa-rotate fa-spin','text-blue-600'],online:['fa-cloud-check','text-emerald-600'],error:['fa-triangle-exclamation','text-rose-600']};const [ic,cl]=map[mode]||map.offline;el.className='inline-flex items-center gap-1 font-semibold '+cl;el.innerHTML=`<i class="fa-solid ${ic}"></i> ${label}`;}
     function updateModeSwitchUI(){const toggle=document.getElementById('offline-mode-toggle');if(toggle)toggle.checked=!offlineMode;document.getElementById('mode-label-offline')?.classList.toggle('active',offlineMode);document.getElementById('mode-label-online')?.classList.toggle('active',!offlineMode);}
-    function setOfflineMode(isOffline){
+    async function setOfflineMode(isOffline){
       const wantsOnline=!isOffline;
-      if(wantsOnline&&!navigator.onLine){offlineMode=true;localStorage.setItem(OFFLINE_MODE_KEY,'true');updateModeSwitchUI();updateSyncIndicator('error','Internet unavailable · Offline mode');showOfflineSyncModal('Your internet is not connected, connect to internet for going online mode',true,'Internet Not Connected','Continue Offline');return;}
+      if(wantsOnline&&!navigator.onLine){offlineMode=true;localStorage.setItem(OFFLINE_MODE_KEY,'true');updateModeSwitchUI();showOfflineSyncModal('There is no internet connection. The portal will remain in Offline mode and save on this device.',true,'Online Mode Unavailable','Continue Offline');return;}
+      if(wantsOnline&&!getServerSessionId()){
+        try{const session=await claimGoogleServerSession();if(session.status!=='success')throw new Error(session.message||'Another device is already using this portal.');}
+        catch(e){offlineMode=true;localStorage.setItem(OFFLINE_MODE_KEY,'true');updateModeSwitchUI();showOfflineSyncModal(e.message,true,'Online Mode Not Enabled','Continue Offline');return;}
+      }
       offlineMode=!wantsOnline;localStorage.setItem(OFFLINE_MODE_KEY,offlineMode?'true':'false');updateModeSwitchUI();
-      if(offlineMode){writeOfflineSnapshot().catch(e=>alert(e.message));updateSyncIndicator('offline','Offline mode');showOfflineSyncModal('Offline mode is now active. Your changes will be saved on this device and will not be sent to Google Sheets until you switch to Online mode.',true,'Offline Mode Enabled','Continue Offline');}
-      else{syncWithCloud(true,false).then(ok=>{if(!ok){offlineMode=true;localStorage.setItem(OFFLINE_MODE_KEY,'true');updateModeSwitchUI();updateSyncIndicator('offline','Offline mode · local data retained');}});}
+      if(offlineMode){await writeOfflineSnapshot(false);updateSyncIndicator('offline','Offline mode');showOfflineSyncModal('Offline mode is active. Changes are saved on this device only and are not sent to Google Server.',true,'Offline Mode Enabled','Continue Offline');}
+      else{const ok=await syncWithCloud(true,false);if(!ok){offlineMode=true;localStorage.setItem(OFFLINE_MODE_KEY,'true');updateModeSwitchUI();updateSyncIndicator('offline','Offline mode · local data retained');}}
     }
     function closeOfflineSyncModal(){document.getElementById('offline-sync-modal')?.classList.add('hidden');}
     function showOfflineSyncModal(message,complete=false,title='Online synchronisation',buttonLabel='Continue'){const m=document.getElementById('offline-sync-modal');if(!m)return;const heading=m.querySelector('h3');if(heading)heading.textContent=title;const modalIcon=m.querySelector('.mx-auto i');if(modalIcon){modalIcon.className='fa-solid '+(title.toLowerCase().includes('offline')?'fa-hard-drive':'fa-cloud-arrow-up');}document.getElementById('offline-sync-modal-message').textContent=message;document.getElementById('offline-sync-progress').classList.toggle('hidden',complete);const button=document.getElementById('offline-sync-continue');button.classList.toggle('hidden',!complete);button.textContent=buttonLabel;m.classList.remove('hidden');}
-    async function manualBackupDownload(){try{await writeOfflineSnapshot();const blob=new Blob([JSON.stringify({createdAt:new Date().toISOString(),state},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='Business_Portal_Backup_'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);alert('Backup downloaded successfully. Keep this file in a safe location.');}catch(e){alert('Backup failed: '+e.message);}}
+    async function manualBackupDownload(){try{await writeOfflineSnapshot(false);const blob=new Blob([JSON.stringify({createdAt:new Date().toISOString(),state},null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='Business_Portal_Backup_'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);alert('Backup downloaded successfully. Keep this file in a safe location.');}catch(e){alert('Backup failed: '+e.message);}}
     async function syncWithCloud(showMessages=false,returnOffline=true){
-      if(isSyncing)return false;if(!navigator.onLine){updateSyncIndicator('error','No internet connection');if(showMessages)showOfflineSyncModal('There is no internet connection, so Online mode cannot be enabled. The portal will remain in Offline mode and your local data is safe.',true,'Online Mode Unavailable','Continue Offline');return false;}isSyncing=true;updateSyncIndicator('syncing','Synchronising');if(showMessages)showOfflineSyncModal(returnOffline?'Checking Google Sheets and refreshing your local backup.':'Connecting to Google Sheets and enabling live sync. Please keep this portal open.',false,returnOffline?'Checking Cloud Backup':'Switching to Online Mode',returnOffline?'Continue Offline':'Continue Online');
+      if(isSyncing)return false;if(!navigator.onLine){updateSyncIndicator('error','No internet connection');if(showMessages)showOfflineSyncModal('No internet connection. Your local data remains safe in Offline mode.',true,'Online Mode Unavailable','Continue Offline');return false;}
+      isSyncing=true;updateSyncIndicator('syncing','Synchronising');if(showMessages)showOfflineSyncModal(returnOffline?'Checking Google Server and refreshing your local backup.':'Connecting to Google Server and enabling live sync. Please keep this portal open.',false,returnOffline?'Checking Cloud Backup':'Switching to Online Mode',returnOffline?'Continue Offline':'Continue Online');
       try{
+        if(!getServerSessionId()){const session=await claimGoogleServerSession();if(session.status!=='success')throw new Error(session.message||'Another device is already using this portal.');}
         const hasPending=localStorage.getItem(OFFLINE_PENDING_KEY)==='true';
-        const response=await fetch(GAS_API_URL+'?action=fetchData');const raw=await response.text();let remote;try{remote=JSON.parse(raw);}catch(e){throw new Error('Invalid Google Sheets response');}
+        const response=await fetch(GAS_API_URL+'?action=fetchData&sessionId='+encodeURIComponent(getServerSessionId()));const raw=await response.text();let remote;try{remote=JSON.parse(raw);}catch(e){throw new Error('Invalid Google Server response');}
+        if(remote.status==='error')throw new Error(remote.message||'Unable to fetch data');
         if(hasPending&&remote&&remote.bookings){
           const local=state;const mergeById=(cloudRows,localRows)=>{const map=new Map((cloudRows||[]).map(x=>[String(x.id),x]));(localRows||[]).forEach(x=>map.set(String(x.id),x));return [...map.values()];};
           const mergeByKey=(cloudRows,localRows,key)=>{const map=new Map((cloudRows||[]).map(x=>[String(x[key]),x]));(localRows||[]).forEach(x=>map.set(String(x[key]),x));return [...map.values()];};
           state={...remote,...local,bookings:mergeById(remote.bookings,local.bookings),quotations:mergeById(remote.quotations,local.quotations),roomsCapacity:mergeByKey(remote.roomsCapacity,local.roomsCapacity,'roomNo'),masterAgents:mergeByKey(remote.masterAgents,local.masterAgents,'agentName'),yearlyCounters:{...(remote.yearlyCounters||{}),...(local.yearlyCounters||{})},quotationYearlyCounters:{...(remote.quotationYearlyCounters||{}),...(local.quotationYearlyCounters||{})}};
-          const post=await fetch(GAS_API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'saveData',state})});const postRaw=await post.text();let result;try{result=JSON.parse(postRaw);}catch(e){throw new Error('Invalid Google Sheets save response');}if(result.status!=='success')throw new Error(result.message||'Cloud save failed');refreshAllUI();
-        }else if(remote&&remote.bookings){state=remote;state.quotations=Array.isArray(state.quotations)?state.quotations:[];state.quotationYearlyCounters=state.quotationYearlyCounters||{};refreshAllUI();}
+          const result=await postToGoogleServer({action:'saveData',state,sessionId:getServerSessionId()});if(result.status!=='success')throw new Error(result.message||'Cloud save failed');refreshAllUI();
+        }else if(remote&&Array.isArray(remote.bookings)){state=remote;state.quotations=Array.isArray(state.quotations)?state.quotations:[];state.quotationYearlyCounters=state.quotationYearlyCounters||{};refreshAllUI();}
         await writeOfflineSnapshot(false);localStorage.removeItem(OFFLINE_PENDING_KEY);localStorage.setItem(LAST_SYNC_KEY,String(Date.now()));updateSyncIndicator('online',returnOffline?'Synced':'Live sync active');
-        // Startup reconciliation returns to offline-first mode; explicit online mode remains online.
         if(returnOffline){offlineMode=true;localStorage.setItem(OFFLINE_MODE_KEY,'true');updateModeSwitchUI();}
-        if(showMessages){document.getElementById('offline-sync-modal-message').textContent=returnOffline?'Google Sheets sync is complete. Your latest data is saved on this device, and the portal has returned to Offline mode.':'Online mode is now active. Changes will sync with Google Sheets while you work.';const heading=document.querySelector('#offline-sync-modal h3');if(heading)heading.textContent=returnOffline?'Cloud Backup Updated':'Online Mode Enabled';document.getElementById('offline-sync-progress').classList.add('hidden');const btn=document.getElementById('offline-sync-continue');btn.textContent=returnOffline?'Continue Offline':'Continue Online';btn.classList.remove('hidden');}
+        if(showMessages){document.getElementById('offline-sync-modal-message').textContent=returnOffline?'Google Server sync is complete. Your latest data is saved on this device.':'Online mode is active. Changes will sync with Google Server while you work.';const heading=document.querySelector('#offline-sync-modal h3');if(heading)heading.textContent=returnOffline?'Cloud Backup Updated':'Online Mode Enabled';document.getElementById('offline-sync-progress').classList.add('hidden');const btn=document.getElementById('offline-sync-continue');btn.textContent=returnOffline?'Continue Offline':'Continue Online';btn.classList.remove('hidden');}
         return true;
-      }catch(error){console.error('Cloud synchronisation failed',error);updateSyncIndicator('error','Sync failed · offline data retained');if(showMessages){document.getElementById('offline-sync-modal-message').textContent=returnOffline?'The cloud backup could not be refreshed. Your existing local data is still available in Offline mode.':(!navigator.onLine?'Your internet is not connected, connect to internet for going online mode':'Could not connect to Google Sheets. Please check your internet connection and try again. The portal has stayed in Offline mode and your local changes are retained.');const heading=document.querySelector('#offline-sync-modal h3');if(heading)heading.textContent=returnOffline?'Cloud Sync Not Completed':'Online Mode Not Enabled';document.getElementById('offline-sync-progress').classList.add('hidden');const btn=document.getElementById('offline-sync-continue');btn.textContent='Continue Offline';btn.classList.remove('hidden');}return false;}
+      }catch(error){console.error('Cloud synchronisation failed',error);updateSyncIndicator('error','Sync failed · offline data retained');if(showMessages){document.getElementById('offline-sync-modal-message').textContent='Could not connect to Google Server: '+error.message+'. Your local data has been retained and the portal remains Offline.';const heading=document.querySelector('#offline-sync-modal h3');if(heading)heading.textContent=returnOffline?'Cloud Sync Not Completed':'Online Mode Not Enabled';document.getElementById('offline-sync-progress').classList.add('hidden');const btn=document.getElementById('offline-sync-continue');btn.textContent='Continue Offline';btn.classList.remove('hidden');}return false;}
       finally{isSyncing=false;}
     }
     function initialiseOfflineMode(){offlineMode=true;localStorage.setItem(OFFLINE_MODE_KEY,'true');updateModeSwitchUI();updateSyncIndicator('offline','Preparing offline storage');try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().then(granted=>console.info('Persistent browser storage:',granted?'granted':'not granted')).catch(()=>{});}catch(e){}}
-    // This browser-only lease prevents duplicate tabs/windows sharing this browser profile.
-    // A true cross-device/cross-browser account lock must also be implemented in the Google Apps Script backend.
+    // Browser-profile lock handles tabs/windows; Apps Script session lease handles
+    // different browsers and devices for the same portal account.
     function acquireSingleTabLock(){
       const now=Date.now();let lock=null;try{lock=JSON.parse(localStorage.getItem(TAB_LOCK_KEY)||'null');}catch(e){}
-      if(lock&&lock.tabId!==activeTabId&&now-Number(lock.heartbeat||0)<15000){alert('This portal is already open in another tab or window in this browser. Please log out or close the existing session first.');return false;}
+      if(lock&&lock.tabId!==activeTabId&&now-Number(lock.heartbeat||0)<20000){alert('This portal is already open in another tab or window in this browser. Please log out there first.');return false;}
       localStorage.setItem(TAB_LOCK_KEY,JSON.stringify({tabId:activeTabId,heartbeat:now}));
-      window.addEventListener('storage',e=>{if(e.key===TAB_LOCK_KEY&&e.newValue){try{const other=JSON.parse(e.newValue);if(other.tabId!==activeTabId&&Date.now()-other.heartbeat<15000){isLoggedIn=false;sessionStorage.removeItem('app_authenticated');alert('Another tab has claimed this portal session. This tab will return to login.');location.reload();}}catch(err){}}});
-      setInterval(()=>{let current=null;try{current=JSON.parse(localStorage.getItem(TAB_LOCK_KEY)||'null');}catch(e){}if(!current||current.tabId===activeTabId)localStorage.setItem(TAB_LOCK_KEY,JSON.stringify({tabId:activeTabId,heartbeat:Date.now()}));},5000);
+      if(!window.__portalTabStorageListener){window.__portalTabStorageListener=true;window.addEventListener('storage',e=>{if(e.key===TAB_LOCK_KEY&&e.newValue){try{const other=JSON.parse(e.newValue);if(other.tabId!==activeTabId&&Date.now()-other.heartbeat<20000){isLoggedIn=false;sessionStorage.removeItem('app_authenticated');stopServerSessionHeartbeat();alert('Another tab has claimed this portal session. This tab will return to login.');location.reload();}}catch(err){}}});}
+      if(!window.__portalTabHeartbeat){window.__portalTabHeartbeat=setInterval(()=>{if(!isLoggedIn)return;let current=null;try{current=JSON.parse(localStorage.getItem(TAB_LOCK_KEY)||'null');}catch(e){}if(current&&current.tabId!==activeTabId){isLoggedIn=false;sessionStorage.removeItem('app_authenticated');alert('Another tab is now using this portal session.');location.reload();return;}localStorage.setItem(TAB_LOCK_KEY,JSON.stringify({tabId:activeTabId,heartbeat:Date.now()}));},5000);}
       return true;
     }
     function releaseSingleTabLock(){try{const lock=JSON.parse(localStorage.getItem(TAB_LOCK_KEY)||'null');if(lock&&lock.tabId===activeTabId)localStorage.removeItem(TAB_LOCK_KEY);}catch(e){}}
@@ -2106,74 +2150,47 @@ function checkBirthdayTrigger() {
       document.getElementById('login-alert-modal').classList.add('hidden');
     }
 
-    function checkAuthStatus() {
+    async function checkAuthStatus() {
       const sessionAuth = sessionStorage.getItem('app_authenticated');
       if (sessionAuth === 'true') {
         if(!acquireSingleTabLock()){sessionStorage.removeItem('app_authenticated');isLoggedIn=false;document.getElementById('login-overlay').classList.remove('hidden');return;}
-        isLoggedIn = true;
-        document.getElementById('login-overlay').classList.add('hidden');
-        startInactivityMonitoring();
-      } else {
-        isLoggedIn = false;
-        document.getElementById('login-overlay').classList.remove('hidden');
-      }
+        if(navigator.onLine){const session=await claimGoogleServerSession();if(session.status==='conflict'){releaseSingleTabLock();sessionStorage.removeItem('app_authenticated');isLoggedIn=false;document.getElementById('login-overlay').classList.remove('hidden');document.getElementById('login-error').innerText=session.message;document.getElementById('login-error').classList.remove('hidden');return;}}
+        isLoggedIn = true;document.getElementById('login-overlay').classList.add('hidden');startInactivityMonitoring();
+      } else {isLoggedIn = false;document.getElementById('login-overlay').classList.remove('hidden');}
     }
 
- function handleLogin(e) {
+    async function handleLogin(e) {
       e.preventDefault();
       const user = document.getElementById('login-userid').value.trim();
       const pass = document.getElementById('login-password').value.trim();
-
       if (user === DEFAULT_USER_ID && pass === DEFAULT_PASSWORD) {
         if(!acquireSingleTabLock())return;
-        isLoggedIn = true;
-        sessionStorage.setItem('app_authenticated', 'true');
-        document.getElementById('login-overlay').classList.add('hidden');
-        document.getElementById('login-error').classList.add('hidden');
-        startInactivityMonitoring();
-        document.getElementById('login-alert-modal').classList.remove('hidden');
-        
-        // ---> ADD THIS LINE HERE TO TRIGGER BIRTHDAY CHECK ON LOGIN <---
-        checkBirthdayTrigger();
-
-      } else {
-        document.getElementById('login-error').classList.remove('hidden');
-      }
+        if(navigator.onLine){
+          const session=await claimGoogleServerSession();
+          if(session.status==='conflict'){releaseSingleTabLock();const el=document.getElementById('login-error');el.innerText=session.message||'This portal account is already active on another device or browser. Please log out there first.';el.classList.remove('hidden');return;}
+          if(session.status==='unavailable'){offlineMode=true;localStorage.setItem(OFFLINE_MODE_KEY,'true');updateModeSwitchUI();}
+        }
+        isLoggedIn = true;sessionStorage.setItem('app_authenticated', 'true');
+        document.getElementById('login-overlay').classList.add('hidden');document.getElementById('login-error').classList.add('hidden');
+        startInactivityMonitoring();document.getElementById('login-alert-modal').classList.remove('hidden');checkBirthdayTrigger();
+      } else {document.getElementById('login-error').classList.remove('hidden');}
     }
 
     function logoutUser(isAuto = false) {
-      if (isAuto) {
-         processLogoutWithSave();
-      } else {
-         document.getElementById('logout-confirm-modal').classList.remove('hidden');
-      }
+      if (isAuto) processLogoutWithSave();
+      else document.getElementById('logout-confirm-modal').classList.remove('hidden');
     }
-    
-    function cancelLogout() {
-      document.getElementById('logout-confirm-modal').classList.add('hidden');
-      resetInactivityTimer();
-    }
-    
+    function cancelLogout() {document.getElementById('logout-confirm-modal').classList.add('hidden');resetInactivityTimer();}
     async function processLogoutWithSave() {
-      document.getElementById('logout-warning-modal').classList.add('hidden');
-      document.getElementById('logout-confirm-modal').classList.add('hidden');
-      
+      document.getElementById('logout-warning-modal').classList.add('hidden');document.getElementById('logout-confirm-modal').classList.add('hidden');
       if (isLoggedIn) {
         document.getElementById('saving-lock-modal').classList.remove('hidden');
         try {
-          await saveChanges(true, true);
-        } catch (e) {
-          console.error("Save on logout error", e);
-        }
+          const saved=await saveChanges(true,true);
+          if(!saved){document.getElementById('saving-lock-modal').classList.add('hidden');alert('Logout paused because the save could not be completed. Your session remains open so you can retry.');return;}
+        } catch (e) {console.error('Save on logout error',e);document.getElementById('saving-lock-modal').classList.add('hidden');alert('Logout paused because saving could not be completed.');return;}
       }
-      
-      isLoggedIn = false;
-      releaseSingleTabLock();
-      isMasterUnlocked = false;
-      sessionStorage.removeItem('app_authenticated');
-      stopInactivityMonitoring();
-      
-      window.location.reload();
+      await releaseGoogleServerSession();isLoggedIn=false;releaseSingleTabLock();isMasterUnlocked=false;sessionStorage.removeItem('app_authenticated');stopServerSessionHeartbeat();stopInactivityMonitoring();window.location.reload();
     }
 
     function openMasterAuthModal() {
@@ -2603,8 +2620,8 @@ function checkBirthdayTrigger() {
       const toast=document.getElementById('toast'),msg=document.getElementById('toast-message');
       const cached=await readOfflineSnapshot();
       if(cached){state=cached;state.quotations=Array.isArray(state.quotations)?state.quotations:[];state.quotationYearlyCounters=state.quotationYearlyCounters||{};refreshAllUI();updateSyncIndicator('offline','Offline data loaded');}
-      else{updateSyncIndicator('offline','Offline mode · no local data yet');if(msg){msg.innerText='No saved data was found on this device. The portal is staying Offline. To restore Google Sheets data, connect to the internet and manually switch to Online mode.';toast.classList.remove('hidden');}}
-      // Never contact Google Sheets during startup. Cloud access begins only after the user
+      else{updateSyncIndicator('offline','Offline mode · no local data yet');if(msg){msg.innerText='No saved data was found on this device. The portal is staying Offline. To restore Google Server data, connect to the internet and manually switch to Online mode.';toast.classList.remove('hidden');}}
+      // Never contact Google Server during startup. Cloud access begins only after the user
       // manually moves the switch to ONLINE.
       checkSheetRowLimits();if(toast)setTimeout(()=>toast.classList.add('hidden'),5000);
     }
@@ -2650,9 +2667,9 @@ function checkBirthdayTrigger() {
       // Network restoration never initiates a cloud sync; the user must switch ONLINE manually.
       window.addEventListener('online',()=>{if(isLoggedIn){updateSyncIndicator('offline','Internet available · still Offline');}});
       window.addEventListener('offline',()=>{offlineMode=true;localStorage.setItem(OFFLINE_MODE_KEY,'true');updateModeSwitchUI();updateSyncIndicator('error','Internet unavailable · local save active');writeOfflineSnapshot().catch(console.error);});
-      window.addEventListener('pagehide',()=>{try{localStorage.setItem(OFFLINE_KEY,JSON.stringify(state));localStorage.setItem(OFFLINE_PENDING_KEY,'true');}catch(e){console.warn('Final synchronous recovery snapshot failed',e);} });
+      window.addEventListener('pagehide',()=>{if(isLoggedIn)writeOfflineSnapshot(false).catch(console.warn);});
       document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&isLoggedIn)writeOfflineSnapshot().catch(console.error);});
-      window.addEventListener('beforeunload',()=>{try{localStorage.setItem(OFFLINE_KEY,JSON.stringify(state));localStorage.setItem(OFFLINE_PENDING_KEY,'true');}catch(e){console.warn('Unload recovery snapshot failed',e);} });
+      window.addEventListener('beforeunload',()=>{if(isLoggedIn){try{localStorage.setItem(OFFLINE_KEY,JSON.stringify(state));}catch(e){console.warn('Unload recovery snapshot failed',e);}}});
     });
 
     function refreshDynamicUI() {
@@ -2669,13 +2686,27 @@ function checkBirthdayTrigger() {
     }
 
     async function saveChanges(isAutoSave = false, quiet = false) {
-      if(!checkSheetRowLimits())return;
-      try{
-        await writeOfflineSnapshot();
-        if(offlineMode){if(!quiet){const msg=document.getElementById('toast-message');msg.innerText=isAutoSave?'Auto-saved on this device (offline).':'Saved on this device. Turn Online Mode on to sync Google Sheets.';document.getElementById('toast').classList.remove('hidden');setTimeout(()=>document.getElementById('toast').classList.add('hidden'),2500);}return true;}
-        const response=await fetch(GAS_API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'saveData',state})});const raw=await response.text();let result;try{result=JSON.parse(raw);}catch(e){throw new Error('Invalid response format received from server.');}
-        if(result.status==='success'){localStorage.removeItem(OFFLINE_PENDING_KEY);localStorage.setItem(LAST_SYNC_KEY,String(Date.now()));updateSyncIndicator('online','Live synced');if(!quiet){const msg=document.getElementById('toast-message');msg.innerText=isAutoSave?'Changes auto-saved and synced!':'Data synced with Google Sheets!';document.getElementById('toast').classList.remove('hidden');setTimeout(()=>document.getElementById('toast').classList.add('hidden'),2500);}return true;}throw new Error(result.message||'Server Error');
-      }catch(error){console.error('Save error:',error);updateSyncIndicator('error','Local save · cloud pending');if(!quiet)alert('Your data is retained locally, but Google Sheets sync failed: '+error.message);return false;}
+      // Local persistence is always completed first. Offline mode never contacts
+      // Google Server; Online mode writes the same complete state to both stores.
+      try {
+        await writeOfflineSnapshot(true);
+        if(offlineMode || !navigator.onLine){
+          if(!quiet){const msg=document.getElementById('toast-message');msg.innerText=isAutoSave?'Auto-saved on this device (offline).':'Saved on this device. Switch to Online Mode to sync Google Server.';document.getElementById('toast').classList.remove('hidden');setTimeout(()=>document.getElementById('toast').classList.add('hidden'),2500);}
+          return true;
+        }
+        if(!getServerSessionId()){const session=await claimGoogleServerSession();if(session.status!=='success')throw new Error(session.message||'Portal session is not active.');}
+        const result=await postToGoogleServer({action:'saveData',state,sessionId:getServerSessionId()});
+        if(result.status==='success'){
+          localStorage.removeItem(OFFLINE_PENDING_KEY);localStorage.setItem(LAST_SYNC_KEY,String(Date.now()));updateSyncIndicator('online','Live synced');
+          if(!quiet){const msg=document.getElementById('toast-message');msg.innerText=isAutoSave?'Changes auto-saved and synced with Google Server!':'Data saved to this device and Google Server!';document.getElementById('toast').classList.remove('hidden');setTimeout(()=>document.getElementById('toast').classList.add('hidden'),2500);}
+          return true;
+        }
+        throw new Error(result.message||'Google Server save failed');
+      }catch(error){
+        console.error('Save error:',error);updateSyncIndicator('error','Local save · server pending');
+        if(!quiet)alert('Your local data is retained, but Google Server sync failed: '+error.message);
+        return false;
+      }
     }
 
     function populateDashboardYearDropdown() {

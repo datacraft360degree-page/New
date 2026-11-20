@@ -318,6 +318,7 @@
         <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 active:scale-98 text-white font-bold py-2.5 rounded-2xl shadow-sm transition text-xs flex items-center justify-center gap-1.5">
           <i class="fa-solid fa-right-to-bracket"></i> Login
         </button>
+        <button type="button" onclick="requestPasswordReset()" class="w-full text-blue-700 hover:text-blue-900 font-semibold text-[11px] py-1">Change / Forgot Password?</button>
         <button type="button" onclick="openAdminSessionReleaseModal()" class="w-full bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 font-semibold py-2 rounded-2xl transition text-[11px] flex items-center justify-center gap-1.5">
           <i class="fa-solid fa-user-shield"></i> Administrator · Release Active Login
         </button>
@@ -325,6 +326,23 @@
     </div>
   </div>
 
+  <!-- PASSWORD RESET / EMAIL OTP MODAL -->
+  <div id="password-reset-modal" class="hidden fixed inset-0 z-[85] bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4 no-print">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-5 space-y-3">
+      <div class="flex items-center gap-3"><div class="bg-blue-50 text-blue-700 w-10 h-10 rounded-2xl flex items-center justify-center"><i class="fa-solid fa-envelope"></i></div><div><h3 class="text-sm font-bold text-slate-900">Change / Forgot Password</h3><p class="text-[10px] text-slate-500">Secure Gmail OTP password reset</p></div></div>
+      <p id="password-reset-message" class="text-[11px] leading-relaxed text-slate-700">A six-digit OTP will be sent to the administrator Gmail address configured in Apps Script.</p>
+      <div id="password-reset-otp-fields" class="hidden space-y-2">
+        <input id="password-reset-otp" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="Enter 6-digit OTP" class="w-full bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 text-sm tracking-[0.3em] text-center">
+        <input id="password-reset-new-password" type="password" autocomplete="new-password" placeholder="New password (min. 8 characters)" class="w-full bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 text-xs">
+        <p class="text-[10px] text-slate-500">Password must contain uppercase, lowercase and a number.</p>
+        <button type="button" onclick="completePasswordReset()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl text-xs">Verify OTP & Update Password</button>
+      </div>
+      <div class="flex gap-2">
+        <button type="button" id="password-reset-send-button" onclick="requestPasswordReset()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-xl text-xs">Send OTP to Gmail</button>
+        <button type="button" onclick="closePasswordResetModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-xl text-xs">Close</button>
+      </div>
+    </div>
+  </div>
   <!-- ADMINISTRATOR ACTIVE-SESSION RELEASE MODAL -->
   <div id="admin-session-release-modal" class="hidden fixed inset-0 z-[80] bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4 no-print">
     <div class="bg-white rounded-3xl shadow-2xl border border-amber-100 max-w-sm w-full p-5 space-y-3 text-left">
@@ -1930,7 +1948,7 @@ function checkBirthdayTrigger() {
       if(!navigator.onLine)return {status:'offline'};
       const sessionId=getServerSessionId()||('sess_'+Date.now()+'_'+Math.random().toString(36).slice(2));
       try{
-        const result=await postToGoogleServer({action:'claimSession',sessionId:sessionId,userId:DEFAULT_USER_ID,clientLabel:(navigator.userAgent||'Browser').slice(0,120)});
+        const result=await postToGoogleServer({action:'claimSession',sessionId:sessionId,userId:(sessionStorage.getItem(PORTAL_USER_KEY)||'Admin'),clientLabel:(navigator.userAgent||'Browser').slice(0,120)});
         if(result.status==='success'){setServerSessionId(sessionId);serverSessionLost=false;startServerSessionHeartbeat();return result;}
         return result;
       }catch(error){return {status:'unavailable',message:'Google Server session service is unavailable. You can continue in Offline mode; cross-device login protection will resume when the server is reachable.'};}
@@ -2311,8 +2329,7 @@ function checkBirthdayTrigger() {
     const INACTIVITY_LIMIT_MS = 10 * 60 * 1000; 
     const WARNING_BUFFER_MS = 1 * 60 * 1000;   
 
-    const DEFAULT_USER_ID = "Admin";
-    const DEFAULT_PASSWORD = "Aadmin123";
+    const PORTAL_USER_KEY = "business-portal-user-id";
 
     let pendingMasterDeleteType = null; 
     let pendingMasterDeleteTarget = null; 
@@ -2387,19 +2404,65 @@ function checkBirthdayTrigger() {
     async function handleLogin(e) {
       e.preventDefault();
       const user = document.getElementById('login-userid').value.trim();
-      const pass = document.getElementById('login-password').value.trim();
-      if (user === DEFAULT_USER_ID && pass === DEFAULT_PASSWORD) {
-        if(!acquireSingleTabLock())return;
-        if(navigator.onLine){
-          const session=await claimGoogleServerSession();
-          if(session.status==='conflict'){releaseSingleTabLock();const el=document.getElementById('login-error');el.innerText=session.message||'This portal account is already active on another device or browser. Please log out there first.';el.classList.remove('hidden');return;}
-          if(session.status==='unavailable'){offlineMode=true;localStorage.setItem(OFFLINE_MODE_KEY,'true');updateModeSwitchUI();}
-        }
-        isLoggedIn = true;sessionStorage.setItem('app_authenticated', 'true');
-        document.getElementById('login-overlay').classList.add('hidden');document.getElementById('login-error').classList.add('hidden');
+      const pass = document.getElementById('login-password').value;
+      const errorEl=document.getElementById('login-error');
+      errorEl.classList.add('hidden');
+      if(!user||!pass){errorEl.textContent='Enter User ID and Password.';errorEl.classList.remove('hidden');return;}
+      if(!navigator.onLine){errorEl.textContent='Internet connection is required for secure server-side login. After a successful login, an existing session can continue in Offline mode.';errorEl.classList.remove('hidden');return;}
+      if(!acquireSingleTabLock())return;
+      const sessionId='sess_'+Date.now()+'_'+Math.random().toString(36).slice(2);
+      try{
+        const result=await postToGoogleServer({action:'authenticate',userId:user,password:pass,sessionId:sessionId,clientLabel:(navigator.userAgent||'Browser').slice(0,120)});
+        if(result.status!=='success')throw new Error(result.message||'Invalid User ID or Password.');
+        setServerSessionId(sessionId);sessionStorage.setItem(PORTAL_USER_KEY,user);serverSessionLost=false;startServerSessionHeartbeat();
+        isLoggedIn=true;sessionStorage.setItem('app_authenticated','true');
+        document.getElementById('login-overlay').classList.add('hidden');
+        document.getElementById('login-password').value='';
         startInactivityMonitoring();document.getElementById('login-alert-modal').classList.remove('hidden');checkBirthdayTrigger();
-      } else {document.getElementById('login-error').classList.remove('hidden');}
+      }catch(err){releaseSingleTabLock();errorEl.textContent=err.message||'Login failed. Please try again.';errorEl.classList.remove('hidden');}
     }
+
+    async function requestPasswordReset(){
+      const modal=document.getElementById('password-reset-modal');
+      const msg=document.getElementById('password-reset-message');
+      const fields=document.getElementById('password-reset-otp-fields');
+      const sendButton=document.getElementById('password-reset-send-button');
+      if(modal)modal.classList.remove('hidden');
+      const userId=document.getElementById('login-userid')?.value.trim()||'';
+      if(!navigator.onLine){if(msg)msg.textContent='Connect to the internet to request a password reset.';return;}
+      if(!userId){if(msg)msg.textContent='Enter your User ID on the login screen first.';return;}
+      if(msg)msg.textContent='Requesting a secure OTP…';
+      if(sendButton)sendButton.disabled=true;
+      try{
+        const result=await postToGoogleServer({action:'requestPasswordReset',userId:userId});
+        if(msg)msg.textContent=result.message||'Password reset request could not be completed.';
+        if(result.status==='success'){
+          if(fields)fields.classList.remove('hidden');
+          if(sendButton)sendButton.classList.add('hidden');
+        }
+      }catch(err){if(msg)msg.textContent=err.message||'Could not contact the password-reset service.';}
+      finally{if(sendButton)sendButton.disabled=false;}
+    }
+    async function completePasswordReset(){
+      const userId=document.getElementById('login-userid')?.value.trim()||'';
+      const otp=document.getElementById('password-reset-otp')?.value.trim()||'';
+      const newPassword=document.getElementById('password-reset-new-password')?.value||'';
+      const msg=document.getElementById('password-reset-message');
+      if(!userId||!/^\\d{6}$/.test(otp)||!newPassword){if(msg)msg.textContent='Enter your User ID, six-digit OTP and new password.';return;}
+      if(msg)msg.textContent='Verifying OTP and updating password…';
+      try{
+        const result=await postToGoogleServer({action:'completePasswordReset',userId:userId,otp:otp,newPassword:newPassword});
+        if(msg)msg.textContent=result.message||'Password reset could not be completed.';
+        if(result.status==='success'){
+          document.getElementById('password-reset-otp-fields')?.classList.add('hidden');
+          document.getElementById('password-reset-send-button')?.classList.remove('hidden');
+          document.getElementById('password-reset-otp').value='';
+          document.getElementById('password-reset-new-password').value='';
+          document.getElementById('login-password').value='';
+        }
+      }catch(err){if(msg)msg.textContent=err.message||'Could not verify the OTP.';}
+    }
+    function closePasswordResetModal(){document.getElementById('password-reset-modal')?.classList.add('hidden');}
 
     function openAdminSessionReleaseModal(){
       const modal=document.getElementById('admin-session-release-modal');
@@ -2420,7 +2483,7 @@ function checkBirthdayTrigger() {
       if(!navigator.onLine){if(error){error.textContent='Internet connection is required to release the server session. Reconnect and try again.';error.classList.remove('hidden');}return;}
       if(button){button.disabled=true;button.textContent='Releasing…';}
       try{
-        const result=await postToGoogleServer({action:'adminReleaseSession',adminUser:DEFAULT_USER_ID,adminPassword:password});
+        const result=await postToGoogleServer({action:'adminReleaseSession',adminUser:'Admin',adminPassword:password});
         if(result.status!=='success')throw new Error(result.message||'Administrator release was rejected.');
         setServerSessionId('');
         closeAdminSessionReleaseModal();
@@ -2456,17 +2519,17 @@ function checkBirthdayTrigger() {
       document.getElementById('master-auth-modal').classList.add('hidden');
     }
 
-    function handleMasterAuth(e) {
+    async function handleMasterAuth(e) {
       e.preventDefault();
-      const enteredPass = document.getElementById('master-password-input').value.trim();
-
-      if (enteredPass === DEFAULT_PASSWORD) {
-        isMasterUnlocked = true;
-        closeMasterAuthModal();
-        performSwitchTab('master');
-      } else {
-        document.getElementById('master-auth-error').classList.remove('hidden');
-      }
+      const enteredPass = document.getElementById('master-password-input').value;
+      const errorEl=document.getElementById('master-auth-error');
+      errorEl.classList.add('hidden');
+      if(!navigator.onLine){errorEl.textContent='Internet connection is required to verify the master password securely.';errorEl.classList.remove('hidden');return;}
+      try{
+        const result=await postToGoogleServer({action:'verifyPassword',userId:sessionStorage.getItem(PORTAL_USER_KEY)||'Admin',password:enteredPass,sessionId:getServerSessionId()});
+        if(result.status!=='success')throw new Error(result.message||'Incorrect Master Password!');
+        isMasterUnlocked=true;closeMasterAuthModal();performSwitchTab('master');
+      }catch(err){errorEl.textContent=err.message||'Incorrect Master Password!';errorEl.classList.remove('hidden');}
     }
 
     function startInactivityMonitoring() {

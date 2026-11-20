@@ -430,7 +430,7 @@
          <p class="flex items-start gap-2"><i class="fa-solid fa-check text-blue-500 mt-0.5"></i> <span>1. Google Chrome/Microsoft edge is best view browser for this Portal.</span></p>
         <p class="flex items-start gap-2"><i class="fa-solid fa-check text-blue-500 mt-0.5"></i> <span>2. Take backup every day or every week.</span></p>
         <p class="flex items-start gap-2"><i class="fa-solid fa-check text-blue-500 mt-0.5"></i> <span>3. Do not force close 'The Portal'; always close it using the 'Logout' option.</span></p>
-        <p class="flex items-start gap-2"><i class="fa-solid fa-check text-blue-500 mt-0.5"></i> <span>4. Each portal has its own login restriction. Do not open this same portal on multiple devices, browsers or tabs at the same time. Other portal links work independently.</span></p>
+        <p class="flex items-start gap-2"><i class="fa-solid fa-check text-blue-500 mt-0.5"></i> <span>4. Do not 'Login' with multiple device/multiple browser/multiple browser tab at a same time to avoid data merge.</span></p>
         <p class="flex items-start gap-2"><i class="fa-solid fa-check text-blue-500 mt-0.5"></i> <span>5. Data save/Data fetch take little bit time so hold on ⏳.</span></p>
       </div>
       <button onclick="closeLoginAlertModal()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-2xl shadow-sm transition text-xs mt-2">
@@ -1918,29 +1918,9 @@ function checkBirthdayTrigger() {
     }
 
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbz6rME_OuYHucGBPCfCrV7EYjuE5YF0eqSeuqBjm42-HPXUYJzUSBu0mov9jCdM7zx5Ng/exec";
-    // Each GitHub Pages path is a separate portal/security/data boundary.
-    const PORTAL_KEY = (() => {
-      const path = String(location.pathname || '').replace(/\/+$/, '').toLowerCase();
-      if (path.endsWith('/homestay-booking-portal')) return 'HOMESTAY';
-      if (path.endsWith('/test')) return 'TEST';
-      if (path.endsWith('/new')) return 'NEW';
-      throw new Error('Unknown portal path. Open this application from its approved GitHub Pages link.');
-    })();
-    const PORTAL_STORAGE_PREFIX = 'business-portal:' + PORTAL_KEY + ':';
-    // Scope all localStorage/sessionStorage keys, including older ad-hoc keys.
-    // This prevents the same-origin GitHub Pages paths from sharing locks or data.
-    if (!Storage.prototype.__portalScoped) {
-      const nativeGet = Storage.prototype.getItem;
-      const nativeSet = Storage.prototype.setItem;
-      const nativeRemove = Storage.prototype.removeItem;
-      Storage.prototype.getItem = function(key) { const scoped = nativeGet.call(this, PORTAL_STORAGE_PREFIX + key); if (scoped !== null) return scoped; if (PORTAL_KEY === 'NEW') { const legacy = nativeGet.call(this, key); if (legacy !== null) { nativeSet.call(this, PORTAL_STORAGE_PREFIX + key, legacy); return legacy; } } return null; };
-      Storage.prototype.setItem = function(key, value) { return nativeSet.call(this, PORTAL_STORAGE_PREFIX + key, value); };
-      Storage.prototype.removeItem = function(key) { nativeRemove.call(this, PORTAL_STORAGE_PREFIX + key); if (PORTAL_KEY === 'NEW') nativeRemove.call(this, key); };
-      Object.defineProperty(Storage.prototype, '__portalScoped', {value:true});
-    }
 
     // Offline-first data layer. IndexedDB is the primary local store.
-    const OFFLINE_DB_NAME='business-portal-offline-v1-'+PORTAL_KEY.toLowerCase();
+    const OFFLINE_DB_NAME='business-portal-offline-v1';
     const OFFLINE_STORE='snapshots';
     const OFFLINE_KEY='portal-state';
     const OFFLINE_PENDING_KEY='portal-pending-sync';
@@ -2005,7 +1985,7 @@ function checkBirthdayTrigger() {
     function getServerSessionId(){return sessionStorage.getItem(SERVER_SESSION_KEY)||'';}
     function setServerSessionId(value){if(value)sessionStorage.setItem(SERVER_SESSION_KEY,value);else sessionStorage.removeItem(SERVER_SESSION_KEY);}
     async function postToGoogleServer(payload){
-      const response=await fetch(GAS_API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({...payload,portalKey:PORTAL_KEY})});
+      const response=await fetch(GAS_API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)});
       const raw=await response.text();let result;try{result=JSON.parse(raw);}catch(e){throw new Error('Invalid response received from Google Server');}
       if(!response.ok)throw new Error(result.message||('HTTP '+response.status));
       return result;
@@ -2123,7 +2103,7 @@ function checkBirthdayTrigger() {
       try{
         if(!getServerSessionId()){const session=await claimGoogleServerSession();if(session.status!=='success')throw new Error(session.message||'Another device is already using this portal.');}
         const hasPending=localStorage.getItem(OFFLINE_PENDING_KEY)==='true';
-        const remote=await getGoogleServerDataWithProgress(GAS_API_URL+'?action=fetchData&portalKey='+encodeURIComponent(PORTAL_KEY)+'&sessionId='+encodeURIComponent(getServerSessionId()));
+        const remote=await getGoogleServerDataWithProgress(GAS_API_URL+'?action=fetchData&sessionId='+encodeURIComponent(getServerSessionId()));
         if(remote.status==='error')throw new Error(remote.message||'Unable to fetch data');
         if(remote.rowLimits){applyServerRowLimits(remote.rowLimits,true);delete remote.rowLimits;}
         if(hasPending&&remote&&remote.bookings){
@@ -2146,7 +2126,7 @@ function checkBirthdayTrigger() {
       const now=Date.now();let lock=null;try{lock=JSON.parse(localStorage.getItem(TAB_LOCK_KEY)||'null');}catch(e){}
       if(lock&&lock.tabId!==activeTabId&&now-Number(lock.heartbeat||0)<20000){alert('This portal is already open in another tab or window in this browser. Please log out there first.');return false;}
       localStorage.setItem(TAB_LOCK_KEY,JSON.stringify({tabId:activeTabId,heartbeat:now}));
-      if(!window.__portalTabStorageListener){window.__portalTabStorageListener=true;window.addEventListener('storage',e=>{if(e.key===PORTAL_STORAGE_PREFIX+TAB_LOCK_KEY&&e.newValue){try{const other=JSON.parse(e.newValue);if(other.tabId!==activeTabId&&Date.now()-other.heartbeat<20000){isLoggedIn=false;sessionStorage.removeItem('app_authenticated');sessionStorage.removeItem('portal_user_id');currentUserId='';stopServerSessionHeartbeat();alert('Another tab has claimed this portal session. This tab will return to login.');location.reload();}}catch(err){}}});}
+      if(!window.__portalTabStorageListener){window.__portalTabStorageListener=true;window.addEventListener('storage',e=>{if(e.key===TAB_LOCK_KEY&&e.newValue){try{const other=JSON.parse(e.newValue);if(other.tabId!==activeTabId&&Date.now()-other.heartbeat<20000){isLoggedIn=false;sessionStorage.removeItem('app_authenticated');sessionStorage.removeItem('portal_user_id');currentUserId='';stopServerSessionHeartbeat();alert('Another tab has claimed this portal session. This tab will return to login.');location.reload();}}catch(err){}}});}
       if(!window.__portalTabHeartbeat){window.__portalTabHeartbeat=setInterval(()=>{if(!isLoggedIn)return;let current=null;try{current=JSON.parse(localStorage.getItem(TAB_LOCK_KEY)||'null');}catch(e){}if(current&&current.tabId!==activeTabId){isLoggedIn=false;sessionStorage.removeItem('app_authenticated');alert('Another tab is now using this portal session.');location.reload();return;}localStorage.setItem(TAB_LOCK_KEY,JSON.stringify({tabId:activeTabId,heartbeat:Date.now()}));},5000);}
       return true;
     }

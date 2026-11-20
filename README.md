@@ -427,6 +427,14 @@
     </div>
   </div>
 
+  <!-- MASTER DATA BUFFERING OVERLAY -->
+  <div id="master-auth-loading-overlay" class="hidden fixed inset-0 z-[100] bg-slate-950/75 backdrop-blur-sm flex items-center justify-center p-4 no-print" role="status" aria-live="polite" aria-label="Unlocking Master Data">
+    <div class="flex flex-col items-center justify-center gap-5">
+      <div id="master-auth-loading-logo" class="flex items-center justify-center"></div>
+      <div class="text-white text-lg font-semibold tracking-[0.16em]">LOADING...</div>
+    </div>
+  </div>
+
   <!-- MASTER DATA PERMANENT DELETION RECONFIRMATION POPUP MODAL -->
   <div id="master-delete-confirm-modal" class="hidden fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-4 no-print">
     <div class="bg-white rounded-3xl shadow-2xl border border-rose-100 max-w-sm w-full p-5 space-y-3 text-center">
@@ -2503,16 +2511,40 @@ function checkBirthdayTrigger() {
       document.getElementById('master-auth-modal').classList.add('hidden');
     }
 
+    function showMasterAuthLoading(show) {
+      const overlay = document.getElementById('master-auth-loading-overlay');
+      const logoHost = document.getElementById('master-auth-loading-logo');
+      if (!overlay || !logoHost) return;
+      if (show) {
+        if (!logoHost.firstElementChild) {
+          const sourceLogo = document.querySelector('#login-loading-overlay .login-loading-ring');
+          if (sourceLogo) {
+            const logo = sourceLogo.cloneNode(true);
+            logo.removeAttribute('id');
+            logo.style.width = '174px';
+            logo.style.height = '180px';
+            logoHost.appendChild(logo);
+          }
+        }
+        overlay.classList.remove('hidden');
+      } else {
+        overlay.classList.add('hidden');
+      }
+    }
+
     async function handleMasterAuth(e) {
       e.preventDefault();
       const enteredPass = document.getElementById('master-password-input').value;
       const errorEl = document.getElementById('master-auth-error');
+      const submitBtn = e.submitter || e.target.querySelector('button[type="submit"]');
       errorEl.classList.add('hidden');
       if (!navigator.onLine) {
         errorEl.innerText = 'Internet connection is required to verify the master password.';
         errorEl.classList.remove('hidden');
         return;
       }
+      showMasterAuthLoading(true);
+      if (submitBtn) submitBtn.disabled = true;
       try {
         const result = await postToGoogleServer({action:'authenticateUser', userId:currentUserId || sessionStorage.getItem('portal_user_id') || '', password:enteredPass});
         if (result.status !== 'success') throw new Error(result.message || 'Incorrect Master Password!');
@@ -2523,6 +2555,9 @@ function checkBirthdayTrigger() {
       } catch (err) {
         errorEl.innerText = err.message || 'Incorrect Master Password!';
         errorEl.classList.remove('hidden');
+      } finally {
+        showMasterAuthLoading(false);
+        if (submitBtn) submitBtn.disabled = false;
       }
     }
 

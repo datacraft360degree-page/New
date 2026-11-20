@@ -274,14 +274,16 @@
   box-shadow:none!important;
   overflow:visible;
 }
-.master-data-dot-spinner-rotor{
+.master-data-dot-spinner circle{
+  opacity:.18;
   transform-box:fill-box;
   transform-origin:center;
-  animation:masterDataVectorSpin 1.15s linear infinite;
+  animation:masterDataDotBlink 500ms steps(1,end) infinite;
+  animation-delay:calc(var(--dot-index) * 41.6667ms);
 }
-@keyframes masterDataVectorSpin{
-  from{transform:rotate(0deg)}
-  to{transform:rotate(360deg)}
+@keyframes masterDataDotBlink{
+  0%,8.333%{opacity:1;transform:scale(1.48)}
+  8.334%,100%{opacity:.18;transform:scale(.62)}
 }
 #login-loading-overlay .master-data-dot-spinner,
 #master-auth-loading-overlay .master-data-dot-spinner{
@@ -373,19 +375,19 @@
   <div id="login-loading-overlay" class="hidden fixed inset-0 z-[95] bg-slate-950/75 backdrop-blur-sm flex items-center justify-center p-4 no-print" role="status" aria-live="polite" aria-label="Logging in">
     <div class="flex flex-col items-center justify-center gap-5">
       <svg class="master-data-dot-spinner" viewBox="0 0 100 100" role="img" aria-label="Loading">
-        <g class="master-data-dot-spinner-rotor" fill="#ff7069">
-          <circle cx="50" cy="8" r="4.3"/>
-          <circle cx="72" cy="14" r="3.9"/>
-          <circle cx="88" cy="30" r="3.4"/>
-          <circle cx="94" cy="50" r="8.2"/>
-          <circle cx="88" cy="72" r="8.2"/>
-          <circle cx="72" cy="88" r="8.2"/>
-          <circle cx="50" cy="94" r="8.2"/>
-          <circle cx="28" cy="88" r="8.2"/>
-          <circle cx="12" cy="72" r="8.2"/>
-          <circle cx="6" cy="50" r="6.1"/>
-          <circle cx="12" cy="28" r="5.0"/>
-          <circle cx="28" cy="12" r="4.3"/>
+        <g fill="#ff7069">
+          <circle cx="50" cy="8" r="4.3" style="--dot-index:0"/>
+          <circle cx="72" cy="14" r="3.9" style="--dot-index:1"/>
+          <circle cx="88" cy="30" r="3.4" style="--dot-index:2"/>
+          <circle cx="94" cy="50" r="8.2" style="--dot-index:3"/>
+          <circle cx="88" cy="72" r="8.2" style="--dot-index:4"/>
+          <circle cx="72" cy="88" r="8.2" style="--dot-index:5"/>
+          <circle cx="50" cy="94" r="8.2" style="--dot-index:6"/>
+          <circle cx="28" cy="88" r="8.2" style="--dot-index:7"/>
+          <circle cx="12" cy="72" r="8.2" style="--dot-index:8"/>
+          <circle cx="6" cy="50" r="6.1" style="--dot-index:9"/>
+          <circle cx="12" cy="28" r="5.0" style="--dot-index:10"/>
+          <circle cx="28" cy="12" r="4.3" style="--dot-index:11"/>
         </g>
       </svg>
       <div class="text-white text-lg font-semibold tracking-[0.16em]">Logging in</div>
@@ -481,19 +483,19 @@
   <div id="master-auth-loading-overlay" class="hidden fixed inset-0 z-[100] bg-slate-950/75 backdrop-blur-sm flex items-center justify-center p-4 no-print" role="status" aria-live="polite" aria-label="Logging in">
     <div class="flex flex-col items-center justify-center gap-5">
       <svg class="master-data-dot-spinner" viewBox="0 0 100 100" role="img" aria-label="Loading">
-        <g class="master-data-dot-spinner-rotor" fill="#ff7069">
-          <circle cx="50" cy="8" r="4.3"/>
-          <circle cx="72" cy="14" r="3.9"/>
-          <circle cx="88" cy="30" r="3.4"/>
-          <circle cx="94" cy="50" r="8.2"/>
-          <circle cx="88" cy="72" r="8.2"/>
-          <circle cx="72" cy="88" r="8.2"/>
-          <circle cx="50" cy="94" r="8.2"/>
-          <circle cx="28" cy="88" r="8.2"/>
-          <circle cx="12" cy="72" r="8.2"/>
-          <circle cx="6" cy="50" r="6.1"/>
-          <circle cx="12" cy="28" r="5.0"/>
-          <circle cx="28" cy="12" r="4.3"/>
+        <g fill="#ff7069">
+          <circle cx="50" cy="8" r="4.3" style="--dot-index:0"/>
+          <circle cx="72" cy="14" r="3.9" style="--dot-index:1"/>
+          <circle cx="88" cy="30" r="3.4" style="--dot-index:2"/>
+          <circle cx="94" cy="50" r="8.2" style="--dot-index:3"/>
+          <circle cx="88" cy="72" r="8.2" style="--dot-index:4"/>
+          <circle cx="72" cy="88" r="8.2" style="--dot-index:5"/>
+          <circle cx="50" cy="94" r="8.2" style="--dot-index:6"/>
+          <circle cx="28" cy="88" r="8.2" style="--dot-index:7"/>
+          <circle cx="12" cy="72" r="8.2" style="--dot-index:8"/>
+          <circle cx="6" cy="50" r="6.1" style="--dot-index:9"/>
+          <circle cx="12" cy="28" r="5.0" style="--dot-index:10"/>
+          <circle cx="28" cy="12" r="4.3" style="--dot-index:11"/>
         </g>
       </svg>
       <div class="text-white text-lg font-semibold tracking-[0.16em]">Logging in</div>

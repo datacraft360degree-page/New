@@ -195,6 +195,60 @@
  #quotation-preview-modal .quotation-preview-paper iframe{border-radius:9px;}
 }
 </style>
+
+<style id="quotation-cross-browser-compact-fix">
+/* Normalize quotation dialogs across Safari, Chrome, Firefox, desktop and mobile. */
+#quotation-modal,
+#quotation-preview-modal {
+  position:fixed!important; inset:0!important; box-sizing:border-box!important;
+  display:flex!important; align-items:center!important; justify-content:center!important;
+  width:100%!important; height:100vh!important; height:100dvh!important;
+  padding:12px!important; overflow-x:hidden!important; overflow-y:auto!important;
+  -webkit-overflow-scrolling:touch!important;
+}
+#quotation-modal > .quotation-oneui-card {
+  box-sizing:border-box!important; flex:0 1 760px!important;
+  width:min(760px, calc(100vw - 24px))!important;
+  max-width:760px!important; max-height:calc(100vh - 24px)!important;
+  max-height:calc(100dvh - 24px)!important; min-height:0!important;
+  margin:auto!important; overflow-x:hidden!important; overflow-y:auto!important;
+  -webkit-overflow-scrolling:touch!important; overscroll-behavior:contain!important;
+}
+#quotation-preview-modal > .quotation-preview-oneui {
+  box-sizing:border-box!important; flex:0 1 760px!important;
+  width:min(760px, calc(100vw - 24px))!important; max-width:760px!important;
+  height:min(820px, calc(100vh - 24px))!important;
+  height:min(820px, calc(100dvh - 24px))!important;
+  min-height:300px!important; max-height:calc(100vh - 24px)!important;
+  max-height:calc(100dvh - 24px)!important; margin:auto!important;
+}
+#quotation-preview-modal .quotation-preview-paper {
+  display:block!important; flex:1 1 auto!important; min-height:0!important;
+  overflow:auto!important; -webkit-overflow-scrolling:touch!important;
+}
+#quotation-preview-modal #quotation-preview-frame {
+  display:block!important; width:100%!important; height:100%!important;
+  min-height:300px!important; border:0!important; background:#fff!important;
+}
+@media(max-width:640px) {
+  #quotation-modal, #quotation-preview-modal {
+    align-items:center!important; justify-content:center!important;
+    padding:12px!important;
+  }
+  #quotation-modal > .quotation-oneui-card {
+    width:calc(100vw - 24px)!important; max-width:760px!important;
+    max-height:calc(100vh - 24px)!important; max-height:calc(100dvh - 24px)!important;
+    border-radius:22px!important; padding:12px!important;
+  }
+  #quotation-preview-modal > .quotation-preview-oneui {
+    width:calc(100vw - 24px)!important; max-width:760px!important;
+    height:calc(100vh - 24px)!important; height:calc(100dvh - 24px)!important;
+    max-height:calc(100vh - 24px)!important; max-height:calc(100dvh - 24px)!important;
+    min-height:260px!important; border-radius:22px!important;
+  }
+}
+</style>
+
 </head>
 <body class="text-slate-800 font-sans min-h-screen flex flex-col relative antialiased text-xs" onclick="closeCommentBox()">
 

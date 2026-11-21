@@ -1292,7 +1292,7 @@
               <label class="block font-semibold text-slate-600 mb-0.5">Contact No</label>
               <div class="flex gap-1">
                 <input type="text" id="cust-country-code" value="+91" placeholder="+91" class="w-1/3 bg-white border border-slate-200 rounded-xl px-1.5 py-1.5 focus:outline-none focus:border-blue-500 font-bold text-center text-blue-700" />
-                <input type="text" id="cust-contact" maxlength="10" pattern="[0-9]*" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)" placeholder="Mobile No" class="w-2/3 bg-white border border-slate-200 rounded-xl px-2 py-1.5 focus:outline-none focus:border-blue-500" />
+                <input type="text" id="cust-contact" required maxlength="10" minlength="10" pattern="[0-9]{10}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)" placeholder="Mobile No" class="w-2/3 bg-white border border-slate-200 rounded-xl px-2 py-1.5 focus:outline-none focus:border-blue-500" />
               </div>
             </div>
             <div class="sm:col-span-2">
@@ -1539,7 +1539,7 @@
         <input type="number" id="cust-total" readonly class="w-full min-w-0 box-border bg-slate-200/60 text-blue-700 font-bold border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" value="0" />
       </div>
       <div class="min-w-0">
-        <label class="block font-semibold text-slate-600 mb-0.5">Advanced (₹)</label>
+        <label class="block font-semibold text-slate-600 mb-0.5">Advance (₹) <span class="font-normal text-slate-400">(Optional)</span></label>
         <input type="number" id="cust-advance" value="0" oninput="calculateModalBilling()" class="w-full min-w-0 box-border bg-white border border-slate-200 rounded-xl px-2 py-1.5 focus:outline-none focus:border-blue-500 font-semibold text-emerald-600" />
       </div>
     
@@ -1954,6 +1954,9 @@ function checkBirthdayTrigger() {
     const DEVICE_META_KEY='business-portal-device-metadata';
     const SERVER_SESSION_HEARTBEAT_MS=15000;
     function getPortalDeviceId(){let id=localStorage.getItem(DEVICE_ID_KEY);if(!id){id='device_'+(crypto.randomUUID?crypto.randomUUID():Date.now()+'_'+Math.random().toString(36).slice(2));localStorage.setItem(DEVICE_ID_KEY,id);}return id;}
+    // Collision-resistant IDs work across browsers/devices and while offline. Never depend on a local counter alone.
+    function makeGloballyUniqueToken(){try{if(window.crypto&&typeof crypto.randomUUID==='function')return crypto.randomUUID().replace(/-/g,'').slice(0,12).toUpperCase();}catch(e){}return (Date.now().toString(36)+Math.random().toString(36).slice(2,12)).toUpperCase();}
+    function makeRecordId(prefix){try{if(window.crypto&&typeof crypto.randomUUID==='function')return prefix+'_'+crypto.randomUUID();}catch(e){}return prefix+'_'+Date.now().toString(36)+'_'+makeGloballyUniqueToken();}
     function getBrowserName(){const ua=navigator.userAgent||'';if(/Edg\//.test(ua))return 'Microsoft Edge';if(/OPR\//.test(ua))return 'Opera';if(/CriOS\//.test(ua))return 'Chrome (iOS)';if(/Chrome\//.test(ua))return 'Google Chrome';if(/FxiOS|Firefox\//.test(ua))return 'Firefox';if(/Safari\//.test(ua))return 'Safari';return 'Unknown browser';}
     function getBrowserVersion(){const ua=navigator.userAgent||'';const match=ua.match(/(?:Edg|OPR|CriOS|Chrome|Firefox|Version)\/([0-9.]+)/);return match?match[1]:'Unknown';}
     function getDeviceType(){const ua=navigator.userAgent||'';if(/iPad|Tablet/i.test(ua))return 'Tablet';if(/Mobile|Android|iPhone|iPod/i.test(ua))return 'Mobile';return 'Desktop';}
@@ -3140,8 +3143,8 @@ function checkBirthdayTrigger() {
       const paddedSeq = String(seq).padStart(7, '0');
 
       return {
-        bookingCode: `BKG-${targetYear}-${paddedSeq}`,
-        invoiceNo: `INV-${targetYear}-${paddedSeq}`
+        bookingCode: `BKG-${targetYear}-${paddedSeq}-${makeGloballyUniqueToken()}`,
+        invoiceNo: `INV-${targetYear}-${paddedSeq}-${makeGloballyUniqueToken()}`
       };
     }
     
@@ -4118,18 +4121,12 @@ function updateDashboardCards() {
       let phone = b.contactNo ? String(b.contactNo).replace(/\D/g, '') : '';
       let initialAdvanceVal = b.initialAdv !== undefined ? parseFloat(b.initialAdv) : 0;
       
-      let validationErrors = [];
-      if (!phone || phone.length !== 10) {
-        validationErrors.push("• Guest contact number must be exactly 10 digits.");
-      }
-      if (!(initialAdvanceVal > 0)) {
-        validationErrors.push("• Advanced payment must be greater than 0.");
-      }
-
-      if (validationErrors.length > 0) {
-        alert("⚠️ Cannot send via WhatsApp:\n\n" + validationErrors.join("\n"));
+      if (!/^\d{10}$/.test(phone)) {
+        alert("⚠️ Cannot send via WhatsApp: Guest contact number must be exactly 10 digits.");
         return;
       }
+      // Advance payment is optional. A valid contact number is sufficient to send the receipt.
+
 
       const fullPhoneNumber = rawCountryCode + phone;
       const upiId = "aniruddha.e@oksbi";
@@ -4149,7 +4146,7 @@ function updateDashboardCards() {
         `• Check-Out: ${formatDateTime(effectiveOut)}\n\n` +
         `*Billing Summary:*\n` +
         `• Total Amount: ₹${b.totalAmount}\n` +
-        `• Advance Amount: ₹${initialAdvanceVal}\n` +
+        `• Advance Amount: ₹${initialAdvanceVal.toLocaleString('en-IN')}\n` +
         discountValue +
         `• Grand Total: ₹${Math.max(0, Number(b.totalAmount || 0) - Number(b.discountAmount || 0)).toLocaleString('en-IN')}\n` +
         `• Balance Due: ₹${b.totalDue}\n\n` +
@@ -4195,15 +4192,14 @@ function updateDashboardCards() {
         } else {
           waBtn.classList.remove('hidden');
           const contactDigits = b.contactNo ? String(b.contactNo).replace(/\D/g, '') : '';
-          const hasValidContact = contactDigits.length === 10;
-          const hasAdvanced = (parseFloat(b.initialAdv) || 0) > 0;
+          const hasValidContact = /^\d{10}$/.test(contactDigits);
 
-          if (hasValidContact && hasAdvanced) {
+          if (hasValidContact) {
             waBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-            waBtn.title = "Send Receipt via WhatsApp";
+            waBtn.title = "Send Receipt via WhatsApp (advance payment optional)";
           } else {
             waBtn.classList.add('opacity-50', 'cursor-not-allowed');
-            waBtn.title = "Inactive: Advance payment must be > 0 and contact number must be 10 digits.";
+            waBtn.title = "Inactive: A valid 10-digit contact number is required.";
           }
         }
       }
@@ -4615,10 +4611,10 @@ function updateDashboardCards() {
       // Preview only; the number is consumed only after a successful save.
       const year = (dateValue || new Date().toISOString().slice(0,10)).slice(0,4);
       const savedMax = (state.quotations || []).reduce((max, q) => {
-        const match = String(q.quotationNo || '').match(new RegExp('^QT-' + year + '-(\\d+)$'));
+        const match = String(q.quotationNo || '').match(new RegExp('^QT-' + year + '-(\\d+)(?:-[A-Z0-9]+)?$'));
         return match ? Math.max(max, Number(match[1]) || 0) : max;
       }, 0);
-      return `QT-${year}-${String(savedMax + 1).padStart(7,'0')}`;
+      return `QT-${year}-${String(savedMax + 1).padStart(7,'0')}-${makeGloballyUniqueToken()}`;
     }
     function countWordsNoSpaces(value){return String(value||'').trim().split(/\s+/).filter(Boolean).length;}
     function updateQuotationWordCount(inputId,countId){const input=document.getElementById(inputId),out=document.getElementById(countId);if(!input||!out)return;const n=countWordsNoSpaces(input.value);out.textContent=n+' / 200 words';out.className='block text-[9px] text-right '+(n>200?'text-rose-600 font-bold':'text-slate-400');}
@@ -4635,7 +4631,7 @@ function updateDashboardCards() {
       const tomorrowDate = new Date(today.getFullYear(), today.getMonth(), today.getDate()+1);
       const tomorrow = `${tomorrowDate.getFullYear()}-${String(tomorrowDate.getMonth()+1).padStart(2,'0')}-${String(tomorrowDate.getDate()).padStart(2,'0')}`;
       const qNo = existing ? existing.quotationNo : nextQuotationNumber(date);
-      const q = existing || {id:`qt_${Date.now()}`, quotationNo:qNo, quotationDate:date, guestName:'', address:'', phone:'', email:'', checkIn:date, checkOut:tomorrow, guests:2, additionalGuests:0, additionalRate:0, roomType:'Deluxe', rooms:1, ratePerDay:1200, cabTrips:[], discount:0};
+      const q = existing || {id:makeRecordId('qt'), quotationNo:qNo, quotationDate:date, guestName:'', address:'', phone:'', email:'', checkIn:date, checkOut:tomorrow, guests:2, additionalGuests:0, additionalRate:0, roomType:'Deluxe', rooms:1, ratePerDay:1200, cabTrips:[], discount:0};
       const trips = (q.cabTrips || []);
       const tripRows = trips;
       document.getElementById('quotation-modal')?.remove();
@@ -4719,7 +4715,7 @@ function updateDashboardCards() {
       if(!canIncreaseSheetRows('quotations',additionalQuotationRows))return;
       if(ix>=0) state.quotations[ix]=q; else state.quotations.push(q);
       state.quotationYearlyCounters=state.quotationYearlyCounters||{};
-      const numberMatch=String(q.quotationNo||'').match(/^QT-(\\d{4})-(\\d+)$/);
+      const numberMatch=String(q.quotationNo||'').match(/^QT-(\\d{4})-(\\d+)(?:-[A-Z0-9]+)?$/);
       if(numberMatch) state.quotationYearlyCounters[numberMatch[1]]=Math.max(Number(state.quotationYearlyCounters[numberMatch[1]])||0,Number(numberMatch[2])||0);
       document.getElementById('quotation-modal').remove();
       renderQuotations();updateQuotationDashboard();
@@ -5553,8 +5549,9 @@ if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
       }
 
       const contactNoVal = document.getElementById('cust-contact').value.trim();
-      if (contactNoVal && contactNoVal.length !== 10) {
-        alert("⚠️ Please provide a valid 10-digit guest contact number.");
+      if (!/^\d{10}$/.test(contactNoVal)) {
+        alert("⚠️ A valid 10-digit guest contact number is mandatory.");
+        document.getElementById('cust-contact').focus();
         return;
       }
 
@@ -5833,7 +5830,7 @@ if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
       const countryCodeVal = document.getElementById('cust-country-code').value.trim() || '+91';
 
       const newBooking = {
-        id: id || `bk_${Date.now()}`,
+        id: id || makeRecordId('bk'),
         lastUpdatedTimestamp: new Date().toISOString(),
         bookingCode: existingCode,
         invoiceNo: existingInv,

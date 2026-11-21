@@ -2623,15 +2623,20 @@ function checkBirthdayTrigger() {
       const trusted=getOfflineTrustedDevice();
       currentUserId=(trusted&&trusted.userId)||localStorage.getItem('portal_user_id')||sessionStorage.getItem('portal_user_id')||'';
       const sessionAuth=trusted&&localStorage.getItem('app_authenticated')==='true';
+      // navigator.onLine can remain true when Wi-Fi/mobile data is connected
+      // but the internet or Google Apps Script is unreachable. Test the actual
+      // portal endpoint before deciding whether startup is online or offline.
+      let portalReachable=false;
+      if(navigator.onLine){portalReachable=await probePortalNetwork();}
       if(sessionAuth){
-        if(!navigator.onLine){
+        if(!portalReachable){
           // Require the user to re-enter both User ID and password in offline mode.
           // The entered password is checked against the salted local verifier.
           isLoggedIn=false;document.getElementById('login-overlay').classList.remove('hidden');
           return;
         }
         if(!acquireSingleTabLock()){isLoggedIn=false;document.getElementById('login-overlay').classList.remove('hidden');return;}
-        if(navigator.onLine){
+        if(portalReachable){
           // The browser-installation session ID is persisted locally. Reclaiming
           // it proves continuity to the server; no password is requested again.
           if(!getServerSessionId()){
@@ -2653,6 +2658,25 @@ function checkBirthdayTrigger() {
       }else{isLoggedIn=false;document.getElementById('login-overlay').classList.remove('hidden');}
     }
 
+    async function enterOfflineWithCredentials(user,pass,errorEl){
+      const trusted=getOfflineTrustedDevice();
+      if(!trusted||trusted.userId.toLowerCase()!==String(user||'').trim().toLowerCase()){
+        throw new Error('Offline login is available only after a successful online login and device enrolment on this same browser. Please connect to the internet for first-time enrolment.');
+      }
+      if(!(await verifyOfflineTrustedPassword(trusted,pass)))throw new Error('Incorrect User ID or Password for this offline browser/device.');
+      if(!acquireSingleTabLock())throw new Error('This portal is already open in another tab or window in this browser.');
+      currentUserId=trusted.userId;
+      localStorage.setItem('app_authenticated','true');
+      localStorage.setItem('portal_user_id',currentUserId);
+      isLoggedIn=true;
+      document.getElementById('login-overlay').classList.add('hidden');
+      if(errorEl)errorEl.classList.add('hidden');
+      document.getElementById('login-password').value='';
+      startInactivityMonitoring();startNetworkModeMonitor();
+      initialiseOnlineAfterLogin();
+      return true;
+    }
+
     async function handleLogin(e) {
       e.preventDefault();
       const user = document.getElementById('login-userid').value.trim();
@@ -2662,24 +2686,26 @@ function checkBirthdayTrigger() {
       const spinner = document.getElementById('login-loading-overlay');
       if (!user || !pass) return;
       errorEl.classList.add('hidden');
-      if (!navigator.onLine) {
-        const trusted=getOfflineTrustedDevice();
-        if(trusted&&trusted.userId.toLowerCase()===user.toLowerCase()){
-          try{
-            if(!(await verifyOfflineTrustedPassword(trusted,pass)))throw new Error('Incorrect User ID or Password for this offline browser/device.');
-            if(!acquireSingleTabLock())return;
-            currentUserId=trusted.userId;localStorage.setItem('app_authenticated','true');localStorage.setItem('portal_user_id',currentUserId);
-            isLoggedIn=true;document.getElementById('login-overlay').classList.add('hidden');errorEl.classList.add('hidden');
-            document.getElementById('login-password').value='';startInactivityMonitoring();startNetworkModeMonitor();initialiseOnlineAfterLogin();return;
-          }catch(offlineAuthError){errorEl.innerText=offlineAuthError.message||'Offline login verification failed.';errorEl.classList.remove('hidden');return;}
-        }
-        errorEl.innerText='Offline login is available only after a successful online login on this same browser and device. Please connect to the internet for first-time login or device enrolment.';
-        errorEl.classList.remove('hidden');return;
+      // Check actual reachability rather than navigator.onLine alone. On phones,
+      // navigator.onLine is often true even when there is no internet access.
+      const portalReachable=navigator.onLine?await probePortalNetwork():false;
+      if(!portalReachable){
+        try{await enterOfflineWithCredentials(user,pass,errorEl);return;}
+        catch(offlineAuthError){errorEl.innerText=offlineAuthError.message||'Offline login verification failed.';errorEl.classList.remove('hidden');return;}
       }
       if (spinner) spinner.classList.remove('hidden');
       if (submitBtn) { submitBtn.disabled = true; submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Verifying...'; }
       try {
-        const auth = await postToGoogleServer({action:'authenticateUser', userId:user, password:pass});
+        let auth;
+        try{auth=await postToGoogleServer({action:'authenticateUser', userId:user, password:pass});}
+        catch(authNetworkError){
+          // Connectivity may disappear between the health check and login POST.
+          if(!await probePortalNetwork()){
+            await enterOfflineWithCredentials(user,pass,errorEl);
+            return;
+          }
+          throw authNetworkError;
+        }
         if (!auth || auth.status !== 'success') throw new Error((auth && auth.message) || 'Invalid User ID or Password!');
         if (!acquireSingleTabLock()) return;
         currentUserId = auth.userId || user;

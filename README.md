@@ -1678,7 +1678,7 @@
         </label>
       </div>
       <div id="inv-payment-qr" class="hidden flex flex-col items-center border-t border-slate-100 pt-3">
-        <img alt="Google Pay payment QR code" class="w-36 h-48 object-contain" src="https://drive.google.com/thumbnail?id=1u77yidlo2DpGI0Z74yyb2lzIT9HEpLp7&amp;sz=w1000" referrerpolicy="no-referrer" loading="eager" onerror="this.onerror=null;this.src='https://lh3.googleusercontent.com/d/1u77yidlo2DpGI0Z74yyb2lzIT9HEpLp7'">
+        <img alt="Google Pay payment QR code" class="w-36 h-48 object-contain" src="https://drive.google.com/uc?export=view&amp;id=1PNNw7rwQVpw81377wqwXCiMsmJw6QfJ4" referrerpolicy="no-referrer" loading="eager" onerror="this.onerror=null;this.src='https://lh3.googleusercontent.com/d/1PNNw7rwQVpw81377wqwXCiMsmJw6QfJ4'">
         <p class="text-[9px] text-slate-500 font-semibold">Scan to pay using any UPI app</p>
       </div>
       <div id="inv-booking-remark" class="hidden mb-3 p-3 border border-slate-200 rounded-xl text-[10px] whitespace-pre-wrap break-words"></div>
@@ -1795,20 +1795,16 @@ function checkBirthdayTrigger() {
         return `${yyyy}-${mm}-${dd}T${hh}:${min}:00+05:30`;
     }
 
-    // NEW helper logic to format dates strictly into 24-hour style "dd/mm/yy hh:mm" for Excel exports (Enforcing IST)
+    // Format timestamps in the current portal user's device timezone (24-hour clock).
     function format24hDate(dtStr) {
       if (!dtStr) return '';
       const d = new Date(typeof dtStr === 'string' ? dtStr.replace(' ', 'T') : dtStr);
       if (isNaN(d.getTime())) return String(dtStr);
-      
-      const utcMs = d.getTime();
-      const istDate = new Date(utcMs + (330 * 60000));
-      
-      const dd = String(istDate.getUTCDate()).padStart(2, '0');
-      const mm = String(istDate.getUTCMonth() + 1).padStart(2, '0');
-      const yy = String(istDate.getUTCFullYear()).slice(-2);
-      const hh = String(istDate.getUTCHours()).padStart(2, '0');
-      const min = String(istDate.getUTCMinutes()).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const yy = String(d.getFullYear()).slice(-2);
+      const hh = String(d.getHours()).padStart(2, '0');
+      const min = String(d.getMinutes()).padStart(2, '0');
       return `${dd}/${mm}/${yy} ${hh}:${min}`;
     }
 

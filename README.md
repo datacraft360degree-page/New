@@ -1888,9 +1888,12 @@ function checkBirthdayTrigger() {
       try {
         // Offline wipe is deliberately local-only. It must not become a queued
         // cloud deletion when the device reconnects.
-        if (!offlineMode && navigator.onLine) {
+        const completedOnlineWipe = !offlineMode && navigator.onLine;
+        if (completedOnlineWipe) {
           const result = await postToGoogleServer({ action: "wipeData", sessionId: getServerSessionId() });
           if (!result || result.status !== 'success') throw new Error(result?.message || 'Google Server wipe failed');
+          localStorage.removeItem(exportHeaderPreferenceKey('booking'));
+          localStorage.removeItem(exportHeaderPreferenceKey('quotation'));
         }
         state.bookings = [];
         state.quotations = [];
@@ -2908,12 +2911,39 @@ function checkBirthdayTrigger() {
         return;
       }
 
-      if (exportDataType === 'quotation') exportQuotationData(startDateStr, endDateStr);
-      else exportToExcel(startDateStr, endDateStr);
+      openExportHeaderPicker(startDateStr, endDateStr);
+    }
+
+    function exportHeaderDefinitions(type) {
+      if (type === 'quotation') return ['Last Updated Timestamp','Quotation ID','Quotation No','Quotation Date','Guest Name','Address','Phone','Email','Greeting','Check-In','Check-Out','Guests','Additional Guests','Additional Rate/Day','Room Type','No. of Rooms','Rate/Day','Cab Fare','Discount','Quotation Total Amount','Terms & Conditions','Trip','Date & Time','Cab Remarks','Rate/Trip (₹)','Cab Trip Total (₹)'];
+      return ['Last Updated Timestamp','Booking ID (System)','Booking ID','Invoice ID','Booking Status','Guest Name','Address','City','State','Country','Pin/Zip Code','ID Number','Country Code','Contact No','Attached ID File Name','Quotation No. & Date','Quotation Total Amount','Room No(s)','Agent Info','Main Guest Joined','Add Extra Guest/Minor','Extra Guest/Minor Check-In','Extra Guest/Minor Check-Out','Check-In','Check-Out','Has Extended Check-Out','Extended Check-Out','Trip Cancelled','Trip Cancel Check-In','Trip Cancel Check-Out','Include Meals','Food Orders Details','Cab Trips Details','Booking Remarks','Extra Guest/Minor Price / Day','Extra Guest/Minor Stay Days','Extra Guest/Minor Total Price','Main Guest Price / Day','Main Guest Stay Days','Main Guest Total Price','Total Cab Fare','Total Extra Food & Drinks','Grand Total','Advanced','Discounted %','Discounted Amount','Discount % Shown on Receipt','Discount Amount Shown on Receipt','Balance Due','Cleared Bill'];
+    }
+    function exportHeaderPreferenceKey(type) { return 'export-header-selection:' + PORTAL_KEY + ':' + type; }
+    function openExportHeaderPicker(startDate, endDate) {
+      const type = exportDataType, headers = exportHeaderDefinitions(type), key = exportHeaderPreferenceKey(type);
+      let saved = null; try { saved = JSON.parse(localStorage.getItem(key) || 'null'); } catch(e) {}
+      const selected = Array.isArray(saved) ? saved.filter(h => headers.includes(h)) : headers.slice();
+      const modal = document.createElement('div'); modal.id='export-header-picker';
+      modal.className='fixed inset-0 z-[140] bg-slate-950/50 backdrop-blur-sm flex items-center justify-center p-3 no-print';
+      modal.innerHTML = `<div class="bg-white rounded-2xl shadow-2xl p-4 w-full max-w-md max-h-[85dvh] flex flex-col gap-3">
+        <div class="flex items-center justify-between"><h3 class="font-black text-sm">Select ${type==='quotation'?'Quotation':'Booking'} Excel Headers</h3><button type="button" class="text-slate-500 text-lg" onclick="document.getElementById('export-header-picker').remove()">×</button></div>
+        <div class="flex gap-2"><button type="button" class="text-blue-700 font-bold text-xs" onclick="setAllExportHeaders(true)">Select All</button><button type="button" class="text-slate-500 font-bold text-xs" onclick="setAllExportHeaders(false)">Untick All</button></div>
+        <div id="export-header-list" class="overflow-y-auto border rounded-xl p-2 grid grid-cols-1 sm:grid-cols-2 gap-2">${headers.map((h,i)=>`<label class="flex items-center gap-2 text-[11px] p-1"><input type="checkbox" class="export-header-check" value="${escapeRemarkHtml(h)}" ${selected.includes(h)?'checked':''}>${escapeRemarkHtml(h)}</label>`).join('')}</div>
+        <div class="flex justify-end gap-2"><button type="button" class="px-3 py-2 bg-slate-100 rounded-xl text-xs" onclick="document.getElementById('export-header-picker').remove()">Cancel</button><button type="button" class="px-3 py-2 bg-blue-600 text-white rounded-xl font-bold text-xs" onclick="confirmExportHeaders('${type}','${startDate}','${endDate}')">Download Excel</button></div>
+      </div>`;
+      document.body.appendChild(modal);
+    }
+    function setAllExportHeaders(checked) { document.querySelectorAll('#export-header-list .export-header-check').forEach(el=>el.checked=checked); }
+    function confirmExportHeaders(type,startDate,endDate) {
+      const selected=Array.from(document.querySelectorAll('#export-header-list .export-header-check:checked')).map(el=>el.value);
+      if(!selected.length){alert('Select at least one header to export.');return;}
+      localStorage.setItem(exportHeaderPreferenceKey(type),JSON.stringify(selected));
+      document.getElementById('export-header-picker')?.remove();
+      if(type==='quotation') exportQuotationData(startDate,endDate,selected); else exportToExcel(startDate,endDate,selected);
       closeExportModal();
     }
 
-    function exportToExcel(startDateStr, endDateStr) {
+    function exportToExcel(startDateStr, endDateStr, selectedHeaders) {
       if (!state.bookings || state.bookings.length === 0) {
         alert("No booking records available to export!");
         return;
@@ -2949,6 +2979,7 @@ function checkBirthdayTrigger() {
         const cabList = parseJSONField(b.cabTrips);
         
       return {
+          "Last Updated Timestamp": b.lastUpdatedTimestamp ? format24hDate(b.lastUpdatedTimestamp) : "",
           "Booking ID (System)": b.id || "",
           "Booking ID": b.bookingCode || "",
           "Invoice ID": b.invoiceNo || "",
@@ -3001,7 +3032,8 @@ function checkBirthdayTrigger() {
         };
       });
 
-      const worksheet = XLSX.utils.json_to_sheet(exportData);
+      const selected = Array.isArray(selectedHeaders) ? selectedHeaders : exportHeaderDefinitions('booking');
+      const worksheet = XLSX.utils.json_to_sheet(exportData.map(row => Object.fromEntries(selected.filter(h => Object.prototype.hasOwnProperty.call(row,h)).map(h => [h,row[h]]))), {header:selected});
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, "Bookings");
 
@@ -4683,7 +4715,7 @@ function updateDashboardCards() {
       if(!guestName){alert('Guest Name is mandatory. Please enter the guest name before saving the quotation.');document.getElementById('q-guest').focus();return;}
       const date=document.getElementById('q-date').value;const inDate=document.getElementById('q-in').value,outDate=document.getElementById('q-out').value;if(!date){alert('Please select quotation date.');return;}if(!inDate||!outDate||outDate<=inDate){alert('Check-out date must be later than check-in date.');return;}
       const cabTrips=[...document.querySelectorAll('.q-cab-row')].map(r=>({trip:r.querySelector('.q-cab-trip').value,dateTime:r.querySelector('.q-cab-date').value,remarks:r.querySelector('.q-cab-remark').value,rate:Number(r.querySelector('.q-cab-rate').value)||0}));
-      const q={id,quotationNo:document.getElementById('q-number').innerText,quotationDate:date,guestName:guestName,address:document.getElementById('q-address').value,phone:document.getElementById('q-phone').value,email:document.getElementById('q-email').value,greeting:document.getElementById('q-greeting').value,checkIn:document.getElementById('q-in').value,checkOut:document.getElementById('q-out').value,guests:Number(document.getElementById('q-guests').value)||1,additionalGuests:Number(document.getElementById('q-extra').value)||0,additionalRate:Number(document.getElementById('q-extra-rate').value)||0,roomType:document.getElementById('q-room-type').value,rooms:Number(document.getElementById('q-rooms').value)||1,ratePerDay:Number(document.getElementById('q-rate').value)||0,cabTrips,discount:Number(document.getElementById('q-discount').value)||0,totalAmount:Number(document.getElementById('q-grand-total').innerText.replace(/,/g,''))||0,terms:document.getElementById('q-terms').value};
+      const q={id,lastUpdatedTimestamp:new Date().toISOString(),quotationNo:document.getElementById('q-number').innerText,quotationDate:date,guestName:guestName,address:document.getElementById('q-address').value,phone:document.getElementById('q-phone').value,email:document.getElementById('q-email').value,greeting:document.getElementById('q-greeting').value,checkIn:document.getElementById('q-in').value,checkOut:document.getElementById('q-out').value,guests:Number(document.getElementById('q-guests').value)||1,additionalGuests:Number(document.getElementById('q-extra').value)||0,additionalRate:Number(document.getElementById('q-extra-rate').value)||0,roomType:document.getElementById('q-room-type').value,rooms:Number(document.getElementById('q-rooms').value)||1,ratePerDay:Number(document.getElementById('q-rate').value)||0,cabTrips,discount:Number(document.getElementById('q-discount').value)||0,totalAmount:Number(document.getElementById('q-grand-total').innerText.replace(/,/g,''))||0,terms:document.getElementById('q-terms').value};
       const ix=(state.quotations||[]).findIndex(x=>x.id===id);
       const oldQuotationRows=ix>=0?Math.max(1,Array.isArray(state.quotations[ix].cabTrips)?state.quotations[ix].cabTrips.length:0):0;
       const newQuotationRows=Math.max(1,cabTrips.length);
@@ -4805,16 +4837,16 @@ function updateDashboardCards() {
     function choosePriorQuotation(yes){if(!yes){document.getElementById('booking-quotation-choice').remove();openBookingModal();const quotationRef=document.getElementById('cust-quotation-ref');const quotationAmount=document.getElementById('cust-quotation-total');if(quotationRef)quotationRef.value='NA';if(quotationAmount)quotationAmount.value='NA';return;}const actions=document.getElementById('prior-quotation-choice-actions');if(actions)actions.classList.add('hidden');document.getElementById('prior-quotation-search').classList.remove('hidden');searchPriorQuotation();}
     function searchPriorQuotation(){const no=(document.getElementById('prior-q-no')?.value||'').toLowerCase(),date=document.getElementById('prior-q-date')?.value||'';const results=(state.quotations||[]).filter(q=>(!no||String(q.quotationNo||'').toLowerCase().includes(no))&&(!date||q.quotationDate===date)).sort((a,b)=>String(b.quotationDate||'').localeCompare(String(a.quotationDate||'')));const box=document.getElementById('prior-q-results');if(!box)return;box.innerHTML=results.map(q=>`<button onclick="selectPriorQuotation('${q.id}')" class="w-full text-left border border-slate-200 rounded-xl p-3 hover:border-blue-300 hover:bg-blue-50/70 transition"><div class="flex items-center justify-between gap-2"><b class="text-xs text-slate-900">${escapeRemarkHtml(q.quotationNo)}</b><span class="text-[10px] text-slate-500">${escapeRemarkHtml(q.quotationDate)}</span></div><div class="text-[11px] text-slate-600 mt-1">${escapeRemarkHtml(q.guestName)} · ₹${Number(q.totalAmount||0).toLocaleString('en-IN')}</div></button>`).join('')||'<p class="text-slate-400 text-xs p-3 text-center">No matching quotations.</p>'; }
     function selectPriorQuotation(id){pendingBookingQuotation=(state.quotations||[]).find(q=>q.id===id);document.getElementById('booking-quotation-choice').remove();openBookingModal();setTimeout(()=>{if(!pendingBookingQuotation)return;const q=pendingBookingQuotation;document.getElementById('cust-quotation-ref').value=`${q.quotationNo} | ${formatQuotationDateIST(q.quotationDate)}`;document.getElementById('cust-quotation-total').value=q.totalAmount||0;pendingBookingQuotation=null;},80);}
-    function exportQuotationData(startDate,endDate){
+    function exportQuotationData(startDate,endDate,selectedHeaders){
       const data=(state.quotations||[]).filter(q=>{const d=q.quotationDate||'';return (!startDate||d>=startDate)&&(!endDate||d<=endDate);});
       if(!data.length){alert('No quotation records found for selected period.');return;}
-      const quotationHeaders=['Quotation ID','Quotation No','Quotation Date','Guest Name','Address','Phone','Email','Greeting','Check-In','Check-Out','Guests','Additional Guests','Additional Rate/Day','Room Type','No. of Rooms','Rate/Day','Cab Fare','Discount','Quotation Total Amount','Terms & Conditions','Trip','Date & Time','Cab Remarks','Rate/Trip (₹)','Cab Trip Total (₹)'];
+      const quotationHeaders=['Last Updated Timestamp','Quotation ID','Quotation No','Quotation Date','Guest Name','Address','Phone','Email','Greeting','Check-In','Check-Out','Guests','Additional Guests','Additional Rate/Day','Room Type','No. of Rooms','Rate/Day','Cab Fare','Discount','Quotation Total Amount','Terms & Conditions','Trip','Date & Time','Cab Remarks','Rate/Trip (₹)','Cab Trip Total (₹)'];
       const quotationRows=[];
       data.forEach(q=>{
         const trips=Array.isArray(q.cabTrips)&&q.cabTrips.length?q.cabTrips:[null];
         const cabFare=(q.cabTrips||[]).reduce((sum,t)=>sum+Number(t.rate||0),0);
         trips.forEach((t,i)=>quotationRows.push({
-          'Quotation ID':q.id,'Quotation No':q.quotationNo,'Quotation Date':formatQuotationDateIST(q.quotationDate),'Guest Name':q.guestName,'Address':q.address,'Phone':q.phone,'Email':q.email,
+          'Last Updated Timestamp':q.lastUpdatedTimestamp?format24hDate(q.lastUpdatedTimestamp):'','Quotation ID':q.id,'Quotation No':q.quotationNo,'Quotation Date':formatQuotationDateIST(q.quotationDate),'Guest Name':q.guestName,'Address':q.address,'Phone':q.phone,'Email':q.email,
           'Greeting':q.greeting,'Check-In':q.checkIn,'Check-Out':q.checkOut,'Guests':q.guests,'Additional Guests':q.additionalGuests,'Additional Rate/Day':q.additionalRate,
           'Room Type':q.roomType,'No. of Rooms':q.rooms,'Rate/Day':q.ratePerDay,'Cab Fare':cabFare,'Discount':q.discount,
           'Quotation Total Amount':q.totalAmount,'Terms & Conditions':q.terms,
@@ -4824,7 +4856,9 @@ function updateDashboardCards() {
         }));
       });
       const wb=XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(quotationRows,{header:quotationHeaders}),'Quotation Details');
+      const selected = Array.isArray(selectedHeaders) ? selectedHeaders : quotationHeaders;
+      const filteredRows = quotationRows.map(row=>Object.fromEntries(selected.filter(h=>Object.prototype.hasOwnProperty.call(row,h)).map(h=>[h,row[h]])));
+      XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(filteredRows,{header:selected}),'Quotation Details');
       XLSX.writeFile(wb,`Quotation_Data_${startDate||'All'}_${endDate||'All'}.xlsx`);
     }
     function showExportChoices(){
@@ -5804,6 +5838,7 @@ if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
 
       const newBooking = {
         id: id || `bk_${Date.now()}`,
+        lastUpdatedTimestamp: new Date().toISOString(),
         bookingCode: existingCode,
         invoiceNo: existingInv,
         name: guestName,

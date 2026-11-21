@@ -2029,12 +2029,49 @@ function checkBirthdayTrigger() {
     }
     function constantTimeStringEqual(a,b){if(typeof a!=='string'||typeof b!=='string'||a.length!==b.length)return false;let diff=0;for(let i=0;i<a.length;i++)diff|=a.charCodeAt(i)^b.charCodeAt(i);return diff===0;}
     async function saveOfflineTrustedDevice(userId,password){
+      // Create and persist only a salted PBKDF2 verifier; never persist the raw password.
       const verifier=await deriveOfflinePasswordVerifier(password,'');
       const grant={version:2,userId:String(userId||''),deviceId:getPortalDeviceId(),passwordVerifier:verifier,createdAt:new Date().toISOString()};
-      localStorage.setItem(OFFLINE_TRUST_KEY,JSON.stringify(grant));
-      localStorage.setItem('portal_user_id',grant.userId);
-      localStorage.setItem('app_authenticated','true');
-      return grant;
+      try{
+        localStorage.setItem(OFFLINE_TRUST_KEY,JSON.stringify(grant));
+        localStorage.setItem('portal_user_id',grant.userId);
+        localStorage.setItem('app_authenticated','true');
+      }catch(storageError){
+        throw new Error('Offline device enrolment failed: this browser could not save the trusted-device record. Check browser storage/privacy settings and try again.');
+      }
+
+      // Read the record back from local storage and verify that the saved
+      // verifier actually matches the password entered during this login.
+      const saved=getOfflineTrustedDevice();
+      if(!saved||saved.userId!==grant.userId||saved.deviceId!==grant.deviceId||
+         !saved.passwordVerifier||!saved.passwordVerifier.salt||!saved.passwordVerifier.hash){
+        clearOfflineTrustedDevice();
+        throw new Error('Offline device enrolment failed: the saved trusted-device record could not be verified. You can continue online, but offline login is not yet enabled.');
+      }
+      let passwordMatches=false;
+      try{passwordMatches=await verifyOfflineTrustedPassword(saved,password);}
+      catch(verifyError){
+        clearOfflineTrustedDevice();
+        throw new Error('Offline device enrolment failed: the saved password verifier could not be checked by this browser. You can continue online, but offline login is not yet enabled.');
+      }
+      if(!passwordMatches){
+        clearOfflineTrustedDevice();
+        throw new Error('Offline device enrolment failed: password-verifier read-back did not match. You can continue online, but offline login is not yet enabled.');
+      }
+      return {userId:saved.userId,deviceId:saved.deviceId,verified:true};
+    }
+
+    function showPortalToast(message,isError){
+      const toast=document.getElementById('toast');
+      const msg=document.getElementById('toast-message');
+      if(!toast||!msg)return;
+      msg.textContent=message;
+      const icon=toast.querySelector('i');
+      if(icon){
+        icon.className=isError?'fa-solid fa-triangle-exclamation text-amber-300 text-base':'fa-solid fa-circle-check text-emerald-400 text-base';
+      }
+      toast.classList.remove('hidden');
+      setTimeout(()=>toast.classList.add('hidden'),6500);
     }
     function getOfflineTrustedDevice(){
       try{const grant=JSON.parse(localStorage.getItem(OFFLINE_TRUST_KEY)||'null');
@@ -2718,12 +2755,23 @@ function checkBirthdayTrigger() {
           throw new Error(session.message || 'Could not establish a secure portal session. Please try again.');
         }
         isLoggedIn = true;
-        await saveOfflineTrustedDevice(currentUserId,pass);
+        let offlineEnrollmentMessage='';
+        try{
+          const enrollment=await saveOfflineTrustedDevice(currentUserId,pass);
+          if(enrollment&&enrollment.verified){
+            offlineEnrollmentMessage='Offline device enrolment successful — User ID, this browser/device ID and password verifier were saved and read-back verified. No raw password was stored.';
+          }
+        }catch(enrollmentError){
+          // The online server login is already valid. Do not undo the server
+          // session or block online access merely because local enrolment failed.
+          offlineEnrollmentMessage=enrollmentError.message||'Offline device enrolment failed. You can continue online, but offline login is not enabled on this browser.';
+        }
         document.getElementById('login-overlay').classList.add('hidden');
         document.getElementById('login-error').classList.add('hidden');
         document.getElementById('login-password').value = '';
         startInactivityMonitoring();startNetworkModeMonitor();
         document.getElementById('login-alert-modal').classList.remove('hidden');
+        if(offlineEnrollmentMessage)showPortalToast(offlineEnrollmentMessage,!offlineEnrollmentMessage.startsWith('Offline device enrolment successful'));
         checkBirthdayTrigger();initialiseOnlineAfterLogin();
       } catch (err) {
         errorEl.innerText = err.message || 'Login failed. Please check your credentials and try again.';

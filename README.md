@@ -1,3 +1,4 @@
+
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -3081,7 +3082,7 @@ function checkBirthdayTrigger() {
           "Booking Status": bStatus,
           "Guest Name": b.name || "",
           "Address": b.address || "",
-          "City": b.city || "",
+          <! - - "City": b.city || "", - ->
           "State": b.state || "",
           "Country": b.country || "",
           "Pin/Zip Code": b.zipCode || "",

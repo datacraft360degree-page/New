@@ -3125,15 +3125,26 @@ function checkBirthdayTrigger() {
 
     function duplicateDisplayCode(baseCode, existingCodes) {
       const used = (existingCodes || []).map(value => String(value || '').trim()).filter(Boolean);
-      const hasCollision = used.some(value => value === baseCode || value.startsWith(baseCode + '-'));
+      const hasCollision = used.some(value => value.toLowerCase() === baseCode.toLowerCase());
       if (!hasCollision) return baseCode;
-      let duplicateNo = 1;
-      const escaped = baseCode.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      const pattern = new RegExp('^' + escaped + '-Duplicate(\\d+)$', 'i');
-      used.forEach(value => { const match = value.match(pattern); if (match) duplicateNo = Math.max(duplicateNo, Number(match[1]) + 1); });
-      let candidate = `${baseCode}-Duplicate${String(duplicateNo).padStart(2, '0')}`;
-      while (used.includes(candidate)) { duplicateNo += 1; candidate = `${baseCode}-Duplicate${String(duplicateNo).padStart(2, '0')}`; }
-      return candidate;
+      const duplicateCandidate = `${baseCode}-Duplicate`;
+      if (!used.some(value => value.toLowerCase() === duplicateCandidate.toLowerCase())) return duplicateCandidate;
+      // Only one record can own the exact -Duplicate label. If that label is
+      // already occupied, continue with the next unused normal sequence.
+      const match = baseCode.match(/^((?:BKG|INV|QT)-\d{4}-)(\d+)$/i);
+      if (!match) return baseCode;
+      const prefix = match[1], width = match[2].length;
+      let highest = Number(match[2]) || 0;
+      used.forEach(value => {
+        const found = String(value).match(new RegExp('^' + prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(\\d+)(?:-|$)', 'i'));
+        if (found) highest = Math.max(highest, Number(found[1]) || 0);
+      });
+      let next = `${prefix}${String(highest + 1).padStart(width, '0')}`;
+      while (used.some(value => value.toLowerCase() === next.toLowerCase())) {
+        highest += 1;
+        next = `${prefix}${String(highest + 1).padStart(width, '0')}`;
+      }
+      return next;
     }
 
     function generateIDsForYear(checkInDateStr) {
@@ -3279,7 +3290,7 @@ function checkBirthdayTrigger() {
           const quotationIdsCorrected = (result.quotationIdUpdates || []).length > 0;
           (result.quotationIdUpdates || []).forEach(update => { const item=(state.quotations||[]).find(q=>String(q.id)===String(update.id)); if(item)item.quotationNo=update.quotationNo; });
           if(quotationIdsCorrected){
-            // Immediately refresh every quotation-facing view after the server assigns DuplicateNN.
+            // Immediately refresh every quotation-facing view after the server assigns the corrected Duplicate ID.
             renderQuotations();
             updateQuotationDashboard();
           }
@@ -4162,7 +4173,6 @@ function updateDashboardCards() {
         `*Reservation Details:*\n` +
         `• Booking ID: *${b.bookingCode}*\n` +
         `• Invoice ID: *${b.invoiceNo || 'N/A'}*\n` +
-        (b.quotationNo && b.quotationNo !== 'NA' ? `• Quotation No: *${b.quotationNo}*\n` : '') +
         `• Room No: ${roomsDisplay}\n` +
         `• Check-In: ${formatDateTime(b.checkIn)}\n` +
         `• Check-Out: ${formatDateTime(effectiveOut)}\n\n` +
@@ -4250,15 +4260,7 @@ function updateDashboardCards() {
       }
 
       document.getElementById('inv-booking-id').innerText = b.bookingCode || 'N/A';
-      let invQuotationRef = document.getElementById('inv-quotation-id');
-      if (!invQuotationRef) {
-        invQuotationRef = document.createElement('p');
-        invQuotationRef.id = 'inv-quotation-id';
-        invQuotationRef.className = 'text-[10px] text-slate-500';
-        document.getElementById('inv-booking-id').parentElement.insertAdjacentElement('afterend', invQuotationRef);
-      }
-      invQuotationRef.innerText = b.quotationNo && b.quotationNo !== 'NA' ? `Quotation No: ${b.quotationNo}` : '';
-      invQuotationRef.classList.toggle('hidden', !b.quotationNo || b.quotationNo === 'NA');
+      // Quotation number is intentionally omitted from the invoice/receipt print.
       document.getElementById('inv-date').innerText = today;
 
       const fullLocation = [b.address, b.city, b.state, b.country, b.zipCode].filter(Boolean).map(formatTitleCase).join(', ');
@@ -4642,7 +4644,7 @@ function updateDashboardCards() {
 
     // --- QUOTATION MANAGEMENT ---
     function nextQuotationNumber(dateValue) {
-      // Sequential IDs are normal; DuplicateNN is used only for a collision.
+      // Sequential IDs are normal; Duplicate is used only for a collision.
       const year = (dateValue || new Date().toISOString().slice(0,10)).slice(0,4);
       const savedMax = (state.quotations || []).reduce((max, q) => {
         const match = String(q.quotationNo || '').match(new RegExp('^QT-' + year + '-(\\d+)(?:-|$)', 'i'));
@@ -6098,7 +6100,6 @@ if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
             </div>
             <div class="mt-1 space-y-0.5 text-[9px] font-mono break-all">
               <div class="text-violet-700">Invoice: ${escapeRemarkHtml(b.invoiceNo || 'N/A')}</div>
-              ${b.quotationNo && b.quotationNo !== 'NA' ? `<div class="text-emerald-700">Quotation: ${escapeRemarkHtml(b.quotationNo)}</div>` : ''}
             </div>
             ${isInactive ? '<span class="bg-slate-600 text-white font-bold px-1.5 py-0.2 rounded-full text-[8px] uppercase block mt-0.5 w-max">Inactive</span>' : (!isMasterValid ? '<span class="bg-rose-700 text-white font-bold px-1.5 py-0.2 rounded-full text-[8px] uppercase block mt-0.5 w-max">Master Removed</span>' : '')}
           </td>

@@ -3150,9 +3150,10 @@ function checkBirthdayTrigger() {
       const paddedSeq = String(seq).padStart(7, '0');
       const bookingBase = `BKG-${targetYear}-${paddedSeq}`;
       const invoiceBase = `INV-${targetYear}-${paddedSeq}`;
+      const bookings = state.bookings || [];
       return {
-        bookingCode: duplicateDisplayCode(bookingBase, (state.bookings || []).map(b => b.bookingCode)),
-        invoiceNo: `${invoiceBase}-${makeGloballyUniqueToken()}`
+        bookingCode: duplicateDisplayCode(bookingBase, bookings.map(b => b.bookingCode)),
+        invoiceNo: duplicateDisplayCode(invoiceBase, bookings.map(b => b.invoiceNo))
       };
     }
 
@@ -3274,7 +3275,14 @@ function checkBirthdayTrigger() {
         if(result.status==='success'){
           // Apply collision resolutions returned by the authoritative cloud store.
           (result.bookingIdUpdates || []).forEach(update => { const item=(state.bookings||[]).find(b=>String(b.id)===String(update.id)); if(item)item.bookingCode=update.bookingCode; });
+          (result.invoiceIdUpdates || []).forEach(update => { const item=(state.bookings||[]).find(b=>String(b.id)===String(update.id)); if(item)item.invoiceNo=update.invoiceNo; });
+          const quotationIdsCorrected = (result.quotationIdUpdates || []).length > 0;
           (result.quotationIdUpdates || []).forEach(update => { const item=(state.quotations||[]).find(q=>String(q.id)===String(update.id)); if(item)item.quotationNo=update.quotationNo; });
+          if(quotationIdsCorrected){
+            // Immediately refresh every quotation-facing view after the server assigns DuplicateNN.
+            renderQuotations();
+            updateQuotationDashboard();
+          }
           if(result.rowLimits)applyServerRowLimits(result.rowLimits,true);
           await writeOfflineSnapshot(true);
           localStorage.removeItem(OFFLINE_PENDING_KEY);localStorage.removeItem(DEFERRED_SYNC_PROMPT_KEY);localStorage.setItem(LAST_SYNC_KEY,String(Date.now()));updateSyncIndicator('online','Live synced');
@@ -4153,6 +4161,8 @@ function updateDashboardCards() {
         `Thank you for booking with us! Here are your booking details:\n\n` +
         `*Reservation Details:*\n` +
         `• Booking ID: *${b.bookingCode}*\n` +
+        `• Invoice ID: *${b.invoiceNo || 'N/A'}*\n` +
+        (b.quotationNo && b.quotationNo !== 'NA' ? `• Quotation No: *${b.quotationNo}*\n` : '') +
         `• Room No: ${roomsDisplay}\n` +
         `• Check-In: ${formatDateTime(b.checkIn)}\n` +
         `• Check-Out: ${formatDateTime(effectiveOut)}\n\n` +
@@ -4240,6 +4250,15 @@ function updateDashboardCards() {
       }
 
       document.getElementById('inv-booking-id').innerText = b.bookingCode || 'N/A';
+      let invQuotationRef = document.getElementById('inv-quotation-id');
+      if (!invQuotationRef) {
+        invQuotationRef = document.createElement('p');
+        invQuotationRef.id = 'inv-quotation-id';
+        invQuotationRef.className = 'text-[10px] text-slate-500';
+        document.getElementById('inv-booking-id').parentElement.insertAdjacentElement('afterend', invQuotationRef);
+      }
+      invQuotationRef.innerText = b.quotationNo && b.quotationNo !== 'NA' ? `Quotation No: ${b.quotationNo}` : '';
+      invQuotationRef.classList.toggle('hidden', !b.quotationNo || b.quotationNo === 'NA');
       document.getElementById('inv-date').innerText = today;
 
       const fullLocation = [b.address, b.city, b.state, b.country, b.zipCode].filter(Boolean).map(formatTitleCase).join(', ');
@@ -6075,7 +6094,11 @@ if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
             <div class="flex items-center gap-1.5">
               ${statusDotHtml}
               ${isInactive ? '<span class="w-2.5 h-2.5 bg-rose-600 rounded-full inline-block flex-shrink-0" title="Inactive Booking"></span>' : ''}
-              <span class="bg-blue-50 border border-blue-200 text-blue-700 font-mono font-bold px-2 py-0.5 rounded-full text-[9px] block w-max">${b.bookingCode}</span>
+              <span class="bg-blue-50 border border-blue-200 text-blue-700 font-mono font-bold px-2 py-0.5 rounded-full text-[9px] block w-max">${escapeRemarkHtml(b.bookingCode || 'N/A')}</span>
+            </div>
+            <div class="mt-1 space-y-0.5 text-[9px] font-mono break-all">
+              <div class="text-violet-700">Invoice: ${escapeRemarkHtml(b.invoiceNo || 'N/A')}</div>
+              ${b.quotationNo && b.quotationNo !== 'NA' ? `<div class="text-emerald-700">Quotation: ${escapeRemarkHtml(b.quotationNo)}</div>` : ''}
             </div>
             ${isInactive ? '<span class="bg-slate-600 text-white font-bold px-1.5 py-0.2 rounded-full text-[8px] uppercase block mt-0.5 w-max">Inactive</span>' : (!isMasterValid ? '<span class="bg-rose-700 text-white font-bold px-1.5 py-0.2 rounded-full text-[8px] uppercase block mt-0.5 w-max">Master Removed</span>' : '')}
           </td>

@@ -1292,7 +1292,7 @@
               <label class="block font-semibold text-slate-600 mb-0.5">Contact No</label>
               <div class="flex gap-1">
                 <input type="text" id="cust-country-code" value="+91" placeholder="+91" class="w-1/3 bg-white border border-slate-200 rounded-xl px-1.5 py-1.5 focus:outline-none focus:border-blue-500 font-bold text-center text-blue-700" />
-                <input type="text" id="cust-contact" required maxlength="10" minlength="10" pattern="[0-9]{10}" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)" placeholder="Mobile No" class="w-2/3 bg-white border border-slate-200 rounded-xl px-2 py-1.5 focus:outline-none focus:border-blue-500" />
+                <input type="text" id="cust-contact" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)" placeholder="Mobile No" class="w-2/3 bg-white border border-slate-200 rounded-xl px-2 py-1.5 focus:outline-none focus:border-blue-500" />
               </div>
             </div>
             <div class="sm:col-span-2">
@@ -1378,7 +1378,7 @@
                 <label class="block font-semibold text-slate-600 mb-0.5"><i class="fa-solid fa-plane-arrival text-emerald-600 mr-1"></i> Check In</label>
                 <div class="flex gap-1">
                   <input type="date" id="cust-checkin-date" onchange="handleStayDatesChange()" required="" class="w-2/3 bg-white border border-slate-200 rounded-xl px-2 py-1.5 focus:outline-none focus:border-blue-500 font-medium" />
-                  <input type="time" id="cust-checkin-time" onchange="handleStayDatesChange()" required="" class="w-1/3 bg-white border border-slate-200 rounded-xl px-1.5 py-1.5 focus:outline-none focus:border-blue-500 font-medium" />
+                  <input type="time" id="cust-checkin-time" onchange="handleStayDatesChange()" class="w-1/3 bg-white border border-slate-200 rounded-xl px-1.5 py-1.5 focus:outline-none focus:border-blue-500 font-medium" />
                 </div>
               </div>
 
@@ -1386,7 +1386,7 @@
                 <label class="block font-semibold text-slate-600 mb-0.5"><i class="fa-solid fa-plane-departure text-rose-500 mr-1"></i> Check Out</label>
                 <div class="flex gap-1">
                   <input type="date" id="cust-checkout-date" onchange="handleStayDatesChange()" required="" class="w-2/3 bg-white border border-slate-200 rounded-xl px-2 py-1.5 focus:outline-none focus:border-blue-500 font-medium" />
-                  <input type="time" id="cust-checkout-time" onchange="handleStayDatesChange()" required="" class="w-1/3 bg-white border border-slate-200 rounded-xl px-1.5 py-1.5 focus:outline-none focus:border-blue-500 font-medium" />
+                  <input type="time" id="cust-checkout-time" onchange="handleStayDatesChange()" class="w-1/3 bg-white border border-slate-200 rounded-xl px-1.5 py-1.5 focus:outline-none focus:border-blue-500 font-medium" />
                 </div>
               </div>
             </div>
@@ -3123,31 +3123,39 @@ function checkBirthdayTrigger() {
       searchMasterBookingById();
     }
 
+    function duplicateDisplayCode(baseCode, existingCodes) {
+      const used = (existingCodes || []).map(value => String(value || '').trim()).filter(Boolean);
+      const hasCollision = used.some(value => value === baseCode || value.startsWith(baseCode + '-'));
+      if (!hasCollision) return baseCode;
+      let duplicateNo = 1;
+      const escaped = baseCode.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const pattern = new RegExp('^' + escaped + '-Duplicate(\\d+)$', 'i');
+      used.forEach(value => { const match = value.match(pattern); if (match) duplicateNo = Math.max(duplicateNo, Number(match[1]) + 1); });
+      let candidate = `${baseCode}-Duplicate${String(duplicateNo).padStart(2, '0')}`;
+      while (used.includes(candidate)) { duplicateNo += 1; candidate = `${baseCode}-Duplicate${String(duplicateNo).padStart(2, '0')}`; }
+      return candidate;
+    }
+
     function generateIDsForYear(checkInDateStr) {
       let targetYear = defaultAppYear;
-      if (checkInDateStr) {
-        targetYear = new Date(checkInDateStr.replace(' ', 'T')).getFullYear() || defaultAppYear;
-      }
-
+      if (checkInDateStr) targetYear = new Date(checkInDateStr.replace(' ', 'T')).getFullYear() || defaultAppYear;
       if (!state.yearlyCounters) state.yearlyCounters = {};
-
-      if (!state.yearlyCounters[targetYear]) {
-        const countForYear = state.bookings.filter(b => {
-          return b.checkIn && new Date(b.checkIn.replace(' ', 'T')).getFullYear() === targetYear;
-        }).length;
-        state.yearlyCounters[targetYear] = countForYear;
-      }
-
-      state.yearlyCounters[targetYear] += 1;
+      const sequencePattern = new RegExp('^BKG-' + targetYear + '-(\\d+)(?:-|$)', 'i');
+      const highestExisting = (state.bookings || []).reduce((max, booking) => {
+        const match = String(booking.bookingCode || '').match(sequencePattern);
+        return match ? Math.max(max, Number(match[1]) || 0) : max;
+      }, 0);
+      state.yearlyCounters[targetYear] = Math.max(Number(state.yearlyCounters[targetYear]) || 0, highestExisting) + 1;
       const seq = state.yearlyCounters[targetYear];
       const paddedSeq = String(seq).padStart(7, '0');
-
+      const bookingBase = `BKG-${targetYear}-${paddedSeq}`;
+      const invoiceBase = `INV-${targetYear}-${paddedSeq}`;
       return {
-        bookingCode: `BKG-${targetYear}-${paddedSeq}-${makeGloballyUniqueToken()}`,
-        invoiceNo: `INV-${targetYear}-${paddedSeq}-${makeGloballyUniqueToken()}`
+        bookingCode: duplicateDisplayCode(bookingBase, (state.bookings || []).map(b => b.bookingCode)),
+        invoiceNo: `${invoiceBase}-${makeGloballyUniqueToken()}`
       };
     }
-    
+
     function refreshAllUI() {
       if (!state.roomsCapacity || state.roomsCapacity.length === 0) {
         state.roomsCapacity = [
@@ -3264,7 +3272,11 @@ function checkBirthdayTrigger() {
         const result=await postToGoogleServerWithProgress({action:'saveData',state,sessionId:getServerSessionId()});hideTransferProgress();
         if(result.status==='row_limit'){if(result.rowLimits)applyServerRowLimits(result.rowLimits,true);throw new Error(result.message||'Google Sheet row limit reached');}
         if(result.status==='success'){
+          // Apply collision resolutions returned by the authoritative cloud store.
+          (result.bookingIdUpdates || []).forEach(update => { const item=(state.bookings||[]).find(b=>String(b.id)===String(update.id)); if(item)item.bookingCode=update.bookingCode; });
+          (result.quotationIdUpdates || []).forEach(update => { const item=(state.quotations||[]).find(q=>String(q.id)===String(update.id)); if(item)item.quotationNo=update.quotationNo; });
           if(result.rowLimits)applyServerRowLimits(result.rowLimits,true);
+          await writeOfflineSnapshot(true);
           localStorage.removeItem(OFFLINE_PENDING_KEY);localStorage.removeItem(DEFERRED_SYNC_PROMPT_KEY);localStorage.setItem(LAST_SYNC_KEY,String(Date.now()));updateSyncIndicator('online','Live synced');
           if(!quiet){const msg=document.getElementById('toast-message');msg.innerText=isAutoSave?'Changes auto-saved and synced with Google Server!':'Data saved to this device and Google Server!';document.getElementById('toast').classList.remove('hidden');setTimeout(()=>document.getElementById('toast').classList.add('hidden'),2500);}
           return true;
@@ -4122,7 +4134,7 @@ function updateDashboardCards() {
       let initialAdvanceVal = b.initialAdv !== undefined ? parseFloat(b.initialAdv) : 0;
       
       if (!/^\d{10}$/.test(phone)) {
-        alert("⚠️ Cannot send via WhatsApp: Guest contact number must be exactly 10 digits.");
+        alert("Add contact number in booking details to send WhatsApp SMS");
         return;
       }
       // Advance payment is optional. A valid contact number is sufficient to send the receipt.
@@ -4195,11 +4207,14 @@ function updateDashboardCards() {
           const hasValidContact = /^\d{10}$/.test(contactDigits);
 
           if (hasValidContact) {
-            waBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            waBtn.classList.remove('opacity-50', 'cursor-not-allowed', 'grayscale');
+            waBtn.setAttribute('aria-disabled', 'false');
             waBtn.title = "Send Receipt via WhatsApp (advance payment optional)";
           } else {
-            waBtn.classList.add('opacity-50', 'cursor-not-allowed');
-            waBtn.title = "Inactive: A valid 10-digit contact number is required.";
+            // Keep click handling active so the requested guidance popup can appear.
+            waBtn.classList.add('opacity-50', 'cursor-not-allowed', 'grayscale');
+            waBtn.setAttribute('aria-disabled', 'true');
+            waBtn.title = "Add contact number in booking details to send WhatsApp SMS";
           }
         }
       }
@@ -4608,13 +4623,14 @@ function updateDashboardCards() {
 
     // --- QUOTATION MANAGEMENT ---
     function nextQuotationNumber(dateValue) {
-      // Preview only; the number is consumed only after a successful save.
+      // Sequential IDs are normal; DuplicateNN is used only for a collision.
       const year = (dateValue || new Date().toISOString().slice(0,10)).slice(0,4);
       const savedMax = (state.quotations || []).reduce((max, q) => {
-        const match = String(q.quotationNo || '').match(new RegExp('^QT-' + year + '-(\\d+)(?:-[A-Z0-9]+)?$'));
+        const match = String(q.quotationNo || '').match(new RegExp('^QT-' + year + '-(\\d+)(?:-|$)', 'i'));
         return match ? Math.max(max, Number(match[1]) || 0) : max;
       }, 0);
-      return `QT-${year}-${String(savedMax + 1).padStart(7,'0')}-${makeGloballyUniqueToken()}`;
+      const base = `QT-${year}-${String(savedMax + 1).padStart(7,'0')}`;
+      return duplicateDisplayCode(base, (state.quotations || []).map(q => q.quotationNo));
     }
     function countWordsNoSpaces(value){return String(value||'').trim().split(/\s+/).filter(Boolean).length;}
     function updateQuotationWordCount(inputId,countId){const input=document.getElementById(inputId),out=document.getElementById(countId);if(!input||!out)return;const n=countWordsNoSpaces(input.value);out.textContent=n+' / 200 words';out.className='block text-[9px] text-right '+(n>200?'text-rose-600 font-bold':'text-slate-400');}
@@ -5549,14 +5565,15 @@ if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
       }
 
       const contactNoVal = document.getElementById('cust-contact').value.trim();
-      if (!/^\d{10}$/.test(contactNoVal)) {
-        alert("⚠️ A valid 10-digit guest contact number is mandatory.");
-        document.getElementById('cust-contact').focus();
-        return;
-      }
 
       const inDate = document.getElementById('cust-checkin-date').value;
       const outDate = document.getElementById('cust-checkout-date').value;
+      if (!inDate || !outDate) {
+        alert("⚠️ Main Check-In Date and Check-Out Date are mandatory fields.");
+        if (!inDate) document.getElementById('cust-checkin-date').focus();
+        else document.getElementById('cust-checkout-date').focus();
+        return;
+      }
       const inTime = document.getElementById('cust-checkin-time').value || '00:00';
       const outTime = document.getElementById('cust-checkout-time').value || '00:00';
 

@@ -652,9 +652,12 @@
         <span id="sync-transfer" class="hidden inline-flex items-center gap-1 rounded-full bg-blue-50 border border-blue-100 px-2 py-1 text-blue-700 font-bold whitespace-nowrap" aria-live="polite"><i id="sync-transfer-icon" class="fa-solid fa-cloud-arrow-up"></i><span id="sync-transfer-label">Uploading 0%</span></span>
         <span id="sync-status" class="inline-flex items-center gap-1 text-slate-500 font-semibold" aria-live="polite"><i class="fa-solid fa-cloud-arrow-down"></i> Offline ready</span>
       </div>
+      </div>
 
+      <!-- Third row: portal action buttons, kept separate from storage/sync controls. -->
+      <div class="portal-header-actions flex flex-wrap items-center justify-start gap-2 w-full border-t border-slate-100 pt-2">
       <!-- Action Buttons -->
-      <div class="flex items-center space-x-1.5">
+      <div class="flex flex-wrap items-center gap-1.5">
         <button onclick="openAlertModal()" title="View Alerts" class="relative bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 px-3 py-1.5 rounded-full text-[11px] font-semibold flex items-center gap-1 transition">
           <i class="fa-solid fa-bell text-[10px]"></i> Alerts
           <span id="alert-badge" class="hidden absolute -top-1 -right-1 bg-rose-600 text-white text-[9px] font-black px-1.5 py-0.2 rounded-full border border-white animate-bounce">0</span>
@@ -1422,8 +1425,8 @@
               <div id="trip-cancel-container" class="hidden bg-rose-50/70 p-2.5 rounded-2xl border border-rose-200/80 mt-1.5">
                 <label class="block font-bold text-rose-900 mb-1">Cancellation Check-In &amp; Check-Out Date &amp; Time</label>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  <div><label class="block text-[10px] font-semibold text-rose-800">Cancel Check-In</label><div class="flex gap-1"><input type="date" id="cust-cancel-checkin-date" onchange="handleExtraPersonDatesChange()" class="w-2/3 bg-white border border-rose-200 rounded-xl px-2 py-1.5"><input type="time" id="cust-cancel-checkin-time" onchange="handleExtraPersonDatesChange()" class="w-1/3 bg-white border border-rose-200 rounded-xl px-1.5 py-1.5"></div></div>
-                  <div><label class="block text-[10px] font-semibold text-rose-800">Cancel Check-Out</label><div class="flex gap-1"><input type="date" id="cust-cancel-checkout-date" onchange="handleExtraPersonDatesChange()" class="w-2/3 bg-white border border-rose-200 rounded-xl px-2 py-1.5"><input type="time" id="cust-cancel-checkout-time" onchange="handleExtraPersonDatesChange()" class="w-1/3 bg-white border border-rose-200 rounded-xl px-1.5 py-1.5"></div></div>
+                  <div><label class="block text-[10px] font-semibold text-rose-800">Cancel Check-In</label><div class="flex gap-1"><input type="date" id="cust-cancel-checkin-date" onchange="handleTripCancelDateChange('in')" class="w-2/3 bg-white border border-rose-200 rounded-xl px-2 py-1.5"><input type="time" id="cust-cancel-checkin-time" onchange="handleExtraPersonDatesChange()" class="w-1/3 bg-white border border-rose-200 rounded-xl px-1.5 py-1.5"></div></div>
+                  <div><label class="block text-[10px] font-semibold text-rose-800">Cancel Check-Out</label><div class="flex gap-1"><input type="date" id="cust-cancel-checkout-date" onchange="handleTripCancelDateChange('out')" class="w-2/3 bg-white border border-rose-200 rounded-xl px-2 py-1.5"><input type="time" id="cust-cancel-checkout-time" onchange="handleExtraPersonDatesChange()" class="w-1/3 bg-white border border-rose-200 rounded-xl px-1.5 py-1.5"></div></div>
                 </div>
               </div>
             </div>
@@ -2520,7 +2523,7 @@ function checkBirthdayTrigger() {
     let inactivityTimer = null;
     let warningTimer = null;
     let countdownInterval = null;
-    const INACTIVITY_LIMIT_MS = 10 * 60 * 1000; 
+    const INACTIVITY_LIMIT_MS = 15 * 60 * 1000; 
     const WARNING_BUFFER_MS = 1 * 60 * 1000;   
 
     let currentUserId = sessionStorage.getItem('portal_user_id') || '';
@@ -2755,7 +2758,7 @@ function checkBirthdayTrigger() {
     function startInactivityMonitoring() {
       stopInactivityMonitoring();
       
-      const activityEvents = ['mousemove', 'keydown', 'mousedown', 'touchstart', 'scroll'];
+      const activityEvents = ['mousemove', 'pointermove', 'keydown', 'mousedown', 'touchstart', 'touchmove', 'scroll', 'wheel'];
       activityEvents.forEach(evt => {
         window.addEventListener(evt, resetInactivityTimer);
       });
@@ -2768,7 +2771,7 @@ function checkBirthdayTrigger() {
       if (warningTimer) clearTimeout(warningTimer);
       if (countdownInterval) clearInterval(countdownInterval);
       
-      const activityEvents = ['mousemove', 'keydown', 'mousedown', 'touchstart', 'scroll'];
+      const activityEvents = ['mousemove', 'pointermove', 'keydown', 'mousedown', 'touchstart', 'touchmove', 'scroll', 'wheel'];
       activityEvents.forEach(evt => {
         window.removeEventListener(evt, resetInactivityTimer);
       });
@@ -5307,6 +5310,30 @@ function updateDashboardCards() {
       document.getElementById('booking-modal').classList.add('hidden');
     }
 
+    function handleTripCancelDateChange(which) {
+      const isCheckIn = which === 'in';
+      const input = document.getElementById(isCheckIn ? 'cust-cancel-checkin-date' : 'cust-cancel-checkout-date');
+      const mainIn = document.getElementById('cust-checkin-date')?.value || '';
+      const mainOut = document.getElementById('cust-checkout-date')?.value || '';
+      if (!input) return;
+
+      input.min = mainIn;
+      input.max = mainOut;
+      if (input.value && mainIn && input.value < mainIn) {
+        alert(isCheckIn
+          ? '⚠️ Trip Cancel Check-In cannot be earlier than the main booking Check-In date. Please correct it.'
+          : '⚠️ Trip Cancel Check-Out cannot be earlier than the main booking Check-In date. Please correct it.');
+        input.value = mainIn;
+      } else if (input.value && mainOut && input.value > mainOut) {
+        alert(isCheckIn
+          ? '⚠️ Trip Cancel Check-In cannot be later than the main booking Check-Out date. Please correct it.'
+          : '⚠️ Trip Cancel Check-Out cannot be later than the main booking Check-Out date. Please correct it.');
+        input.value = mainOut;
+      }
+
+      handleExtraPersonDatesChange();
+    }
+
     function handleExtraPersonDatesChange() {
       const mainInDate = document.getElementById('cust-checkin-date')?.value;
       const mainInTime = document.getElementById('cust-checkin-time')?.value || '12:00';
@@ -5654,8 +5681,8 @@ if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
           alert('Please enter a valid Trip Cancellation check-in and check-out date/time. Check-out must be after check-in.');
           return;
         }
-        if (cancelInDate <= inDate || cancelInDate >= outDate || cancelOutDate <= inDate || cancelOutDate >= outDate) {
-          alert('Trip Cancel check-in and check-out dates must be strictly between the main booking check-in and check-out dates.');
+        if (cancelInDate < inDate || cancelInDate > outDate || cancelOutDate < inDate || cancelOutDate > outDate) {
+          alert('Trip Cancel check-in and check-out dates must be on or after the main booking Check-In date and on or before the main booking Check-Out date.');
           return;
         }
       }

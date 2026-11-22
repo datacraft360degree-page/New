@@ -2175,39 +2175,6 @@ function checkBirthdayTrigger() {
         }
       },15000);
     }
-    let portalLoginCompletedAt = 0;
-    let automaticExportTimer = null;
-    function scheduleAutomaticCombinedExcelExport(){
-      if (automaticExportTimer) clearTimeout(automaticExportTimer);
-      const elapsed = Date.now() - Number(portalLoginCompletedAt || Date.now());
-      const delay = Math.max(0, 15000 - elapsed);
-      automaticExportTimer = setTimeout(() => {
-        automaticExportTimer = null;
-        runAutomaticCombinedExcelExport().catch(error => console.warn('Automatic Excel export could not be completed:', error));
-      }, delay);
-    }
-    async function runAutomaticCombinedExcelExport(){
-      if (!isLoggedIn || !navigator.onLine || offlineMode || isSyncing) return;
-      // Always refresh from Google Sheets before exporting; never export a stale
-      // browser snapshot as the scheduled backup.
-      const refreshed = await syncWithCloud(false, false);
-      if (!refreshed || !isLoggedIn || offlineMode) return;
-      const workbook = XLSX.utils.book_new();
-      const bookingHeaders = exportHeaderDefinitions('booking');
-      const quotationHeaders = exportHeaderDefinitions('quotation');
-      exportToExcel('0000-01-01', '9999-12-31', bookingHeaders, workbook, true);
-      exportQuotationData(null, null, quotationHeaders, workbook, true);
-      const claim = await postToGoogleServer({
-        action: 'claimAutomaticExcelExport',
-        portalKey: PORTAL_KEY,
-        sessionId: getServerSessionId()
-      });
-      if (!claim || claim.status === 'not_due') return;
-      if (claim.status !== 'success') throw new Error(claim.message || 'Automatic backup schedule could not be verified.');
-      const stamp = new Date(claim.exportedAt || Date.now()).toISOString().replace(/[:.]/g, '-');
-      XLSX.writeFile(workbook, `Portal_Automatic_Backup_${stamp}.xlsx`);
-    }
-
     async function initialiseOnlineAfterLogin(){
       if(hasDeferredLocalChanges()){
         offlineMode=true;localStorage.setItem(OFFLINE_MODE_KEY,'true');updateModeSwitchUI();
@@ -2216,7 +2183,7 @@ function checkBirthdayTrigger() {
       if(!navigator.onLine){offlineMode=true;localStorage.setItem(OFFLINE_MODE_KEY,'true');updateModeSwitchUI();return;}
       const ok=await syncWithCloud(false,false);
       if(!ok){offlineMode=true;localStorage.setItem(OFFLINE_MODE_KEY,'true');updateModeSwitchUI();updateSyncIndicator('offline','Offline mode · local data retained');}
-      else{offlineMode=false;localStorage.setItem(OFFLINE_MODE_KEY,'false');updateModeSwitchUI();updateSyncIndicator('online','Online · data synchronised');scheduleAutomaticCombinedExcelExport();}
+      else{offlineMode=false;localStorage.setItem(OFFLINE_MODE_KEY,'false');updateModeSwitchUI();updateSyncIndicator('online','Online · data synchronised');}
     }
     function scheduleDeferredSyncPrompt(){
       if(!isLoggedIn)return;
@@ -2264,12 +2231,11 @@ function checkBirthdayTrigger() {
           const local=state;const mergeById=(cloudRows,localRows)=>{const map=new Map((cloudRows||[]).map(x=>[String(x.id),x]));(localRows||[]).forEach(x=>map.set(String(x.id),x));return [...map.values()];};
           const mergeByKey=(cloudRows,localRows,key)=>{const map=new Map((cloudRows||[]).map(x=>[String(x[key]),x]));(localRows||[]).forEach(x=>map.set(String(x[key]),x));return [...map.values()];};
           state={...remote,...local,bookings:mergeById(remote.bookings,local.bookings),quotations:mergeById(remote.quotations,local.quotations),roomsCapacity:mergeByKey(remote.roomsCapacity,local.roomsCapacity,'roomNo'),masterAgents:mergeByKey(remote.masterAgents,local.masterAgents,'agentName'),yearlyCounters:{...(remote.yearlyCounters||{}),...(local.yearlyCounters||{})},quotationYearlyCounters:{...(remote.quotationYearlyCounters||{}),...(local.quotationYearlyCounters||{})}};
-          const result=await postToGoogleServerWithProgress({action:'saveData',state,sessionId:getServerSessionId()});if(result.status!=='success')throw new Error(result.message||'Cloud save failed');if(result.rowLimits)applyServerRowLimits(result.rowLimits,true);state.deletedQuotationIds=[];refreshAllUI();
+          const result=await postToGoogleServerWithProgress({action:'saveData',state,sessionId:getServerSessionId()});if(result.status!=='success')throw new Error(result.message||'Cloud save failed');if(result.rowLimits)applyServerRowLimits(result.rowLimits,true);refreshAllUI();
         }else if(remote&&Array.isArray(remote.bookings)){state=remote;state.quotations=Array.isArray(state.quotations)?state.quotations:[];state.quotationYearlyCounters=state.quotationYearlyCounters||{};refreshAllUI();}
         await writeOfflineSnapshot(false);localStorage.removeItem(OFFLINE_PENDING_KEY);localStorage.removeItem(DEFERRED_SYNC_PROMPT_KEY);localStorage.setItem(LAST_SYNC_KEY,String(Date.now()));hideTransferProgress();updateSyncIndicator('online',returnOffline?'Synced':'Live sync active');
         if(returnOffline){offlineMode=true;localStorage.setItem(OFFLINE_MODE_KEY,'true');updateModeSwitchUI();}
         closeOfflineSyncModal();
-        if (isLoggedIn && portalLoginCompletedAt) scheduleAutomaticCombinedExcelExport();
         return true;
       }catch(error){hideTransferProgress();console.error('Cloud synchronisation failed',error);updateSyncIndicator('error','Sync failed · offline data retained');closeOfflineSyncModal();return false;}
       finally{isSyncing=false;}
@@ -2676,7 +2642,6 @@ function checkBirthdayTrigger() {
           throw new Error(session.message || 'Could not establish a secure portal session. Please try again.');
         }
         isLoggedIn = true;
-        portalLoginCompletedAt = Date.now();
         sessionStorage.setItem('app_authenticated', 'true');
         document.getElementById('login-overlay').classList.add('hidden');
         document.getElementById('login-error').classList.add('hidden');
@@ -2977,7 +2942,7 @@ function checkBirthdayTrigger() {
       closeExportModal();
     }
 
-    function exportToExcel(startDateStr, endDateStr, selectedHeaders, sharedWorkbook = null, automatic = false) {
+    function exportToExcel(startDateStr, endDateStr, selectedHeaders) {
       if (!state.bookings || state.bookings.length === 0) {
         alert("No booking records available to export!");
         return;
@@ -3067,12 +3032,12 @@ function checkBirthdayTrigger() {
       });
 
       const selected = Array.isArray(selectedHeaders) ? selectedHeaders : exportHeaderDefinitions('booking');
-      const bookingSheetRows = exportData.map(row => Object.fromEntries(selected.filter(h => Object.prototype.hasOwnProperty.call(row,h)).map(h => [h,row[h]])));
-      const worksheet = bookingSheetRows.length ? XLSX.utils.json_to_sheet(bookingSheetRows, {header:selected}) : XLSX.utils.aoa_to_sheet([selected]);
-      const workbook = sharedWorkbook || XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, "Booking");
-      if (!sharedWorkbook) XLSX.writeFile(workbook, `Booking_Report_${startDateStr}_to_${endDateStr}.xlsx`);
-      if (!automatic) closeExportModal();
+      const worksheet = XLSX.utils.json_to_sheet(exportData.map(row => Object.fromEntries(selected.filter(h => Object.prototype.hasOwnProperty.call(row,h)).map(h => [h,row[h]]))), {header:selected});
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Bookings");
+
+      XLSX.writeFile(workbook, `Booking_Report_${startDateStr}_to_${endDateStr}.xlsx`);
+      closeExportModal();
     }
 
     function populateBookingAgentSearch() {
@@ -3330,7 +3295,6 @@ function checkBirthdayTrigger() {
             updateQuotationDashboard();
           }
           if(result.rowLimits)applyServerRowLimits(result.rowLimits,true);
-          state.deletedQuotationIds=[];
           await writeOfflineSnapshot(true);
           localStorage.removeItem(OFFLINE_PENDING_KEY);localStorage.removeItem(DEFERRED_SYNC_PROMPT_KEY);localStorage.setItem(LAST_SYNC_KEY,String(Date.now()));updateSyncIndicator('online','Live synced');
           if(!quiet){const msg=document.getElementById('toast-message');msg.innerText=isAutoSave?'Changes auto-saved and synced with Google Server!':'Data saved to this device and Google Server!';document.getElementById('toast').classList.remove('hidden');setTimeout(()=>document.getElementById('toast').classList.add('hidden'),2500);}
@@ -4873,7 +4837,7 @@ function updateDashboardCards() {
       const rows=(state.quotations||[]).filter(q=>(year==='ALL'||Number(String(q.quotationDate||'').slice(0,4))===Number(year))&&(!date||q.quotationDate===date)&&(!no||String(q.quotationNo).toLowerCase().includes(no))).sort((a,b)=>String(b.quotationDate||'').localeCompare(String(a.quotationDate||''))||String(b.quotationNo||'').localeCompare(String(a.quotationNo||''),undefined,{numeric:true}));
       body.innerHTML=rows.length?rows.map(q=>`<tr class="border-b border-slate-100"><td class="p-2 font-bold">${escapeRemarkHtml(q.quotationNo)}</td><td class="p-2">${escapeRemarkHtml(q.quotationDate)}</td><td class="p-2">${escapeRemarkHtml(q.guestName)}</td><td class="p-2 text-right">₹${Number(q.totalAmount||0).toLocaleString('en-IN')}</td><td class="p-2"><button onclick="openQuotationModal('${q.id}')" class="text-blue-600 font-bold mr-2">Edit</button><button onclick="viewQuotationPDFById('${q.id}')" class="text-emerald-600 font-bold mr-2">View PDF</button><button onclick="deleteQuotation('${q.id}')" class="text-rose-600">Delete</button></td></tr>`).join(''):'<tr><td colspan="5" class="p-3 text-center text-slate-400">No quotations found.</td></tr>';
     }
-    function deleteQuotation(id){if(!confirm('Delete this quotation?'))return;state.deletedQuotationIds=Array.isArray(state.deletedQuotationIds)?state.deletedQuotationIds:[];if(!state.deletedQuotationIds.includes(String(id)))state.deletedQuotationIds.push(String(id));state.quotations=state.quotations.filter(q=>String(q.id)!==String(id));renderQuotations();updateQuotationDashboard();saveChanges(false,false);}
+    function deleteQuotation(id){if(!confirm('Delete this quotation?'))return;state.quotations=state.quotations.filter(q=>q.id!==id);renderQuotations();updateQuotationDashboard();saveChanges(false,false);}
     function updateQuotationDashboard(){
       const body=document.getElementById('dash-quotation-summary');if(!body)return;
       const year=state.dashSelectedYear&&state.dashSelectedYear!=='ALL'?Number(state.dashSelectedYear):null;
@@ -4902,9 +4866,9 @@ function updateDashboardCards() {
     function choosePriorQuotation(yes){if(!yes){document.getElementById('booking-quotation-choice').remove();openBookingModal();const quotationRef=document.getElementById('cust-quotation-ref');const quotationAmount=document.getElementById('cust-quotation-total');if(quotationRef)quotationRef.value='NA';if(quotationAmount)quotationAmount.value='NA';return;}const actions=document.getElementById('prior-quotation-choice-actions');if(actions)actions.classList.add('hidden');document.getElementById('prior-quotation-search').classList.remove('hidden');searchPriorQuotation();}
     function searchPriorQuotation(){const no=(document.getElementById('prior-q-no')?.value||'').toLowerCase(),date=document.getElementById('prior-q-date')?.value||'';const results=(state.quotations||[]).filter(q=>(!no||String(q.quotationNo||'').toLowerCase().includes(no))&&(!date||q.quotationDate===date)).sort((a,b)=>String(b.quotationDate||'').localeCompare(String(a.quotationDate||'')));const box=document.getElementById('prior-q-results');if(!box)return;box.innerHTML=results.map(q=>`<button onclick="selectPriorQuotation('${q.id}')" class="w-full text-left border border-slate-200 rounded-xl p-3 hover:border-blue-300 hover:bg-blue-50/70 transition"><div class="flex items-center justify-between gap-2"><b class="text-xs text-slate-900">${escapeRemarkHtml(q.quotationNo)}</b><span class="text-[10px] text-slate-500">${escapeRemarkHtml(q.quotationDate)}</span></div><div class="text-[11px] text-slate-600 mt-1">${escapeRemarkHtml(q.guestName)} · ₹${Number(q.totalAmount||0).toLocaleString('en-IN')}</div></button>`).join('')||'<p class="text-slate-400 text-xs p-3 text-center">No matching quotations.</p>'; }
     function selectPriorQuotation(id){pendingBookingQuotation=(state.quotations||[]).find(q=>q.id===id);document.getElementById('booking-quotation-choice').remove();openBookingModal();setTimeout(()=>{if(!pendingBookingQuotation)return;const q=pendingBookingQuotation;document.getElementById('cust-quotation-ref').value=`${q.quotationNo} | ${formatQuotationDateIST(q.quotationDate)}`;document.getElementById('cust-quotation-total').value=q.totalAmount||0;pendingBookingQuotation=null;},80);}
-    function exportQuotationData(startDate,endDate,selectedHeaders,sharedWorkbook=null,automatic=false){
+    function exportQuotationData(startDate,endDate,selectedHeaders){
       const data=(state.quotations||[]).filter(q=>{const d=q.quotationDate||'';return (!startDate||d>=startDate)&&(!endDate||d<=endDate);});
-      if(!data.length && !automatic){alert('No quotation records found for selected period.');return;}
+      if(!data.length){alert('No quotation records found for selected period.');return;}
       const quotationHeaders=['Last Updated Timestamp','Quotation ID','Quotation No','Quotation Date','Guest Name','Address','Phone','Email','Greeting','Check-In','Check-Out','Guests','Additional Guests','Additional Rate/Day','Room Type','No. of Rooms','Rate/Day','Cab Fare','Discount','Quotation Total Amount','Terms & Conditions','Trip','Date & Time','Cab Remarks','Rate/Trip (₹)','Cab Trip Total (₹)'];
       const quotationRows=[];
       data.forEach(q=>{
@@ -4920,11 +4884,11 @@ function updateDashboardCards() {
           'Cab Trip Total (₹)':t?Number(t.rate)||0:''
         }));
       });
-      const wb=sharedWorkbook || XLSX.utils.book_new();
+      const wb=XLSX.utils.book_new();
       const selected = Array.isArray(selectedHeaders) ? selectedHeaders : quotationHeaders;
       const filteredRows = quotationRows.map(row=>Object.fromEntries(selected.filter(h=>Object.prototype.hasOwnProperty.call(row,h)).map(h=>[h,row[h]])));
-      XLSX.utils.book_append_sheet(wb,filteredRows.length?XLSX.utils.json_to_sheet(filteredRows,{header:selected}):XLSX.utils.aoa_to_sheet([selected]),'Quotation');
-      if (!sharedWorkbook) XLSX.writeFile(wb,`Quotation_Data_${startDate||'All'}_${endDate||'All'}.xlsx`);
+      XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(filteredRows,{header:selected}),'Quotation Details');
+      XLSX.writeFile(wb,`Quotation_Data_${startDate||'All'}_${endDate||'All'}.xlsx`);
     }
     function showExportChoices(){
       document.getElementById('export-choice-modal')?.remove();

@@ -4288,8 +4288,8 @@ function updateDashboardCards() {
       // Show the shortened trip-cancellation stay separately beneath the original dates.
       const tripCancelInvoiceNote = document.getElementById('inv-trip-cancel-details');
       if (tripCancelInvoiceNote) {
-        tripCancelInvoiceNote.innerText = isTrue(b.hasTripCancel)
-          ? `Trip Cancel Check-in: ${formatDateTime(b.tripCancelCheckIn)} | Trip Cancel Check-out: ${formatDateTime(b.tripCancelCheckOut)}`
+        tripCancelInvoiceNote.innerHTML = isTrue(b.hasTripCancel)
+          ? `Trip Cancel Check-in: ${formatDateTime(b.tripCancelCheckIn)}<br>Trip Cancel Check-out: ${formatDateTime(b.tripCancelCheckOut)}`
           : '';
         tripCancelInvoiceNote.classList.toggle('hidden', !isTrue(b.hasTripCancel));
       }

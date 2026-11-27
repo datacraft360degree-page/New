@@ -1,5 +1,5 @@
 
-name: Build Aanoristays Android APK
+name: Build Aanaristays Android APK
 
 on:
   workflow_dispatch:

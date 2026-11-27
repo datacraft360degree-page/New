@@ -293,40 +293,32 @@
 </style>
 
 <style id="aanaristays-premium-ui-only">
-/* UI-only redesign. No HTML/JS logic, API, data, IDs, handlers or validation changed. */
+/* Visual-only redesign: original markup and scripts remain intact. */
 :root{--aa-green:#173d32;--aa-green2:#245746;--aa-gold:#c5a56b;--aa-bg:#f4f6f4;--aa-line:#e2e8e4;--aa-text:#24332c;--aa-muted:#738078}
 html,body{background:var(--aa-bg)!important;color:var(--aa-text)!important;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif!important}
 body{min-height:100vh}
 ::-webkit-scrollbar-thumb{background:#b9c9c0!important}
-/* Desktop: compact persistent navigation rail */
+/* Desktop: premium, compact styling while retaining the original header flow */
 @media(min-width:1024px){
- body{padding-left:252px!important}
- body>header{position:fixed!important;inset:0 auto 0 0!important;width:252px!important;height:100vh!important;overflow-y:auto!important;background:linear-gradient(180deg,#173d32 0%,#112e26 100%)!important;color:#f6f8f6!important;border:0!important;border-right:1px solid #284c40!important;box-shadow:8px 0 28px rgba(18,45,35,.08)!important;z-index:50!important}
- body>header>div{width:100%!important;max-width:none!important;margin:0!important;padding:24px 16px!important;min-height:100vh!important;display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:22px!important}
- body>header .portal-title-row{min-height:54px!important;padding:5px 4px 15px!important;border-bottom:1px solid rgba(255,255,255,.12)!important;align-items:center!important}
- body>header .portal-title-row>div:first-child{background:rgba(255,255,255,.1)!important;color:#d8c18e!important;box-shadow:none!important;border-radius:14px!important}
- body>header .portal-title-row p{color:#b7c9c0!important;font-size:10px!important;letter-spacing:.04em!important}
- body>header .portal-tab-row{width:100%!important;max-width:none!important;overflow:visible!important;white-space:normal!important;display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:7px!important;background:transparent!important;padding:0!important;border-radius:0!important}
- body>header .portal-tab-row .tab-btn{width:100%!important;text-align:left!important;display:flex!important;align-items:center!important;justify-content:flex-start!important;padding:11px 13px!important;border-radius:12px!important;background:transparent!important;color:#d3e0d9!important;box-shadow:none!important;font-size:12px!important;font-weight:600!important;transition:background .18s,color .18s!important}
+ body>header{background:linear-gradient(180deg,#173d32,#112e26)!important;color:#f6f8f6!important;border-color:#284c40!important;box-shadow:0 4px 18px rgba(18,45,35,.08)!important}
+ body>header .portal-title-row>div:first-child{background:rgba(255,255,255,.1)!important;color:#d8c18e!important;border-radius:14px!important}
+ body>header .portal-title-row p{color:#b7c9c0!important}
+ body>header .portal-tab-row{background:rgba(255,255,255,.07)!important;border-radius:13px!important}
+ body>header .portal-tab-row .tab-btn{border-radius:10px!important;color:#d3e0d9!important;font-weight:600!important}
  body>header .portal-tab-row .tab-btn:hover{background:rgba(255,255,255,.08)!important;color:white!important}
- body>header .portal-tab-row .tab-btn.active-tab,body>header .portal-tab-row .tab-btn.bg-white{background:#f5f7f4!important;color:var(--aa-green)!important;box-shadow:0 4px 12px rgba(0,0,0,.12)!important;font-weight:800!important}
- body>header .portal-header-actions{margin-top:auto!important;display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:9px!important;border-top:1px solid rgba(255,255,255,.12)!important;padding-top:16px!important}
- body>header .portal-header-actions>div{display:flex!important;flex-wrap:wrap!important;align-items:center!important;justify-content:flex-start!important}
- body>header .portal-header-actions button{border-radius:10px!important}
- main{max-width:none!important;width:100%!important;margin:0!important;padding:24px clamp(16px,2.4vw,38px)!important}
+ body>header .portal-tab-row .tab-btn.active-tab,body>header .portal-tab-row .tab-btn.bg-white{background:#f5f7f4!important;color:var(--aa-green)!important;font-weight:800!important}
+ main{max-width:1600px!important;margin-left:auto!important;margin-right:auto!important;padding:24px clamp(16px,2.4vw,38px)!important;width:100%!important}
 }
-/* Mobile/tablet: retain top header with horizontal, scrollable navigation */
+/* Mobile/tablet: responsive original top navigation, horizontal scroll instead of wrapping */
 @media(max-width:1023px){
- body>header{position:sticky!important;top:0!important;background:rgba(255,255,255,.96)!important;color:var(--aa-text)!important;box-shadow:0 4px 18px rgba(19,52,39,.06)!important;backdrop-filter:blur(16px)!important}
- body>header>div{padding:10px 12px!important;gap:8px!important}
- body>header .portal-title-row{align-items:center!important}
+ body>header{background:rgba(255,255,255,.97)!important;color:var(--aa-text)!important;box-shadow:0 4px 18px rgba(19,52,39,.06)!important}
  body>header .portal-title-row>div:first-child{background:var(--aa-green)!important;color:#e0c68f!important}
  body>header .portal-title-row p{color:var(--aa-muted)!important}
  body>header .portal-tab-row{justify-content:flex-start!important;max-width:100%!important;overflow-x:auto!important;flex-wrap:nowrap!important;background:#eef2ef!important;border-radius:13px!important;padding:4px!important}
  body>header .portal-tab-row .tab-btn{border-radius:10px!important;padding:8px 12px!important;font-size:11px!important;flex:0 0 auto!important}
  main{padding:12px!important}
 }
-/* Premium palette and consistent component finish */
+/* Shared visual refinement */
 .tab-content .bg-white,.tab-content [class*="bg-white"]{border-color:var(--aa-line)!important}
 .tab-content .rounded-3xl,.tab-content .rounded-2xl,.tab-content .rounded-xl{border-radius:15px!important}
 .tab-content .shadow-sm{box-shadow:0 2px 10px rgba(20,55,40,.045)!important}
@@ -338,7 +330,6 @@ button:not(.tab-btn):hover{filter:brightness(.97)}
 input,select,textarea{border-radius:10px!important}
 .tab-content table th{background:#edf2ef!important;color:#244638!important}
 .tab-content table td,.tab-content table th{border-color:#e5ebe7!important}
-/* Maintain modal readability while harmonising accent colours */
 #booking-modal>div{border-color:#e1e9e4!important;background:#f8faf8!important}
 #booking-modal #modal-title i{background:#e5efe9!important;color:var(--aa-green)!important}
 #login-overlay>div{border-radius:22px!important;box-shadow:0 25px 70px rgba(17,46,36,.18)!important}
@@ -346,14 +337,12 @@ input,select,textarea{border-radius:10px!important}
 #login-overlay .text-blue-600{color:var(--aa-green)!important}
 @media(max-width:480px){
  main{padding:9px!important}
- body>header .portal-header-actions{padding-top:5px!important}
  body>header .portal-header-actions button{font-size:10px!important;padding:6px 8px!important}
  .tab-content .p-5{padding:13px!important}
  .tab-content .p-4{padding:11px!important}
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation-duration:.01ms!important;animation-iteration-count:1!important}}
 </style>
-
 </head>
 <body class="text-slate-800 font-sans min-h-screen flex flex-col relative antialiased text-xs" onclick="closeCommentBox()">
 

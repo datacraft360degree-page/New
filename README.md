@@ -292,57 +292,6 @@
 }
 </style>
 
-<style id="aanaristays-premium-ui-only">
-/* Visual-only redesign: original markup and scripts remain intact. */
-:root{--aa-green:#173d32;--aa-green2:#245746;--aa-gold:#c5a56b;--aa-bg:#f4f6f4;--aa-line:#e2e8e4;--aa-text:#24332c;--aa-muted:#738078}
-html,body{background:var(--aa-bg)!important;color:var(--aa-text)!important;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif!important}
-body{min-height:100vh}
-::-webkit-scrollbar-thumb{background:#b9c9c0!important}
-/* Desktop: premium, compact styling while retaining the original header flow */
-@media(min-width:1024px){
- body>header{background:linear-gradient(180deg,#173d32,#112e26)!important;color:#f6f8f6!important;border-color:#284c40!important;box-shadow:0 4px 18px rgba(18,45,35,.08)!important}
- body>header .portal-title-row>div:first-child{background:rgba(255,255,255,.1)!important;color:#d8c18e!important;border-radius:14px!important}
- body>header .portal-title-row p{color:#b7c9c0!important}
- body>header .portal-tab-row{background:rgba(255,255,255,.07)!important;border-radius:13px!important}
- body>header .portal-tab-row .tab-btn{border-radius:10px!important;color:#d3e0d9!important;font-weight:600!important}
- body>header .portal-tab-row .tab-btn:hover{background:rgba(255,255,255,.08)!important;color:white!important}
- body>header .portal-tab-row .tab-btn.active-tab,body>header .portal-tab-row .tab-btn.bg-white{background:#f5f7f4!important;color:var(--aa-green)!important;font-weight:800!important}
- main{max-width:1600px!important;margin-left:auto!important;margin-right:auto!important;padding:24px clamp(16px,2.4vw,38px)!important;width:100%!important}
-}
-/* Mobile/tablet: responsive original top navigation, horizontal scroll instead of wrapping */
-@media(max-width:1023px){
- body>header{background:rgba(255,255,255,.97)!important;color:var(--aa-text)!important;box-shadow:0 4px 18px rgba(19,52,39,.06)!important}
- body>header .portal-title-row>div:first-child{background:var(--aa-green)!important;color:#e0c68f!important}
- body>header .portal-title-row p{color:var(--aa-muted)!important}
- body>header .portal-tab-row{justify-content:flex-start!important;max-width:100%!important;overflow-x:auto!important;flex-wrap:nowrap!important;background:#eef2ef!important;border-radius:13px!important;padding:4px!important}
- body>header .portal-tab-row .tab-btn{border-radius:10px!important;padding:8px 12px!important;font-size:11px!important;flex:0 0 auto!important}
- main{padding:12px!important}
-}
-/* Shared visual refinement */
-.tab-content .bg-white,.tab-content [class*="bg-white"]{border-color:var(--aa-line)!important}
-.tab-content .rounded-3xl,.tab-content .rounded-2xl,.tab-content .rounded-xl{border-radius:15px!important}
-.tab-content .shadow-sm{box-shadow:0 2px 10px rgba(20,55,40,.045)!important}
-#tab-dashboard>div:first-child{background:linear-gradient(120deg,var(--aa-green),#2b6650)!important;color:#fff!important;border-radius:18px!important;box-shadow:0 8px 24px rgba(23,61,50,.12)!important}
-#tab-dashboard>div:first-child p{color:#dce9e2!important}
-#tab-dashboard>div:first-child select{color:var(--aa-green)!important}
-button:not(.tab-btn){transition:filter .15s ease,transform .15s ease,box-shadow .15s ease}
-button:not(.tab-btn):hover{filter:brightness(.97)}
-input,select,textarea{border-radius:10px!important}
-.tab-content table th{background:#edf2ef!important;color:#244638!important}
-.tab-content table td,.tab-content table th{border-color:#e5ebe7!important}
-#booking-modal>div{border-color:#e1e9e4!important;background:#f8faf8!important}
-#booking-modal #modal-title i{background:#e5efe9!important;color:var(--aa-green)!important}
-#login-overlay>div{border-radius:22px!important;box-shadow:0 25px 70px rgba(17,46,36,.18)!important}
-#login-overlay .bg-blue-50{background:#e8f0eb!important}
-#login-overlay .text-blue-600{color:var(--aa-green)!important}
-@media(max-width:480px){
- main{padding:9px!important}
- body>header .portal-header-actions button{font-size:10px!important;padding:6px 8px!important}
- .tab-content .p-5{padding:13px!important}
- .tab-content .p-4{padding:11px!important}
-}
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation-duration:.01ms!important;animation-iteration-count:1!important}}
-</style>
 </head>
 <body class="text-slate-800 font-sans min-h-screen flex flex-col relative antialiased text-xs" onclick="closeCommentBox()">
 
@@ -703,9 +652,12 @@ input,select,textarea{border-radius:10px!important}
         <span id="sync-transfer" class="hidden inline-flex items-center gap-1 rounded-full bg-blue-50 border border-blue-100 px-2 py-1 text-blue-700 font-bold whitespace-nowrap" aria-live="polite"><i id="sync-transfer-icon" class="fa-solid fa-cloud-arrow-up"></i><span id="sync-transfer-label">Uploading 0%</span></span>
         <span id="sync-status" class="inline-flex items-center gap-1 text-slate-500 font-semibold" aria-live="polite"><i class="fa-solid fa-cloud-arrow-down"></i> Offline ready</span>
       </div>
+      </div>
 
+      <!-- Third row: portal action buttons, kept separate from storage/sync controls. -->
+      <div class="portal-header-actions flex flex-wrap items-center justify-start gap-2 w-full border-t border-slate-100 pt-2">
       <!-- Action Buttons -->
-      <div class="flex items-center space-x-1.5">
+      <div class="flex flex-wrap items-center gap-1.5">
         <button onclick="openAlertModal()" title="View Alerts" class="relative bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 px-3 py-1.5 rounded-full text-[11px] font-semibold flex items-center gap-1 transition">
           <i class="fa-solid fa-bell text-[10px]"></i> Alerts
           <span id="alert-badge" class="hidden absolute -top-1 -right-1 bg-rose-600 text-white text-[9px] font-black px-1.5 py-0.2 rounded-full border border-white animate-bounce">0</span>
@@ -1343,7 +1295,7 @@ input,select,textarea{border-radius:10px!important}
               <label class="block font-semibold text-slate-600 mb-0.5">Contact No</label>
               <div class="flex gap-1">
                 <input type="text" id="cust-country-code" value="+91" placeholder="+91" class="w-1/3 bg-white border border-slate-200 rounded-xl px-1.5 py-1.5 focus:outline-none focus:border-blue-500 font-bold text-center text-blue-700" />
-                <input type="text" id="cust-contact" maxlength="10" pattern="[0-9]*" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)" placeholder="Mobile No" class="w-2/3 bg-white border border-slate-200 rounded-xl px-2 py-1.5 focus:outline-none focus:border-blue-500" />
+                <input type="text" id="cust-contact" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)" placeholder="Mobile No" class="w-2/3 bg-white border border-slate-200 rounded-xl px-2 py-1.5 focus:outline-none focus:border-blue-500" />
               </div>
             </div>
             <div class="sm:col-span-2">
@@ -1429,7 +1381,7 @@ input,select,textarea{border-radius:10px!important}
                 <label class="block font-semibold text-slate-600 mb-0.5"><i class="fa-solid fa-plane-arrival text-emerald-600 mr-1"></i> Check In</label>
                 <div class="flex gap-1">
                   <input type="date" id="cust-checkin-date" onchange="handleStayDatesChange()" required="" class="w-2/3 bg-white border border-slate-200 rounded-xl px-2 py-1.5 focus:outline-none focus:border-blue-500 font-medium" />
-                  <input type="time" id="cust-checkin-time" onchange="handleStayDatesChange()" required="" class="w-1/3 bg-white border border-slate-200 rounded-xl px-1.5 py-1.5 focus:outline-none focus:border-blue-500 font-medium" />
+                  <input type="time" id="cust-checkin-time" onchange="handleStayDatesChange()" class="w-1/3 bg-white border border-slate-200 rounded-xl px-1.5 py-1.5 focus:outline-none focus:border-blue-500 font-medium" />
                 </div>
               </div>
 
@@ -1437,7 +1389,7 @@ input,select,textarea{border-radius:10px!important}
                 <label class="block font-semibold text-slate-600 mb-0.5"><i class="fa-solid fa-plane-departure text-rose-500 mr-1"></i> Check Out</label>
                 <div class="flex gap-1">
                   <input type="date" id="cust-checkout-date" onchange="handleStayDatesChange()" required="" class="w-2/3 bg-white border border-slate-200 rounded-xl px-2 py-1.5 focus:outline-none focus:border-blue-500 font-medium" />
-                  <input type="time" id="cust-checkout-time" onchange="handleStayDatesChange()" required="" class="w-1/3 bg-white border border-slate-200 rounded-xl px-1.5 py-1.5 focus:outline-none focus:border-blue-500 font-medium" />
+                  <input type="time" id="cust-checkout-time" onchange="handleStayDatesChange()" class="w-1/3 bg-white border border-slate-200 rounded-xl px-1.5 py-1.5 focus:outline-none focus:border-blue-500 font-medium" />
                 </div>
               </div>
             </div>
@@ -1473,8 +1425,8 @@ input,select,textarea{border-radius:10px!important}
               <div id="trip-cancel-container" class="hidden bg-rose-50/70 p-2.5 rounded-2xl border border-rose-200/80 mt-1.5">
                 <label class="block font-bold text-rose-900 mb-1">Cancellation Check-In &amp; Check-Out Date &amp; Time</label>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  <div><label class="block text-[10px] font-semibold text-rose-800">Cancel Check-In</label><div class="flex gap-1"><input type="date" id="cust-cancel-checkin-date" onchange="handleExtraPersonDatesChange()" class="w-2/3 bg-white border border-rose-200 rounded-xl px-2 py-1.5"><input type="time" id="cust-cancel-checkin-time" onchange="handleExtraPersonDatesChange()" class="w-1/3 bg-white border border-rose-200 rounded-xl px-1.5 py-1.5"></div></div>
-                  <div><label class="block text-[10px] font-semibold text-rose-800">Cancel Check-Out</label><div class="flex gap-1"><input type="date" id="cust-cancel-checkout-date" onchange="handleExtraPersonDatesChange()" class="w-2/3 bg-white border border-rose-200 rounded-xl px-2 py-1.5"><input type="time" id="cust-cancel-checkout-time" onchange="handleExtraPersonDatesChange()" class="w-1/3 bg-white border border-rose-200 rounded-xl px-1.5 py-1.5"></div></div>
+                  <div><label class="block text-[10px] font-semibold text-rose-800">Cancel Check-In</label><div class="flex gap-1"><input type="date" id="cust-cancel-checkin-date" onchange="handleTripCancelDateChange('in')" class="w-2/3 bg-white border border-rose-200 rounded-xl px-2 py-1.5"><input type="time" id="cust-cancel-checkin-time" onchange="handleExtraPersonDatesChange()" class="w-1/3 bg-white border border-rose-200 rounded-xl px-1.5 py-1.5"></div></div>
+                  <div><label class="block text-[10px] font-semibold text-rose-800">Cancel Check-Out</label><div class="flex gap-1"><input type="date" id="cust-cancel-checkout-date" onchange="handleTripCancelDateChange('out')" class="w-2/3 bg-white border border-rose-200 rounded-xl px-2 py-1.5"><input type="time" id="cust-cancel-checkout-time" onchange="handleExtraPersonDatesChange()" class="w-1/3 bg-white border border-rose-200 rounded-xl px-1.5 py-1.5"></div></div>
                 </div>
               </div>
             </div>
@@ -1590,7 +1542,7 @@ input,select,textarea{border-radius:10px!important}
         <input type="number" id="cust-total" readonly class="w-full min-w-0 box-border bg-slate-200/60 text-blue-700 font-bold border border-slate-200 rounded-xl px-2 py-1.5 cursor-not-allowed" value="0" />
       </div>
       <div class="min-w-0">
-        <label class="block font-semibold text-slate-600 mb-0.5">Advanced (₹)</label>
+        <label class="block font-semibold text-slate-600 mb-0.5">Advance (₹) <span class="font-normal text-slate-400">(Optional)</span></label>
         <input type="number" id="cust-advance" value="0" oninput="calculateModalBilling()" class="w-full min-w-0 box-border bg-white border border-slate-200 rounded-xl px-2 py-1.5 focus:outline-none focus:border-blue-500 font-semibold text-emerald-600" />
       </div>
     
@@ -1729,7 +1681,7 @@ input,select,textarea{border-radius:10px!important}
         </label>
       </div>
       <div id="inv-payment-qr" class="hidden flex flex-col items-center border-t border-slate-100 pt-3">
-        <img alt="Google Pay payment QR code" class="w-36 h-48 object-contain" src="https://drive.google.com/thumbnail?id=1u77yidlo2DpGI0Z74yyb2lzIT9HEpLp7&amp;sz=w1000" referrerpolicy="no-referrer" loading="eager" onerror="this.onerror=null;this.src='https://lh3.googleusercontent.com/d/1u77yidlo2DpGI0Z74yyb2lzIT9HEpLp7'">
+        <img alt="Google Pay payment QR code" class="w-36 h-48 object-contain" src="https://drive.google.com/uc?export=view&amp;id=1PNNw7rwQVpw81377wqwXCiMsmJw6QfJ4" referrerpolicy="no-referrer" loading="eager" onerror="this.onerror=null;this.src='https://lh3.googleusercontent.com/d/1PNNw7rwQVpw81377wqwXCiMsmJw6QfJ4'">
         <p class="text-[9px] text-slate-500 font-semibold">Scan to pay using any UPI app</p>
       </div>
       <div id="inv-booking-remark" class="hidden mb-3 p-3 border border-slate-200 rounded-xl text-[10px] whitespace-pre-wrap break-words"></div>
@@ -1846,20 +1798,16 @@ function checkBirthdayTrigger() {
         return `${yyyy}-${mm}-${dd}T${hh}:${min}:00+05:30`;
     }
 
-    // NEW helper logic to format dates strictly into 24-hour style "dd/mm/yy hh:mm" for Excel exports (Enforcing IST)
+    // Format timestamps in the current portal user's device timezone (24-hour clock).
     function format24hDate(dtStr) {
       if (!dtStr) return '';
       const d = new Date(typeof dtStr === 'string' ? dtStr.replace(' ', 'T') : dtStr);
       if (isNaN(d.getTime())) return String(dtStr);
-      
-      const utcMs = d.getTime();
-      const istDate = new Date(utcMs + (330 * 60000));
-      
-      const dd = String(istDate.getUTCDate()).padStart(2, '0');
-      const mm = String(istDate.getUTCMonth() + 1).padStart(2, '0');
-      const yy = String(istDate.getUTCFullYear()).slice(-2);
-      const hh = String(istDate.getUTCHours()).padStart(2, '0');
-      const min = String(istDate.getUTCMinutes()).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const yy = String(d.getFullYear()).slice(-2);
+      const hh = String(d.getHours()).padStart(2, '0');
+      const min = String(d.getMinutes()).padStart(2, '0');
       return `${dd}/${mm}/${yy} ${hh}:${min}`;
     }
 
@@ -1939,9 +1887,12 @@ function checkBirthdayTrigger() {
       try {
         // Offline wipe is deliberately local-only. It must not become a queued
         // cloud deletion when the device reconnects.
-        if (!offlineMode && navigator.onLine) {
+        const completedOnlineWipe = !offlineMode && navigator.onLine;
+        if (completedOnlineWipe) {
           const result = await postToGoogleServer({ action: "wipeData", sessionId: getServerSessionId() });
           if (!result || result.status !== 'success') throw new Error(result?.message || 'Google Server wipe failed');
+          localStorage.removeItem(exportHeaderPreferenceKey('booking'));
+          localStorage.removeItem(exportHeaderPreferenceKey('quotation'));
         }
         state.bookings = [];
         state.quotations = [];
@@ -1971,7 +1922,7 @@ function checkBirthdayTrigger() {
       }
     }
 
-    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbx1y0ZQcPX9v66ddWlU8B5xCnOpgGvld39iY3EVNzKQ9tcNcod2onajvq0fM2p6pqExqQ/exec";
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbz6rME_OuYHucGBPCfCrV7EYjuE5YF0eqSeuqBjm42-HPXUYJzUSBu0mov9jCdM7zx5Ng/exec";
     // Each GitHub Pages path is a separate portal/security/data boundary.
     const PORTAL_KEY = (() => {
       const path = String(location.pathname || '').replace(/\/+$/, '').toLowerCase();
@@ -2006,6 +1957,9 @@ function checkBirthdayTrigger() {
     const DEVICE_META_KEY='business-portal-device-metadata';
     const SERVER_SESSION_HEARTBEAT_MS=15000;
     function getPortalDeviceId(){let id=localStorage.getItem(DEVICE_ID_KEY);if(!id){id='device_'+(crypto.randomUUID?crypto.randomUUID():Date.now()+'_'+Math.random().toString(36).slice(2));localStorage.setItem(DEVICE_ID_KEY,id);}return id;}
+    // Collision-resistant IDs work across browsers/devices and while offline. Never depend on a local counter alone.
+    function makeGloballyUniqueToken(){try{if(window.crypto&&typeof crypto.randomUUID==='function')return crypto.randomUUID().replace(/-/g,'').slice(0,12).toUpperCase();}catch(e){}return (Date.now().toString(36)+Math.random().toString(36).slice(2,12)).toUpperCase();}
+    function makeRecordId(prefix){try{if(window.crypto&&typeof crypto.randomUUID==='function')return prefix+'_'+crypto.randomUUID();}catch(e){}return prefix+'_'+Date.now().toString(36)+'_'+makeGloballyUniqueToken();}
     function getBrowserName(){const ua=navigator.userAgent||'';if(/Edg\//.test(ua))return 'Microsoft Edge';if(/OPR\//.test(ua))return 'Opera';if(/CriOS\//.test(ua))return 'Chrome (iOS)';if(/Chrome\//.test(ua))return 'Google Chrome';if(/FxiOS|Firefox\//.test(ua))return 'Firefox';if(/Safari\//.test(ua))return 'Safari';return 'Unknown browser';}
     function getBrowserVersion(){const ua=navigator.userAgent||'';const match=ua.match(/(?:Edg|OPR|CriOS|Chrome|Firefox|Version)\/([0-9.]+)/);return match?match[1]:'Unknown';}
     function getDeviceType(){const ua=navigator.userAgent||'';if(/iPad|Tablet/i.test(ua))return 'Tablet';if(/Mobile|Android|iPhone|iPod/i.test(ua))return 'Mobile';return 'Desktop';}
@@ -2569,7 +2523,7 @@ function checkBirthdayTrigger() {
     let inactivityTimer = null;
     let warningTimer = null;
     let countdownInterval = null;
-    const INACTIVITY_LIMIT_MS = 10 * 60 * 1000; 
+    const INACTIVITY_LIMIT_MS = 15 * 60 * 1000; 
     const WARNING_BUFFER_MS = 1 * 60 * 1000;   
 
     let currentUserId = sessionStorage.getItem('portal_user_id') || '';
@@ -2804,7 +2758,7 @@ function checkBirthdayTrigger() {
     function startInactivityMonitoring() {
       stopInactivityMonitoring();
       
-      const activityEvents = ['mousemove', 'keydown', 'mousedown', 'touchstart', 'scroll'];
+      const activityEvents = ['mousemove', 'pointermove', 'keydown', 'mousedown', 'touchstart', 'touchmove', 'scroll', 'wheel'];
       activityEvents.forEach(evt => {
         window.addEventListener(evt, resetInactivityTimer);
       });
@@ -2817,7 +2771,7 @@ function checkBirthdayTrigger() {
       if (warningTimer) clearTimeout(warningTimer);
       if (countdownInterval) clearInterval(countdownInterval);
       
-      const activityEvents = ['mousemove', 'keydown', 'mousedown', 'touchstart', 'scroll'];
+      const activityEvents = ['mousemove', 'pointermove', 'keydown', 'mousedown', 'touchstart', 'touchmove', 'scroll', 'wheel'];
       activityEvents.forEach(evt => {
         window.removeEventListener(evt, resetInactivityTimer);
       });
@@ -2959,12 +2913,39 @@ function checkBirthdayTrigger() {
         return;
       }
 
-      if (exportDataType === 'quotation') exportQuotationData(startDateStr, endDateStr);
-      else exportToExcel(startDateStr, endDateStr);
+      openExportHeaderPicker(startDateStr, endDateStr);
+    }
+
+    function exportHeaderDefinitions(type) {
+      if (type === 'quotation') return ['Last Updated Timestamp','Quotation ID','Quotation No','Quotation Date','Guest Name','Address','Phone','Email','Greeting','Check-In','Check-Out','Guests','Additional Guests','Additional Rate/Day','Room Type','No. of Rooms','Rate/Day','Cab Fare','Discount','Quotation Total Amount','Terms & Conditions','Trip','Date & Time','Cab Remarks','Rate/Trip (₹)','Cab Trip Total (₹)'];
+      return ['Last Updated Timestamp','Booking ID (System)','Booking ID','Invoice ID','Booking Status','Guest Name','Address','City','State','Country','Pin/Zip Code','ID Number','Country Code','Contact No','Attached ID File Name','Quotation No. & Date','Quotation Total Amount','Room No(s)','Agent Info','Main Guest Joined','Add Extra Guest/Minor','Extra Guest/Minor Check-In','Extra Guest/Minor Check-Out','Check-In','Check-Out','Has Extended Check-Out','Extended Check-Out','Trip Cancelled','Trip Cancel Check-In','Trip Cancel Check-Out','Include Meals','Food Orders Details','Cab Trips Details','Booking Remarks','Extra Guest/Minor Price / Day','Extra Guest/Minor Stay Days','Extra Guest/Minor Total Price','Main Guest Price / Day','Main Guest Stay Days','Main Guest Total Price','Total Cab Fare','Total Extra Food & Drinks','Grand Total','Advanced','Discounted %','Discounted Amount','Discount % Shown on Receipt','Discount Amount Shown on Receipt','Balance Due','Cleared Bill'];
+    }
+    function exportHeaderPreferenceKey(type) { return 'export-header-selection:' + PORTAL_KEY + ':' + type; }
+    function openExportHeaderPicker(startDate, endDate) {
+      const type = exportDataType, headers = exportHeaderDefinitions(type), key = exportHeaderPreferenceKey(type);
+      let saved = null; try { saved = JSON.parse(localStorage.getItem(key) || 'null'); } catch(e) {}
+      const selected = Array.isArray(saved) ? saved.filter(h => headers.includes(h)) : headers.slice();
+      const modal = document.createElement('div'); modal.id='export-header-picker';
+      modal.className='fixed inset-0 z-[140] bg-slate-950/50 backdrop-blur-sm flex items-center justify-center p-3 no-print';
+      modal.innerHTML = `<div class="bg-white rounded-2xl shadow-2xl p-4 w-full max-w-md max-h-[85dvh] flex flex-col gap-3">
+        <div class="flex items-center justify-between"><h3 class="font-black text-sm">Select ${type==='quotation'?'Quotation':'Booking'} Excel Headers</h3><button type="button" class="text-slate-500 text-lg" onclick="document.getElementById('export-header-picker').remove()">×</button></div>
+        <div class="flex gap-2"><button type="button" class="text-blue-700 font-bold text-xs" onclick="setAllExportHeaders(true)">Select All</button><button type="button" class="text-slate-500 font-bold text-xs" onclick="setAllExportHeaders(false)">Untick All</button></div>
+        <div id="export-header-list" class="overflow-y-auto border rounded-xl p-2 grid grid-cols-1 sm:grid-cols-2 gap-2">${headers.map((h,i)=>`<label class="flex items-center gap-2 text-[11px] p-1"><input type="checkbox" class="export-header-check" value="${escapeRemarkHtml(h)}" ${selected.includes(h)?'checked':''}>${escapeRemarkHtml(h)}</label>`).join('')}</div>
+        <div class="flex justify-end gap-2"><button type="button" class="px-3 py-2 bg-slate-100 rounded-xl text-xs" onclick="document.getElementById('export-header-picker').remove()">Cancel</button><button type="button" class="px-3 py-2 bg-blue-600 text-white rounded-xl font-bold text-xs" onclick="confirmExportHeaders('${type}','${startDate}','${endDate}')">Download Excel</button></div>
+      </div>`;
+      document.body.appendChild(modal);
+    }
+    function setAllExportHeaders(checked) { document.querySelectorAll('#export-header-list .export-header-check').forEach(el=>el.checked=checked); }
+    function confirmExportHeaders(type,startDate,endDate) {
+      const selected=Array.from(document.querySelectorAll('#export-header-list .export-header-check:checked')).map(el=>el.value);
+      if(!selected.length){alert('Select at least one header to export.');return;}
+      localStorage.setItem(exportHeaderPreferenceKey(type),JSON.stringify(selected));
+      document.getElementById('export-header-picker')?.remove();
+      if(type==='quotation') exportQuotationData(startDate,endDate,selected); else exportToExcel(startDate,endDate,selected);
       closeExportModal();
     }
 
-    function exportToExcel(startDateStr, endDateStr) {
+    function exportToExcel(startDateStr, endDateStr, selectedHeaders) {
       if (!state.bookings || state.bookings.length === 0) {
         alert("No booking records available to export!");
         return;
@@ -3000,6 +2981,7 @@ function checkBirthdayTrigger() {
         const cabList = parseJSONField(b.cabTrips);
         
       return {
+          "Last Updated Timestamp": b.lastUpdatedTimestamp ? format24hDate(b.lastUpdatedTimestamp) : "",
           "Booking ID (System)": b.id || "",
           "Booking ID": b.bookingCode || "",
           "Invoice ID": b.invoiceNo || "",
@@ -3052,7 +3034,8 @@ function checkBirthdayTrigger() {
         };
       });
 
-      const worksheet = XLSX.utils.json_to_sheet(exportData);
+      const selected = Array.isArray(selectedHeaders) ? selectedHeaders : exportHeaderDefinitions('booking');
+      const worksheet = XLSX.utils.json_to_sheet(exportData.map(row => Object.fromEntries(selected.filter(h => Object.prototype.hasOwnProperty.call(row,h)).map(h => [h,row[h]]))), {header:selected});
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, "Bookings");
 
@@ -3143,31 +3126,51 @@ function checkBirthdayTrigger() {
       searchMasterBookingById();
     }
 
+    function duplicateDisplayCode(baseCode, existingCodes) {
+      const used = (existingCodes || []).map(value => String(value || '').trim()).filter(Boolean);
+      const hasCollision = used.some(value => value.toLowerCase() === baseCode.toLowerCase());
+      if (!hasCollision) return baseCode;
+      const duplicateCandidate = `${baseCode}-Duplicate`;
+      if (!used.some(value => value.toLowerCase() === duplicateCandidate.toLowerCase())) return duplicateCandidate;
+      // Only one record can own the exact -Duplicate label. If that label is
+      // already occupied, continue with the next unused normal sequence.
+      const match = baseCode.match(/^((?:BKG|INV|QT)-\d{4}-)(\d+)$/i);
+      if (!match) return baseCode;
+      const prefix = match[1], width = match[2].length;
+      let highest = Number(match[2]) || 0;
+      used.forEach(value => {
+        const found = String(value).match(new RegExp('^' + prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(\\d+)(?:-|$)', 'i'));
+        if (found) highest = Math.max(highest, Number(found[1]) || 0);
+      });
+      let next = `${prefix}${String(highest + 1).padStart(width, '0')}`;
+      while (used.some(value => value.toLowerCase() === next.toLowerCase())) {
+        highest += 1;
+        next = `${prefix}${String(highest + 1).padStart(width, '0')}`;
+      }
+      return next;
+    }
+
     function generateIDsForYear(checkInDateStr) {
       let targetYear = defaultAppYear;
-      if (checkInDateStr) {
-        targetYear = new Date(checkInDateStr.replace(' ', 'T')).getFullYear() || defaultAppYear;
-      }
-
+      if (checkInDateStr) targetYear = new Date(checkInDateStr.replace(' ', 'T')).getFullYear() || defaultAppYear;
       if (!state.yearlyCounters) state.yearlyCounters = {};
-
-      if (!state.yearlyCounters[targetYear]) {
-        const countForYear = state.bookings.filter(b => {
-          return b.checkIn && new Date(b.checkIn.replace(' ', 'T')).getFullYear() === targetYear;
-        }).length;
-        state.yearlyCounters[targetYear] = countForYear;
-      }
-
-      state.yearlyCounters[targetYear] += 1;
+      const sequencePattern = new RegExp('^BKG-' + targetYear + '-(\\d+)(?:-|$)', 'i');
+      const highestExisting = (state.bookings || []).reduce((max, booking) => {
+        const match = String(booking.bookingCode || '').match(sequencePattern);
+        return match ? Math.max(max, Number(match[1]) || 0) : max;
+      }, 0);
+      state.yearlyCounters[targetYear] = Math.max(Number(state.yearlyCounters[targetYear]) || 0, highestExisting) + 1;
       const seq = state.yearlyCounters[targetYear];
       const paddedSeq = String(seq).padStart(7, '0');
-
+      const bookingBase = `BKG-${targetYear}-${paddedSeq}`;
+      const invoiceBase = `INV-${targetYear}-${paddedSeq}`;
+      const bookings = state.bookings || [];
       return {
-        bookingCode: `BKG-${targetYear}-${paddedSeq}`,
-        invoiceNo: `INV-${targetYear}-${paddedSeq}`
+        bookingCode: duplicateDisplayCode(bookingBase, bookings.map(b => b.bookingCode)),
+        invoiceNo: duplicateDisplayCode(invoiceBase, bookings.map(b => b.invoiceNo))
       };
     }
-    
+
     function refreshAllUI() {
       if (!state.roomsCapacity || state.roomsCapacity.length === 0) {
         state.roomsCapacity = [
@@ -3284,7 +3287,18 @@ function checkBirthdayTrigger() {
         const result=await postToGoogleServerWithProgress({action:'saveData',state,sessionId:getServerSessionId()});hideTransferProgress();
         if(result.status==='row_limit'){if(result.rowLimits)applyServerRowLimits(result.rowLimits,true);throw new Error(result.message||'Google Sheet row limit reached');}
         if(result.status==='success'){
+          // Apply collision resolutions returned by the authoritative cloud store.
+          (result.bookingIdUpdates || []).forEach(update => { const item=(state.bookings||[]).find(b=>String(b.id)===String(update.id)); if(item)item.bookingCode=update.bookingCode; });
+          (result.invoiceIdUpdates || []).forEach(update => { const item=(state.bookings||[]).find(b=>String(b.id)===String(update.id)); if(item)item.invoiceNo=update.invoiceNo; });
+          const quotationIdsCorrected = (result.quotationIdUpdates || []).length > 0;
+          (result.quotationIdUpdates || []).forEach(update => { const item=(state.quotations||[]).find(q=>String(q.id)===String(update.id)); if(item)item.quotationNo=update.quotationNo; });
+          if(quotationIdsCorrected){
+            // Immediately refresh every quotation-facing view after the server assigns the corrected Duplicate ID.
+            renderQuotations();
+            updateQuotationDashboard();
+          }
           if(result.rowLimits)applyServerRowLimits(result.rowLimits,true);
+          await writeOfflineSnapshot(true);
           localStorage.removeItem(OFFLINE_PENDING_KEY);localStorage.removeItem(DEFERRED_SYNC_PROMPT_KEY);localStorage.setItem(LAST_SYNC_KEY,String(Date.now()));updateSyncIndicator('online','Live synced');
           if(!quiet){const msg=document.getElementById('toast-message');msg.innerText=isAutoSave?'Changes auto-saved and synced with Google Server!':'Data saved to this device and Google Server!';document.getElementById('toast').classList.remove('hidden');setTimeout(()=>document.getElementById('toast').classList.add('hidden'),2500);}
           return true;
@@ -4141,18 +4155,12 @@ function updateDashboardCards() {
       let phone = b.contactNo ? String(b.contactNo).replace(/\D/g, '') : '';
       let initialAdvanceVal = b.initialAdv !== undefined ? parseFloat(b.initialAdv) : 0;
       
-      let validationErrors = [];
-      if (!phone || phone.length !== 10) {
-        validationErrors.push("• Guest contact number must be exactly 10 digits.");
-      }
-      if (!(initialAdvanceVal > 0)) {
-        validationErrors.push("• Advanced payment must be greater than 0.");
-      }
-
-      if (validationErrors.length > 0) {
-        alert("⚠️ Cannot send via WhatsApp:\n\n" + validationErrors.join("\n"));
+      if (!/^\d{10}$/.test(phone)) {
+        alert("Add contact number in booking details to send WhatsApp SMS");
         return;
       }
+      // Advance payment is optional. A valid contact number is sufficient to send the receipt.
+
 
       const fullPhoneNumber = rawCountryCode + phone;
       const upiId = "aniruddha.e@oksbi";
@@ -4167,12 +4175,13 @@ function updateDashboardCards() {
         `Thank you for booking with us! Here are your booking details:\n\n` +
         `*Reservation Details:*\n` +
         `• Booking ID: *${b.bookingCode}*\n` +
+        `• Invoice ID: *${b.invoiceNo || 'N/A'}*\n` +
         `• Room No: ${roomsDisplay}\n` +
         `• Check-In: ${formatDateTime(b.checkIn)}\n` +
         `• Check-Out: ${formatDateTime(effectiveOut)}\n\n` +
         `*Billing Summary:*\n` +
         `• Total Amount: ₹${b.totalAmount}\n` +
-        `• Advance Amount: ₹${initialAdvanceVal}\n` +
+        `• Advance Amount: ₹${initialAdvanceVal.toLocaleString('en-IN')}\n` +
         discountValue +
         `• Grand Total: ₹${Math.max(0, Number(b.totalAmount || 0) - Number(b.discountAmount || 0)).toLocaleString('en-IN')}\n` +
         `• Balance Due: ₹${b.totalDue}\n\n` +
@@ -4218,15 +4227,17 @@ function updateDashboardCards() {
         } else {
           waBtn.classList.remove('hidden');
           const contactDigits = b.contactNo ? String(b.contactNo).replace(/\D/g, '') : '';
-          const hasValidContact = contactDigits.length === 10;
-          const hasAdvanced = (parseFloat(b.initialAdv) || 0) > 0;
+          const hasValidContact = /^\d{10}$/.test(contactDigits);
 
-          if (hasValidContact && hasAdvanced) {
-            waBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-            waBtn.title = "Send Receipt via WhatsApp";
+          if (hasValidContact) {
+            waBtn.classList.remove('opacity-50', 'cursor-not-allowed', 'grayscale');
+            waBtn.setAttribute('aria-disabled', 'false');
+            waBtn.title = "Send Receipt via WhatsApp (advance payment optional)";
           } else {
-            waBtn.classList.add('opacity-50', 'cursor-not-allowed');
-            waBtn.title = "Inactive: Advance payment must be > 0 and contact number must be 10 digits.";
+            // Keep click handling active so the requested guidance popup can appear.
+            waBtn.classList.add('opacity-50', 'cursor-not-allowed', 'grayscale');
+            waBtn.setAttribute('aria-disabled', 'true');
+            waBtn.title = "Add contact number in booking details to send WhatsApp SMS";
           }
         }
       }
@@ -4252,6 +4263,7 @@ function updateDashboardCards() {
       }
 
       document.getElementById('inv-booking-id').innerText = b.bookingCode || 'N/A';
+      // Quotation number is intentionally omitted from the invoice/receipt print.
       document.getElementById('inv-date').innerText = today;
 
       const fullLocation = [b.address, b.city, b.state, b.country, b.zipCode].filter(Boolean).map(formatTitleCase).join(', ');
@@ -4276,8 +4288,8 @@ function updateDashboardCards() {
       // Show the shortened trip-cancellation stay separately beneath the original dates.
       const tripCancelInvoiceNote = document.getElementById('inv-trip-cancel-details');
       if (tripCancelInvoiceNote) {
-        tripCancelInvoiceNote.innerText = isTrue(b.hasTripCancel)
-          ? `Trip Cancel Check-in: ${formatDateTime(b.tripCancelCheckIn)} | Trip Cancel Check-out: ${formatDateTime(b.tripCancelCheckOut)}`
+        tripCancelInvoiceNote.innerHTML = isTrue(b.hasTripCancel)
+          ? `Trip Cancel Check-in: ${formatDateTime(b.tripCancelCheckIn)}<br>Trip Cancel Check-out: ${formatDateTime(b.tripCancelCheckOut)}`
           : '';
         tripCancelInvoiceNote.classList.toggle('hidden', !isTrue(b.hasTripCancel));
       }
@@ -4635,13 +4647,14 @@ function updateDashboardCards() {
 
     // --- QUOTATION MANAGEMENT ---
     function nextQuotationNumber(dateValue) {
-      // Preview only; the number is consumed only after a successful save.
+      // Sequential IDs are normal; Duplicate is used only for a collision.
       const year = (dateValue || new Date().toISOString().slice(0,10)).slice(0,4);
       const savedMax = (state.quotations || []).reduce((max, q) => {
-        const match = String(q.quotationNo || '').match(new RegExp('^QT-' + year + '-(\\d+)$'));
+        const match = String(q.quotationNo || '').match(new RegExp('^QT-' + year + '-(\\d+)(?:-|$)', 'i'));
         return match ? Math.max(max, Number(match[1]) || 0) : max;
       }, 0);
-      return `QT-${year}-${String(savedMax + 1).padStart(7,'0')}`;
+      const base = `QT-${year}-${String(savedMax + 1).padStart(7,'0')}`;
+      return duplicateDisplayCode(base, (state.quotations || []).map(q => q.quotationNo));
     }
     function countWordsNoSpaces(value){return String(value||'').trim().split(/\s+/).filter(Boolean).length;}
     function updateQuotationWordCount(inputId,countId){const input=document.getElementById(inputId),out=document.getElementById(countId);if(!input||!out)return;const n=countWordsNoSpaces(input.value);out.textContent=n+' / 200 words';out.className='block text-[9px] text-right '+(n>200?'text-rose-600 font-bold':'text-slate-400');}
@@ -4658,7 +4671,7 @@ function updateDashboardCards() {
       const tomorrowDate = new Date(today.getFullYear(), today.getMonth(), today.getDate()+1);
       const tomorrow = `${tomorrowDate.getFullYear()}-${String(tomorrowDate.getMonth()+1).padStart(2,'0')}-${String(tomorrowDate.getDate()).padStart(2,'0')}`;
       const qNo = existing ? existing.quotationNo : nextQuotationNumber(date);
-      const q = existing || {id:`qt_${Date.now()}`, quotationNo:qNo, quotationDate:date, guestName:'', address:'', phone:'', email:'', checkIn:date, checkOut:tomorrow, guests:2, additionalGuests:0, additionalRate:0, roomType:'Deluxe', rooms:1, ratePerDay:1200, cabTrips:[], discount:0};
+      const q = existing || {id:makeRecordId('qt'), quotationNo:qNo, quotationDate:date, guestName:'', address:'', phone:'', email:'', checkIn:date, checkOut:tomorrow, guests:2, additionalGuests:0, additionalRate:0, roomType:'Deluxe', rooms:1, ratePerDay:1200, cabTrips:[], discount:0};
       const trips = (q.cabTrips || []);
       const tripRows = trips;
       document.getElementById('quotation-modal')?.remove();
@@ -4734,7 +4747,7 @@ function updateDashboardCards() {
       if(!guestName){alert('Guest Name is mandatory. Please enter the guest name before saving the quotation.');document.getElementById('q-guest').focus();return;}
       const date=document.getElementById('q-date').value;const inDate=document.getElementById('q-in').value,outDate=document.getElementById('q-out').value;if(!date){alert('Please select quotation date.');return;}if(!inDate||!outDate||outDate<=inDate){alert('Check-out date must be later than check-in date.');return;}
       const cabTrips=[...document.querySelectorAll('.q-cab-row')].map(r=>({trip:r.querySelector('.q-cab-trip').value,dateTime:r.querySelector('.q-cab-date').value,remarks:r.querySelector('.q-cab-remark').value,rate:Number(r.querySelector('.q-cab-rate').value)||0}));
-      const q={id,quotationNo:document.getElementById('q-number').innerText,quotationDate:date,guestName:guestName,address:document.getElementById('q-address').value,phone:document.getElementById('q-phone').value,email:document.getElementById('q-email').value,greeting:document.getElementById('q-greeting').value,checkIn:document.getElementById('q-in').value,checkOut:document.getElementById('q-out').value,guests:Number(document.getElementById('q-guests').value)||1,additionalGuests:Number(document.getElementById('q-extra').value)||0,additionalRate:Number(document.getElementById('q-extra-rate').value)||0,roomType:document.getElementById('q-room-type').value,rooms:Number(document.getElementById('q-rooms').value)||1,ratePerDay:Number(document.getElementById('q-rate').value)||0,cabTrips,discount:Number(document.getElementById('q-discount').value)||0,totalAmount:Number(document.getElementById('q-grand-total').innerText.replace(/,/g,''))||0,terms:document.getElementById('q-terms').value};
+      const q={id,lastUpdatedTimestamp:new Date().toISOString(),quotationNo:document.getElementById('q-number').innerText,quotationDate:date,guestName:guestName,address:document.getElementById('q-address').value,phone:document.getElementById('q-phone').value,email:document.getElementById('q-email').value,greeting:document.getElementById('q-greeting').value,checkIn:document.getElementById('q-in').value,checkOut:document.getElementById('q-out').value,guests:Number(document.getElementById('q-guests').value)||1,additionalGuests:Number(document.getElementById('q-extra').value)||0,additionalRate:Number(document.getElementById('q-extra-rate').value)||0,roomType:document.getElementById('q-room-type').value,rooms:Number(document.getElementById('q-rooms').value)||1,ratePerDay:Number(document.getElementById('q-rate').value)||0,cabTrips,discount:Number(document.getElementById('q-discount').value)||0,totalAmount:Number(document.getElementById('q-grand-total').innerText.replace(/,/g,''))||0,terms:document.getElementById('q-terms').value};
       const ix=(state.quotations||[]).findIndex(x=>x.id===id);
       const oldQuotationRows=ix>=0?Math.max(1,Array.isArray(state.quotations[ix].cabTrips)?state.quotations[ix].cabTrips.length:0):0;
       const newQuotationRows=Math.max(1,cabTrips.length);
@@ -4742,7 +4755,7 @@ function updateDashboardCards() {
       if(!canIncreaseSheetRows('quotations',additionalQuotationRows))return;
       if(ix>=0) state.quotations[ix]=q; else state.quotations.push(q);
       state.quotationYearlyCounters=state.quotationYearlyCounters||{};
-      const numberMatch=String(q.quotationNo||'').match(/^QT-(\\d{4})-(\\d+)$/);
+      const numberMatch=String(q.quotationNo||'').match(/^QT-(\\d{4})-(\\d+)(?:-[A-Z0-9]+)?$/);
       if(numberMatch) state.quotationYearlyCounters[numberMatch[1]]=Math.max(Number(state.quotationYearlyCounters[numberMatch[1]])||0,Number(numberMatch[2])||0);
       document.getElementById('quotation-modal').remove();
       renderQuotations();updateQuotationDashboard();
@@ -4856,16 +4869,16 @@ function updateDashboardCards() {
     function choosePriorQuotation(yes){if(!yes){document.getElementById('booking-quotation-choice').remove();openBookingModal();const quotationRef=document.getElementById('cust-quotation-ref');const quotationAmount=document.getElementById('cust-quotation-total');if(quotationRef)quotationRef.value='NA';if(quotationAmount)quotationAmount.value='NA';return;}const actions=document.getElementById('prior-quotation-choice-actions');if(actions)actions.classList.add('hidden');document.getElementById('prior-quotation-search').classList.remove('hidden');searchPriorQuotation();}
     function searchPriorQuotation(){const no=(document.getElementById('prior-q-no')?.value||'').toLowerCase(),date=document.getElementById('prior-q-date')?.value||'';const results=(state.quotations||[]).filter(q=>(!no||String(q.quotationNo||'').toLowerCase().includes(no))&&(!date||q.quotationDate===date)).sort((a,b)=>String(b.quotationDate||'').localeCompare(String(a.quotationDate||'')));const box=document.getElementById('prior-q-results');if(!box)return;box.innerHTML=results.map(q=>`<button onclick="selectPriorQuotation('${q.id}')" class="w-full text-left border border-slate-200 rounded-xl p-3 hover:border-blue-300 hover:bg-blue-50/70 transition"><div class="flex items-center justify-between gap-2"><b class="text-xs text-slate-900">${escapeRemarkHtml(q.quotationNo)}</b><span class="text-[10px] text-slate-500">${escapeRemarkHtml(q.quotationDate)}</span></div><div class="text-[11px] text-slate-600 mt-1">${escapeRemarkHtml(q.guestName)} · ₹${Number(q.totalAmount||0).toLocaleString('en-IN')}</div></button>`).join('')||'<p class="text-slate-400 text-xs p-3 text-center">No matching quotations.</p>'; }
     function selectPriorQuotation(id){pendingBookingQuotation=(state.quotations||[]).find(q=>q.id===id);document.getElementById('booking-quotation-choice').remove();openBookingModal();setTimeout(()=>{if(!pendingBookingQuotation)return;const q=pendingBookingQuotation;document.getElementById('cust-quotation-ref').value=`${q.quotationNo} | ${formatQuotationDateIST(q.quotationDate)}`;document.getElementById('cust-quotation-total').value=q.totalAmount||0;pendingBookingQuotation=null;},80);}
-    function exportQuotationData(startDate,endDate){
+    function exportQuotationData(startDate,endDate,selectedHeaders){
       const data=(state.quotations||[]).filter(q=>{const d=q.quotationDate||'';return (!startDate||d>=startDate)&&(!endDate||d<=endDate);});
       if(!data.length){alert('No quotation records found for selected period.');return;}
-      const quotationHeaders=['Quotation ID','Quotation No','Quotation Date','Guest Name','Address','Phone','Email','Greeting','Check-In','Check-Out','Guests','Additional Guests','Additional Rate/Day','Room Type','No. of Rooms','Rate/Day','Cab Fare','Discount','Quotation Total Amount','Terms & Conditions','Trip','Date & Time','Cab Remarks','Rate/Trip (₹)','Cab Trip Total (₹)'];
+      const quotationHeaders=['Last Updated Timestamp','Quotation ID','Quotation No','Quotation Date','Guest Name','Address','Phone','Email','Greeting','Check-In','Check-Out','Guests','Additional Guests','Additional Rate/Day','Room Type','No. of Rooms','Rate/Day','Cab Fare','Discount','Quotation Total Amount','Terms & Conditions','Trip','Date & Time','Cab Remarks','Rate/Trip (₹)','Cab Trip Total (₹)'];
       const quotationRows=[];
       data.forEach(q=>{
         const trips=Array.isArray(q.cabTrips)&&q.cabTrips.length?q.cabTrips:[null];
         const cabFare=(q.cabTrips||[]).reduce((sum,t)=>sum+Number(t.rate||0),0);
         trips.forEach((t,i)=>quotationRows.push({
-          'Quotation ID':q.id,'Quotation No':q.quotationNo,'Quotation Date':formatQuotationDateIST(q.quotationDate),'Guest Name':q.guestName,'Address':q.address,'Phone':q.phone,'Email':q.email,
+          'Last Updated Timestamp':q.lastUpdatedTimestamp?format24hDate(q.lastUpdatedTimestamp):'','Quotation ID':q.id,'Quotation No':q.quotationNo,'Quotation Date':formatQuotationDateIST(q.quotationDate),'Guest Name':q.guestName,'Address':q.address,'Phone':q.phone,'Email':q.email,
           'Greeting':q.greeting,'Check-In':q.checkIn,'Check-Out':q.checkOut,'Guests':q.guests,'Additional Guests':q.additionalGuests,'Additional Rate/Day':q.additionalRate,
           'Room Type':q.roomType,'No. of Rooms':q.rooms,'Rate/Day':q.ratePerDay,'Cab Fare':cabFare,'Discount':q.discount,
           'Quotation Total Amount':q.totalAmount,'Terms & Conditions':q.terms,
@@ -4875,7 +4888,9 @@ function updateDashboardCards() {
         }));
       });
       const wb=XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(quotationRows,{header:quotationHeaders}),'Quotation Details');
+      const selected = Array.isArray(selectedHeaders) ? selectedHeaders : quotationHeaders;
+      const filteredRows = quotationRows.map(row=>Object.fromEntries(selected.filter(h=>Object.prototype.hasOwnProperty.call(row,h)).map(h=>[h,row[h]])));
+      XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(filteredRows,{header:selected}),'Quotation Details');
       XLSX.writeFile(wb,`Quotation_Data_${startDate||'All'}_${endDate||'All'}.xlsx`);
     }
     function showExportChoices(){
@@ -5295,6 +5310,30 @@ function updateDashboardCards() {
       document.getElementById('booking-modal').classList.add('hidden');
     }
 
+    function handleTripCancelDateChange(which) {
+      const isCheckIn = which === 'in';
+      const input = document.getElementById(isCheckIn ? 'cust-cancel-checkin-date' : 'cust-cancel-checkout-date');
+      const mainIn = document.getElementById('cust-checkin-date')?.value || '';
+      const mainOut = document.getElementById('cust-checkout-date')?.value || '';
+      if (!input) return;
+
+      input.min = mainIn;
+      input.max = mainOut;
+      if (input.value && mainIn && input.value < mainIn) {
+        alert(isCheckIn
+          ? '⚠️ Trip Cancel Check-In cannot be earlier than the main booking Check-In date. Please correct it.'
+          : '⚠️ Trip Cancel Check-Out cannot be earlier than the main booking Check-In date. Please correct it.');
+        input.value = mainIn;
+      } else if (input.value && mainOut && input.value > mainOut) {
+        alert(isCheckIn
+          ? '⚠️ Trip Cancel Check-In cannot be later than the main booking Check-Out date. Please correct it.'
+          : '⚠️ Trip Cancel Check-Out cannot be later than the main booking Check-Out date. Please correct it.');
+        input.value = mainOut;
+      }
+
+      handleExtraPersonDatesChange();
+    }
+
     function handleExtraPersonDatesChange() {
       const mainInDate = document.getElementById('cust-checkin-date')?.value;
       const mainInTime = document.getElementById('cust-checkin-time')?.value || '12:00';
@@ -5574,13 +5613,15 @@ if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
       }
 
       const contactNoVal = document.getElementById('cust-contact').value.trim();
-      if (contactNoVal && contactNoVal.length !== 10) {
-        alert("⚠️ Please provide a valid 10-digit guest contact number.");
-        return;
-      }
 
       const inDate = document.getElementById('cust-checkin-date').value;
       const outDate = document.getElementById('cust-checkout-date').value;
+      if (!inDate || !outDate) {
+        alert("⚠️ Main Check-In Date and Check-Out Date are mandatory fields.");
+        if (!inDate) document.getElementById('cust-checkin-date').focus();
+        else document.getElementById('cust-checkout-date').focus();
+        return;
+      }
       const inTime = document.getElementById('cust-checkin-time').value || '00:00';
       const outTime = document.getElementById('cust-checkout-time').value || '00:00';
 
@@ -5640,8 +5681,8 @@ if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
           alert('Please enter a valid Trip Cancellation check-in and check-out date/time. Check-out must be after check-in.');
           return;
         }
-        if (cancelInDate <= inDate || cancelInDate >= outDate || cancelOutDate <= inDate || cancelOutDate >= outDate) {
-          alert('Trip Cancel check-in and check-out dates must be strictly between the main booking check-in and check-out dates.');
+        if (cancelInDate < inDate || cancelInDate > outDate || cancelOutDate < inDate || cancelOutDate > outDate) {
+          alert('Trip Cancel check-in and check-out dates must be on or after the main booking Check-In date and on or before the main booking Check-Out date.');
           return;
         }
       }
@@ -5854,7 +5895,8 @@ if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
       const countryCodeVal = document.getElementById('cust-country-code').value.trim() || '+91';
 
       const newBooking = {
-        id: id || `bk_${Date.now()}`,
+        id: id || makeRecordId('bk'),
+        lastUpdatedTimestamp: new Date().toISOString(),
         bookingCode: existingCode,
         invoiceNo: existingInv,
         name: guestName,
@@ -6081,7 +6123,10 @@ if (foodTotalInput) foodTotalInput.value = foodTotalCharge;
             <div class="flex items-center gap-1.5">
               ${statusDotHtml}
               ${isInactive ? '<span class="w-2.5 h-2.5 bg-rose-600 rounded-full inline-block flex-shrink-0" title="Inactive Booking"></span>' : ''}
-              <span class="bg-blue-50 border border-blue-200 text-blue-700 font-mono font-bold px-2 py-0.5 rounded-full text-[9px] block w-max">${b.bookingCode}</span>
+              <span class="bg-blue-50 border border-blue-200 text-blue-700 font-mono font-bold px-2 py-0.5 rounded-full text-[9px] block w-max">${escapeRemarkHtml(b.bookingCode || 'N/A')}</span>
+            </div>
+            <div class="mt-1 space-y-0.5 text-[9px] font-mono break-all">
+              <div class="text-violet-700">Invoice: ${escapeRemarkHtml(b.invoiceNo || 'N/A')}</div>
             </div>
             ${isInactive ? '<span class="bg-slate-600 text-white font-bold px-1.5 py-0.2 rounded-full text-[8px] uppercase block mt-0.5 w-max">Inactive</span>' : (!isMasterValid ? '<span class="bg-rose-700 text-white font-bold px-1.5 py-0.2 rounded-full text-[8px] uppercase block mt-0.5 w-max">Master Removed</span>' : '')}
           </td>

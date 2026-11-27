@@ -10,10 +10,24 @@ permissions:
 jobs:
   build-android:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Extract app source archive
+        run: |
+          if [ ! -f Aanoristays_Android_Build_Source.zip ]; then
+            echo 'Missing Aanoristays_Android_Build_Source.zip in repository root.'
+            exit 1
+          fi
+          mkdir -p app-source
+          unzip -q Aanoristays_Android_Build_Source.zip -d app-source
+          APP_DIR=app-source
+          if [ ! -f "$APP_DIR/package.json" ]; then
+            echo 'package.json is missing from the source archive.'
+            exit 1
+          fi
+          echo "APP_DIR=$APP_DIR" >> "$GITHUB_ENV"
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -26,24 +40,27 @@ jobs:
           distribution: temurin
           java-version: 21
 
-      - name: Install project dependencies
-        run: npm install
-
-      - name: Generate Android project
-        run: npx cap add android
-
-      - name: Sync portal into Android project
-        run: npx cap sync android
-
-      - name: Build APK
+      - name: Install dependencies and generate Android project
         run: |
-          cd android
+          cd "$APP_DIR"
+          npm install
+          npx cap add android
+          npx cap sync android
+
+      - name: Generate Android launcher icons
+        run: |
+          cd "$APP_DIR"
+          npx capacitor-assets generate --android
+
+      - name: Build debug APK
+        run: |
+          cd "$APP_DIR/android"
           chmod +x gradlew
           ./gradlew assembleDebug
 
-      - name: Upload APK
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: Aanoristays-Android-APK
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          path: ${{ env.APP_DIR }}/android/app/build/outputs/apk/debug/app-debug.apk
           retention-days: 14

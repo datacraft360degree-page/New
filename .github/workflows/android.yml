@@ -1,1 +1,71 @@
+name: Build Aanaristays Android APK
 
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Extract Android app source
+        run: |
+          if [ ! -f Aanaristays_Android_Build_Source.zip ]; then
+            echo 'Missing Aanaristays_Android_Build_Source.zip in repository root.'
+            exit 1
+          fi
+          mkdir -p app-source
+          unzip -q Aanaristays_Android_Build_Source.zip -d app-source
+          if [ ! -f app-source/package.json ] || [ ! -f app-source/www/index.html ]; then
+            echo 'Android source archive is incomplete.'
+            exit 1
+          fi
+          if [ ! -f Aanaristays_Android.html ]; then
+            echo 'Missing Aanaristays_Android.html in repository root.'
+            exit 1
+          fi
+          cp Aanaristays_Android.html app-source/www/index.html
+          echo "APP_DIR=app-source" >> "$GITHUB_ENV"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app-source/package.json
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Install dependencies and generate Android project
+        run: |
+          cd "$APP_DIR"
+          npm install
+          npx cap add android
+          npx cap sync android
+
+      - name: Generate Aanaristays launcher icons
+        run: |
+          cd "$APP_DIR"
+          npx capacitor-assets generate --android
+
+      - name: Build Aanaristays debug APK
+        run: |
+          cd "$APP_DIR/android"
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: Upload Aanaristays APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Aanaristays-Android-APK
+          path: ${{ env.APP_DIR }}/android/app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 14

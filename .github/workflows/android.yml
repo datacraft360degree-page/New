@@ -9,35 +9,28 @@ permissions:
 jobs:
   build-android:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Extract Android app source
+      - name: Verify uploaded source files
         run: |
-          if [ ! -f Aanaristays_Android_Build_Source.zip ]; then
-            echo 'Missing Aanaristays_Android_Build_Source.zip in repository root.'
-            exit 1
-          fi
+          test -f Aanaristays_Android.html || { echo 'ERROR: Aanaristays_Android.html is missing from the repository root.'; exit 1; }
+          test -f Aanaristays_Android_Build_Source.zip || { echo 'ERROR: Aanaristays_Android_Build_Source.zip is missing from the repository root.'; exit 1; }
+
+      - name: Extract Android project template
+        run: |
           mkdir -p app-source
           unzip -q Aanaristays_Android_Build_Source.zip -d app-source
-          if [ ! -f app-source/package.json ] || [ ! -f app-source/www/index.html ]; then
-            echo 'Android source archive is incomplete.'
-            exit 1
-          fi
-          if [ ! -f Aanaristays_Android.html ]; then
-            echo 'Missing Aanaristays_Android.html in repository root.'
-            exit 1
-          fi
+          test -f app-source/package.json || { echo 'ERROR: package.json is missing inside the source ZIP.'; exit 1; }
+          test -f app-source/www/index.html || { echo 'ERROR: www/index.html is missing inside the source ZIP.'; exit 1; }
           cp Aanaristays_Android.html app-source/www/index.html
-          echo "APP_DIR=app-source" >> "$GITHUB_ENV"
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-          cache-dependency-path: app-source/package.json
 
       - name: Set up Java
         uses: actions/setup-java@v4
@@ -45,27 +38,26 @@ jobs:
           distribution: temurin
           java-version: 21
 
-      - name: Install dependencies and generate Android project
+      - name: Install npm dependencies
+        working-directory: app-source
+        run: npm install --no-audit --no-fund
+
+      - name: Generate Android project
+        working-directory: app-source
         run: |
-          cd "$APP_DIR"
-          npm install
           npx cap add android
           npx cap sync android
 
-      - name: Generate Aanaristays launcher icons
+      - name: Build debug APK
+        working-directory: app-source/android
         run: |
-          cd "$APP_DIR"
-          npx capacitor-assets generate --android
-
-      - name: Build Aanaristays debug APK
-        run: |
-          cd "$APP_DIR/android"
           chmod +x gradlew
-          ./gradlew assembleDebug
+          ./gradlew --no-daemon assembleDebug
 
       - name: Upload Aanaristays APK
         uses: actions/upload-artifact@v4
         with:
           name: Aanaristays-Android-APK
-          path: ${{ env.APP_DIR }}/android/app/build/outputs/apk/debug/app-debug.apk
+          path: app-source/android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
           retention-days: 14
